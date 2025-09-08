@@ -1,17 +1,18 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=False,
+        extra="ignore"
+    )
     # OpenAI API 설정
     openai_api_key: str
     
     # 서버 설정
     host: str = "0.0.0.0"
     port: int = 8001
-    
-    # 데이터베이스 설정
-    database_url: str = "postgresql+asyncpg://postgres:password@localhost:5432/family_questions"
-    database_url_sync: str = "postgresql://postgres:password@localhost:5432/family_questions"
     
     # 로깅 설정
     log_level: str = "INFO"
@@ -27,13 +28,4 @@ class Settings(BaseSettings):
         "가족", "추억", "일상", "꿈", "관계", "감정", "취미", "미래"
     ]
     
-    # MCP 설정
-    mcp_context_window: int = 10  # 참고할 과거 대화 수
-    mcp_similarity_threshold: float = 0.7  # 유사도 임계값
-    mcp_analysis_depth: str = "deep"  # shallow, medium, deep
-    
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
-
 settings = Settings() 
