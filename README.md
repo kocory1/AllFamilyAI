@@ -1,11 +1,13 @@
 # 온식구 AI 서버 🏠🤖
 
-가족 유대감을 위한 AI 질문 생성 서버입니다. OpenAI API를 활용해 간단한 질문 생성과 템플릿 기반 question_instance 생성을 제공합니다. 
+가족 유대감을 위한 AI 질문 생성 서버입니다. OpenAI API를 활용해 템플릿 기반 question_instance 생성, 답변 분석, 멤버 할당을 제공합니다.
 
 ## 🚀 주요 기능
 
-### 기본 기능(간소화)
-- **AI 질문 생성**: OpenAI GPT를 활용한 질문 생성
+### 기능
+- **질문 인스턴스 생성**: BE가 전달한 템플릿 파라미터로 인스턴스를 생성(메타 포함, DB 미사용)
+- **답변 분석**: 질문 맥락(카테고리/태그/톤)을 반영해 구조화된 분석 JSON 반환
+- **멤버 할당**: 최근 30회 할당 횟수 기반 가중치로 비복원 랜덤 선택
 
 
 ## 📁 프로젝트 구조 (도메인 기준)
@@ -18,12 +20,13 @@
 │   │   │   └── openai_client.py
 │   │   ├── core/
 │   │   │   └── config.py
-│   │   ├── question/                 # 질문(생성) 도메인
+│   │   ├── question/                 # 질문 도메인
 │   │   │   ├── models.py
 │   │   │   ├── base.py               # QuestionGenerator 인터페이스
 │   │   │   ├── openai_question_generator.py
 │   │   │   └── service/
-│   │   │       └── question_service.py
+│   │   │       ├── question_service.py
+│   │   │       └── assignment_service.py
 │   │   ├── answer/                   # 답변(분석) 도메인
 │   │   │   ├── models.py
 │   │   │   ├── base.py               # AnswerAnalyzer 인터페이스
@@ -40,7 +43,10 @@
 └── README.md
 ```
 
-🆕 **새로 추가된 기능들**
+🧩 설계 포인트
+- 전략 패턴 + DI: `QuestionService(QuestionGenerator)`, `AnswerService(AnswerAnalyzer)`로 구현 교체 용이
+- OpenAI 어댑터: `app/adapters/openai_client.py`에서 OpenAI 호출을 단일화
+- DB/MCP 제거: 모든 생성/분석은 BE 전달 파라미터 기반으로 동작
 
 ## 🛠️ 설치 및 실행
 
@@ -65,23 +71,7 @@ PORT=8001
 LOG_LEVEL=INFO
 ```
 
-### 1-1. 데이터베이스 설정 🆕
 
-PostgreSQL 데이터베이스를 설치하고 설정하세요:
-
-```bash
-# PostgreSQL 설치 (macOS)
-brew install postgresql
-brew services start postgresql
-
-# 데이터베이스 생성
-createdb family_questions
-
-# 또는 psql로 직접 생성
-psql postgres
-CREATE DATABASE family_questions;
-\q
-```
 
 ### 2. Python 버전 및 의존성 설치
 
@@ -119,14 +109,14 @@ uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
 
 ## 🔌 API 엔드포인트
 
-### 질문 인스턴스 생성 API
+### 질문 인스턴스 생성
 
-#### 2. 템플릿 기반 question_instance 생성 (신규)
 ```
-POST /api/v1/questions/instance
+POST /api/v1/questions/instance/api       # OpenAI 구현
+POST /api/v1/questions/instance/langchain  # (501 Not Implemented)
 ```
 
-요청 예시:
+요청 예시(요약):
 ```json
 {
   "template": {
@@ -146,11 +136,11 @@ POST /api/v1/questions/instance
   "subject_member_id": null,
   "mood": "따뜻한",
   "extra_context": {"locale": "KR"},
-  "answer_analysis": {"summary": "최근 긍정적", "key_phrases": ["여행", "학교"], "sentiment": "positive"}
+  "answer_analysis": {"summary": "최근 긍정적"}
 }
 ```
 
-응답 예시:
+응답 예시(요약):
 ```json
 {
   "template_id": 10,
@@ -163,46 +153,50 @@ POST /api/v1/questions/instance
   "generation_model": "gpt-4.1-nano",
   "generation_parameters": {"max_tokens": 100, "temperature": 0.8},
   "generation_prompt": "...",
-  "generation_metadata": {"length": 23, "rules": {"length_ok": true, "ends_question": true}},
+  "generation_metadata": {"length": 23},
   "generation_confidence": 0.9,
   "generated_at": "2025-09-07T12:34:56"
 }
 ```
 
-### 답변 관리 API 🆕
-
-#### 1. 답변 저장
+### 답변 분석
 ```
-POST /api/v1/answers/
-```
-
-#### 2. 질문별 답변 조회
-```
-GET /api/v1/answers/question/{question_uuid}
+POST /api/v1/analysis/answer/api        # OpenAI 구현
+POST /api/v1/analysis/answer/langchain   # (501 Not Implemented)
 ```
 
-#### 3. 구성원별 답변 조회
+요청 필드(요약): `answer_text`, `language`(기본 ko), `question_content`, `question_category`, `question_tags`, `question_tone`, `subject_member_id`(옵션), `family_id`
+
+응답(요약): `summary`, `categories`, `scores(sentiment, emotion, relevance, toxicity, keywords, length)`
+
+### 멤버 할당
 ```
-GET /api/v1/answers/member/{answerer_name}
+POST /api/v1/questions/assign
 ```
 
-### 가족 관리 API 🆕
+요청 예시:
+```json
+{
+  "family_id": 0,
+  "members": [
+    {"member_id": 1, "assigned_count_30": 4},
+    {"member_id": 2, "assigned_count_30": 10},
+    {"member_id": 3, "assigned_count_30": 6}
+  ],
+  "pick_count": 1,
+  "options": {"epsilon": 1e-9}
+}
+```
 
-#### 1. 가족 구성원 등록
-```
-POST /api/v1/family/members
-```
-
-#### 2. 가족 구성원 목록 조회
-```
-GET /api/v1/family/members
+응답 예시:
+```json
+{ "member_ids": [3], "version": "assign-v1" }
 ```
 
-#### 3. 질문/답변 통계
-```
-GET /api/v1/family/statistics/questions
-GET /api/v1/family/statistics/answers
-```
+설명:
+- 가중치: (w_i = (1/N) * (1 - c_i / S)), S는 최근 30회 합계
+- 비복원 샘플링, `epsilon`으로 하한 보정(선택)
+- seed는 제거됨(재현성 필요 시 BE에서 별도 관리)
 
 ## 🎯 사용 예시
 
@@ -213,9 +207,9 @@ GET /api/v1/family/statistics/answers
 ### cURL 예시
 
 
-#### 템플릿 기반 question_instance 생성 (cURL)
+#### 템플릿 기반 question_instance 생성 (OpenAI 구현)
 ```bash
-curl -X POST "http://localhost:8001/api/v1/questions/instance" \
+curl -X POST "http://localhost:8001/api/v1/questions/instance/api" \
   -H "Content-Type: application/json" \
   -d '{
     "template": {"id": 10, "owner_family_id": 3, "content": "{{subject}}에게 오늘 가장 고마웠던 일을 물어보는 질문", "language": "ko"},
@@ -223,30 +217,57 @@ curl -X POST "http://localhost:8001/api/v1/questions/instance" \
   }'
 ```
 
+#### 멤버 할당
+```bash
+curl -X POST "http://localhost:8001/api/v1/questions/assign" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "family_id": 0,
+    "members": [
+      {"member_id": 1, "assigned_count_30": 4},
+      {"member_id": 2, "assigned_count_30": 10}
+    ],
+    "pick_count": 1,
+    "options": {"epsilon": 1e-9}
+  }'
+```
+
+#### 답변 분석
+```bash
+curl -X POST "http://localhost:8001/api/v1/analysis/answer/api" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "answer_text": "퇴근하고 아내가 끓여준 라면이 최고!!",
+    "language": "ko",
+    "question_content": "가장 좋아하는 음식이 무엇인가요?",
+    "question_category": "음식",
+    "question_tags": ["일상", "취향"],
+    "question_tone": "편안",
+    "subject_member_id": null,
+    "family_id": 0
+  }'
+```
+
 ## 🔧 개발 환경
 
-- **Python**: 3.12 권장 (3.13은 일부 DB 드라이버 빌드 이슈 존재)
+- **Python**: 3.12
 - **FastAPI**: 0.115.6
 - **OpenAI**: 1.57.0
-- **PostgreSQL**: 13+
-- **SQLAlchemy**: 2.0.25
 - **Pydantic**: 2.10.4
-
-## 🧩 비고
-- MCP/DB 관련 문서 블록은 현재 버전에서 비활성화되었습니다. 향후 재도입 시 별도 섹션으로 복원합니다.
 
 ## 📝 라이선스
 
 이 프로젝트는 MIT 라이선스 하에 배포됩니다.
 
-## 🤝 기여하기
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
 
 **온식구 AI 서버**로 가족의 따뜻한 대화를 만들어보세요! 🏠💕
+
+## 📦 OpenAPI 정적 내보내기
+
+```bash
+cd ai_server
+curl -sS http://127.0.0.1:8001/openapi.json -o openapi.json
+```
+
+- Swagger Editor에서 열기: `https://editor.swagger.io` → File → Import file → `ai_server/openapi.json`
+- ReDoc 단일 HTML(옵션): `npx redoc-cli bundle openapi.json -o api-docs.html`

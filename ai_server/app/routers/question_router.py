@@ -4,10 +4,13 @@ import logging
 
 from app.question.models import (
     QuestionInstanceCreateRequest,
-    QuestionInstanceResponse
+    QuestionInstanceResponse,
+    MemberAssignRequest,
+    MemberAssignResponse
 )
 from app.question.openai_question_generator import OpenAIQuestionGenerator
 from app.question.service.question_service import QuestionService
+from app.question.service.assignment_service import AssignmentService
 
 # 로거 설정
 logger = logging.getLogger(__name__)
@@ -42,3 +45,17 @@ async def create_question_instance(request: QuestionInstanceCreateRequest) -> Qu
 )
 async def create_question_instance_langchain(request: QuestionInstanceCreateRequest) -> QuestionInstanceResponse:
     raise HTTPException(status_code=501, detail="LangChain 구현은 준비 중입니다.")
+
+
+@router.post(
+    "/assign",
+    response_model=MemberAssignResponse,
+    summary="멤버 할당",
+    description="최근 30회 기준으로 덜 받은 멤버에 확률을 부여해 pick_count명 선정"
+)
+async def assign_members(request: MemberAssignRequest) -> MemberAssignResponse:
+    try:
+        service = AssignmentService()
+        return await service.assign_members(request)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"멤버 할당 실패: {str(e)}")

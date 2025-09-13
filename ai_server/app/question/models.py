@@ -74,5 +74,23 @@ class QuestionInstanceResponse(BaseModel):
     generation_confidence: float = Field(description="생성 신뢰도(0~1)")
     generated_at: datetime = Field(description="생성 시각")
 
+# === 멤버 할당 스키마 ===
+class AssignMemberInput(BaseModel):
+    member_id: int | str = Field(description="멤버 ID")
+    assigned_count_30: int = Field(ge=0, description="최근 30회 내 할당 횟수(0 이상)")
+
+class AssignOptions(BaseModel):
+    epsilon: Optional[float] = Field(default=1e-9, description="가중치 하한값")
+
+class MemberAssignRequest(BaseModel):
+    family_id: int | str = Field(description="가족 ID")
+    members: List[AssignMemberInput] = Field(description="후보 멤버 목록")
+    pick_count: int = Field(ge=1, description="선정할 멤버 수")
+    options: Optional[AssignOptions] = Field(default=None, description="선정 옵션")
+
+class MemberAssignResponse(BaseModel):
+    member_ids: List[int | str] = Field(description="선정된 멤버 ID 목록")
+    version: str = Field(default="assign-v1", description="로직 버전")
+
 
 
