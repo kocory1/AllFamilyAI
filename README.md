@@ -5,7 +5,7 @@
 ## 🚀 주요 기능
 
 ### 기능
-- **질문 인스턴스 생성**: BE가 전달한 템플릿 파라미터로 인스턴스를 생성(메타 포함, DB 미사용)
+- **질문 생성**: BE가 전달한 content와 선택 힌트(language/tone/category/tags/mood/subject_required/answer_analysis)로 생성(메타 포함, DB 미사용)
 - **답변 분석**: 질문 맥락(카테고리/태그/톤)을 반영해 구조화된 분석 JSON 반환
 - **멤버 할당**: 최근 30회 할당 횟수 기반 가중치로 비복원 랜덤 선택
 
@@ -109,43 +109,42 @@ uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
 
 ## 🔌 API 엔드포인트
 
-### 질문 인스턴스 생성
+### 질문 생성
 
 ```
-POST /api/v1/questions/instance/api       # OpenAI 구현
+POST /api/v1/questions/api                 # OpenAI 구현
 POST /api/v1/questions/instance/langchain  # (501 Not Implemented)
 ```
 
 요청 예시(요약):
 ```json
 {
-  "template": {
-    "id": 10,
-    "owner_family_id": 3,
-    "content": "{{subject}}에게 오늘 가장 고마웠던 일을 물어보는 질문",
-    "category": "가족",
-    "tags": ["감사", "일상"],
-    "subject_required": false,
-    "reuse_scope": "per_family",
-    "cooldown_days": 7,
-    "language": "ko",
-    "tone": "따뜻한",
-    "is_active": true
-  },
-  "planned_date": "2025-09-15",
-  "subject_member_id": null,
-  "mood": "따뜻한",
-  "extra_context": {"locale": "KR"},
-  "answer_analysis": {"summary": "최근 긍정적"}
+  "content": "오늘 하루 중 가장 감사했던 순간을 떠올려 볼까요?",
+  "language": "ko",
+  "tone": "따뜻한",
+  "category": "가족",
+  "tags": ["감사", "일상"],
+  "subject_required": false,
+  "mood": "차분한",
+  "answer_analysis": {
+    "summary": "전반적으로 긍정적이고 감사 표현이 많음",
+    "categories": ["감사", "일상"],
+    "scores": {
+      "sentiment": 0.8,
+      "relevance_to_question": 0.9,
+      "relevance_to_category": 0.85,
+      "toxicity": 0.0,
+      "length": 42,
+      "emotion": {"joy": 0.7, "neutral": 0.3}
+    },
+    "keywords": ["감사", "하루", "좋은 순간"]
+  }
 }
 ```
 
 응답 예시(요약):
 ```json
 {
-  "template_id": 10,
-  "family_id": 3,
-  "subject_member_id": null,
   "content": "오늘 가장 고마웠던 순간은 무엇이었나요?",
   "planned_date": "2025-09-15",
   "status": "draft",
@@ -207,13 +206,18 @@ POST /api/v1/questions/assign
 ### cURL 예시
 
 
-#### 템플릿 기반 question_instance 생성 (OpenAI 구현)
+#### 질문 생성 (OpenAI 구현)
 ```bash
-curl -X POST "http://localhost:8001/api/v1/questions/instance/api" \
+curl -X POST "http://localhost:8001/api/v1/questions/api" \
   -H "Content-Type: application/json" \
   -d '{
-    "template": {"id": 10, "owner_family_id": 3, "content": "{{subject}}에게 오늘 가장 고마웠던 일을 물어보는 질문", "language": "ko"},
-    "mood": "따뜻한"
+    "content": "오늘 하루 중 가장 감사했던 순간을 떠올려 볼까요?",
+    "language": "ko",
+    "tone": "따뜻한",
+    "category": "가족",
+    "tags": ["감사", "일상"],
+    "subject_required": false,
+    "mood": "차분한"
   }'
 ```
 

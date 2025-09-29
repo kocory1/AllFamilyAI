@@ -10,8 +10,6 @@ class AnswerAnalysisRequest(BaseModel):
     question_category: str = Field(description="질문 카테고리")
     question_tags: List[str] = Field(default_factory=list, description="질문/템플릿 태그")
     question_tone: Optional[str] = Field(default=None, description="질문 톤/스타일")
-    subject_member_id: Optional[int] = Field(default=None, description="주제 인물 ID (없으면 NULL)")
-    family_id: Optional[int] = Field(default=None, description="가족 그룹 식별자")
 
 
 class AnswerAnalysisRaw(BaseModel):

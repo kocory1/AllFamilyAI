@@ -5,7 +5,7 @@ from app.core.config import settings
 from app.question.base import QuestionGenerator
 from app.adapters.openai_client import OpenAIClient
 from app.question.models import (
-    QuestionInstanceCreateRequest,
+    QuestionGenerateRequest,
     QuestionInstanceResponse,
 )
 
@@ -14,74 +14,136 @@ class OpenAIQuestionGenerator(QuestionGenerator):
     def __init__(self) -> None:
         self.client = OpenAIClient()
 
-    async def generate_from_template(
-        self, request: QuestionInstanceCreateRequest
+    async def generate(
+        self, request: QuestionGenerateRequest
     ) -> QuestionInstanceResponse:
-        prompt = self._build_template_prompt(request)
+        prompt = self._build_prompt(request)
         response = await self._call_openai(prompt)
         content = self._parse_response(response)
 
         confidence, meta = self._evaluate_generation(
             content=content,
-            language=request.template.language or "ko",
-            tone=request.template.tone,
-            max_len=50
+            language=request.language or "ko",
+            tone=request.tone,
+            max_len=settings.max_question_length
         )
 
         return QuestionInstanceResponse(
-            template_id=request.template.id,
-            family_id=request.template.owner_family_id,
-            subject_member_id=request.subject_member_id,
+            template_id=None,
+            family_id=None,
+            subject_member_id=None,
             content=content,
-            planned_date=request.planned_date,
+            planned_date=None,
             status="draft",
             generated_by="ai",
             generation_model=settings.default_model,
-            generation_parameters={
-                "max_tokens": settings.max_tokens,
-                "temperature": settings.temperature
-            },
+            generation_parameters={"max_tokens": settings.max_tokens, "temperature": settings.temperature},
             generation_prompt=prompt,
             generation_metadata=meta,
             generation_confidence=confidence,
             generated_at=datetime.now()
         )
 
-    def _build_template_prompt(self, request: QuestionInstanceCreateRequest) -> str:
-        template = request.template
-        base = f"""
-당신은 가족 유대감을 증진시키는 질문 생성 전문가입니다.
-아래 템플릿과 조건을 반영하여 질문 한 개만 한국어로 생성해주세요.
+    def _build_prompt(self, request: QuestionGenerateRequest) -> str:
+        lines = []
+        lines.append("당신은 가족 유대감을 증진시키는 질문 생성 전문가입니다.")
+        lines.append("아래 정보를 참고하여, 기존 내용을 더 깊게 파고드는 심화·개인화 팔로업 질문 한 개만 한국어로 생성해주세요.")
+        lines.append("")
+        lines.append("=== 기반 문구 ===")
+        lines.append(f"본문: {request.content}")
+        lines.append("")
+        # 맥락 섹션(존재하는 항목만)
+        ctx = []
+        if request.category:
+            ctx.append(f"카테고리: {request.category}")
+        if request.tone:
+            ctx.append(f"톤: {request.tone}")
+        if request.language:
+            ctx.append(f"언어: {request.language}")
+        if request.tags:
+            ctx.append(f"태그: {', '.join(request.tags)}")
+        if request.subject_required is not None:
+            ctx.append(f"주제 인물 필요: {request.subject_required}")
+        if request.mood:
+            ctx.append(f"분위기: {request.mood}")
+        if ctx:
+            lines.append("=== 맥락 ===")
+            lines.extend(ctx)
+            lines.append("")
 
-=== 템플릿 ===
-본문: {template.content}
-카테고리: {template.category or '미지정'}
-톤: {template.tone or '미지정'}
-언어: {template.language or 'ko'}
-태그: {', '.join(template.tags) if template.tags else '없음'}
-주제 인물 필요: {template.subject_required}
+        # 분석 섹션(선택)
+        if request.answer_analysis:
+            lines.append("=== 답변 분석 힌트(선택) ===")
+            summary = request.answer_analysis.summary
+            categories = request.answer_analysis.categories
+            scores = request.answer_analysis.scores
+            keywords = request.answer_analysis.keywords
+            if summary:
+                # 요약은 '참고용'으로만 제공하고, 문구 재사용 금지 지침을 아래에 명시
+                lines.append(f"요약(참고용): {summary}")
+            if categories:
+                lines.append(f"분류: {', '.join(categories)}")
+            if keywords:
+                lines.append(f"키워드: {', '.join(keywords)}")
+            if scores:
+                # 전체 스코어를 JSON 유사 형태로 그대로 노출
+                import json
+                payload = {}
+                if scores.sentiment is not None:
+                    payload["sentiment"] = scores.sentiment
+                if scores.toxicity is not None:
+                    payload["toxicity"] = scores.toxicity
+                if scores.relevance_to_question is not None:
+                    payload["relevance_to_question"] = scores.relevance_to_question
+                if scores.relevance_to_category is not None:
+                    payload["relevance_to_category"] = scores.relevance_to_category
+                if scores.length is not None:
+                    payload["length"] = scores.length
+                if scores.emotion is not None:
+                    emo = {}
+                    if scores.emotion.joy is not None:
+                        emo["joy"] = scores.emotion.joy
+                    if scores.emotion.sadness is not None:
+                        emo["sadness"] = scores.emotion.sadness
+                    if scores.emotion.anger is not None:
+                        emo["anger"] = scores.emotion.anger
+                    if scores.emotion.fear is not None:
+                        emo["fear"] = scores.emotion.fear
+                    if scores.emotion.neutral is not None:
+                        emo["neutral"] = scores.emotion.neutral
+                    if emo:
+                        payload["emotion"] = emo
+                if payload:
+                    lines.append("점수(참고용): " + json.dumps(payload, ensure_ascii=False))
+            # 요약 활용 방식에 대한 추가 지침(복사 금지, 심화 방향)
+            lines.append("참고 지침: 요약과 점수는 맥락 파악용이며, 동일 표현을 복사하지 말고 새로운 심화 질문으로 재구성하세요.")
+            lines.append("참고 지침: '요약에 따르면' 같은 메타 언급 없이 자연스러운 질문만 출력하세요.")
+            lines.append("")
 
-=== 조건 ===
-주제 인물 ID: {request.subject_member_id if request.subject_member_id is not None else '없음'}
-분위기: {request.mood or '기본'}
-추가 컨텍스트: {request.extra_context or {}}
-이전 답변 분석: {request.answer_analysis or '없음'}
-
-=== 생성 규칙 ===
-1) 존댓말 사용
-2) 템플릿의 카테고리({template.category or '미지정'})에 부합하는 질문 생성
-3) 50자 이내
-4) 설명 없이 질문만 출력
-5) 불필요한 따옴표/번호/접두어 제거
-
-질문:"""
-        return base
+        # 생성 규칙
+        lines.append("=== 생성 규칙 ===")
+        lines.append("1) 존댓말 사용, 질문은 단 한 문장")
+        lines.append("2) 상투적·일반론 금지, 요약/키워드/점수는 참고만 하며 표현을 그대로 재사용하지 않음")
+        lines.append("3) 주어진 내용과 분석을 바탕으로 심화·개인화된 개방형 질문 생성")
+        lines.append("4) 제공된 카테고리/톤/태그/분위기와 자연스럽게 일치")
+        lines.append(f"5) {settings.max_question_length}자 이내")
+        lines.append("6) 설명/접두어 없이 질문만 출력, 불필요한 따옴표·번호 제거")
+        lines.append("")
+        lines.append("질문:")
+        return "\n".join(lines)
 
     async def _call_openai(self, prompt: str) -> str:
         return self.client.chat_completion(
             [
-                {"role": "system", "content": "당신은 가족 유대감 증진을 위한 질문 생성 전문가입니다. 따뜻하고 진정성 있는 질문을 만드는 것이 목표입니다."},
-                {"role": "user", "content": prompt}
+                {
+                    "role": "system",
+                    "content": (
+                        "당신은 가족 유대감을 증진시키는 질문 생성 전문가입니다. "
+                        "주어진 내용을 바탕으로 더 깊이 파고드는 심화·개인화된 팔로업 질문을 한 문장으로 만듭니다. "
+                        "상투적 표현은 피하고, 상대가 스스로를 더 이야기하게 하는 개방형 질문을 선호합니다."
+                    ),
+                },
+                {"role": "user", "content": prompt},
             ]
         )
 

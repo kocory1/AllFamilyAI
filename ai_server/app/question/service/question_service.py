@@ -1,5 +1,5 @@
 from app.question.base import QuestionGenerator
-from app.question.models import QuestionInstanceCreateRequest, QuestionInstanceResponse
+from app.question.models import (QuestionGenerateRequest, QuestionInstanceResponse)
 
 
 class QuestionService:
@@ -11,7 +11,7 @@ class QuestionService:
     def __init__(self, generator: QuestionGenerator) -> None:
         self.generator = generator
 
-    async def generate_from_template(self, request: QuestionInstanceCreateRequest) -> QuestionInstanceResponse:
-        return await self.generator.generate_from_template(request)
+    async def generate(self, request: QuestionGenerateRequest) -> QuestionInstanceResponse:
+        return await self.generator.generate(request)
 
 
