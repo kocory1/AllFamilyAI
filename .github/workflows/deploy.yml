@@ -64,17 +64,21 @@ jobs:
             echo "PROFILE_ALPHA_LENGTH=0.5" >> .env
             echo "PROFILE_TOP_N_PRUNE=10" >> .env
             
-            # 서버 백그라운드 실행
-            nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 > server.log 2>&1 &
+            # 서버 백그라운드 실행 (SSH 세션과 완전 분리)
+            source venv/bin/activate
+            nohup venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 > server.log 2>&1 &
+            SERVER_PID=$!
+            disown $SERVER_PID
+            echo "서버 PID: $SERVER_PID"
             
             # 서버 시작 확인
-            sleep 3
+            sleep 5
             if pgrep -f "uvicorn app.main:app" > /dev/null; then
               echo "✅ 서버가 성공적으로 시작되었습니다."
               echo "📝 로그: tail -f ~/onsikgu_ai/ai_server/server.log"
             else
               echo "❌ 서버 시작 실패! 로그 확인:"
-              tail -20 server.log
+              tail -30 server.log
               exit 1
             fi
 

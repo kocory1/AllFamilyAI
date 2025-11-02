@@ -1,12 +1,13 @@
 # 온식구 AI 서버 🏠🤖
 
-가족 유대감을 위한 AI 질문 생성 서버입니다. OpenAI API를 활용해 템플릿 기반 question_instance 생성, 답변 분석, 멤버 할당을 제공합니다.
+가족 유대감을 위한 AI 질문 생성 서버입니다. OpenAI API를 활용해 템플릿 기반 question_instance 생성, 답변 분석, 멤버 프로필 분석, 멤버 할당을 제공합니다.
 
 ## 🚀 주요 기능
 
 ### 기능
-- **질문 생성**: BE가 전달한 content와 선택 힌트(language/tone/category/tags/mood/subject_required/answer_analysis)로 생성(메타 포함, DB 미사용)
-- **답변 분석**: 질문 맥락(카테고리/태그/톤)을 반영해 구조화된 분석 JSON 반환
+- **질문 생성**: BE가 전달한 content와 선택 힌트(language/tone/category/tags/mood/subject_required/answer_analysis)로 개인화된 질문 생성(메타 포함, DB 미사용)
+- **답변 분석**: 질문 맥락(카테고리/태그/톤)을 반영해 구조화된 분석 JSON 반환 (summary, categories, scores, keywords)
+- **멤버 프로필 분석**: 답변 분석 결과를 기반으로 사용자 선호도(preferences)와 참여도(engagement_stats) 계산
 - **멤버 할당**: 최근 30회 할당 횟수 기반 가중치로 비복원 랜덤 선택
 
 
@@ -33,9 +34,19 @@
 │   │   │   ├── openai_answer_analyzer.py
 │   │   │   └── service/
 │   │   │       └── answer_service.py
+│   │   ├── member_profile/           # 멤버 프로필 도메인
+│   │   │   ├── models.py
+│   │   │   ├── base.py               # ProfileUpdater 인터페이스
+│   │   │   ├── updater.py            # 프로필 갱신 로직
+│   │   │   ├── rules.py              # 갱신 규칙 상수
+│   │   │   └── service/
+│   │   │       └── profile_service.py
+│   │   ├── utils/                    # 공통 유틸리티
+│   │   │   └── score_sanitizer.py    # 점수 정제 클래스
 │   │   ├── routers/
 │   │   │   ├── question_router.py
-│   │   │   └── analysis_router.py
+│   │   │   ├── analysis_router.py
+│   │   │   └── profile_router.py
 │   │   └── main.py
 │   ├── requirements.txt
 │   ├── env.example
@@ -164,9 +175,78 @@ POST /api/v1/analysis/answer/api        # OpenAI 구현
 POST /api/v1/analysis/answer/langchain   # (501 Not Implemented)
 ```
 
-요청 필드(요약): `answer_text`, `language`(기본 ko), `question_content`, `question_category`, `question_tags`, `question_tone`, `subject_member_id`(옵션), `family_id`
+요청 필드(요약): `answer_text`, `language`(기본 ko), `question_content`, `question_category`, `question_tags`, `question_tone`
 
-응답(요약): `summary`, `categories`, `scores(sentiment, emotion, relevance, toxicity, keywords, length)`
+응답(요약): `summary`, `categories`, `scores(sentiment, emotion, relevance_to_question, relevance_to_category, toxicity, length, keywords)`
+
+### 멤버 프로필 분석
+```
+POST /api/v1/member/profile/analysis
+```
+
+요청 예시:
+```json
+{
+  "analysis": {
+    "summary": "전반적으로 긍정적이고 감사 표현이 많음",
+    "categories": ["감사", "일상"],
+    "scores": {
+      "sentiment": 0.8,
+      "emotion": {"joy": 0.7, "neutral": 0.3},
+      "relevance_to_question": 0.9,
+      "relevance_to_category": 0.85,
+      "toxicity": 0.0,
+      "length": 42,
+      "keywords": ["감사", "하루", "좋은 순간"]
+    }
+  },
+  "current_profile": {
+    "liked_categories": {"가족": 0.8, "일상": 0.6},
+    "liked_tags": {"감사": 0.7},
+    "preferred_tone": {"따뜻한": 0.5},
+    "taboo_topics": []
+  },
+  "current_engagement": {
+    "avg_length": 35.5
+  },
+  "weights": {
+    "decay": 0.9,
+    "category_gain": 0.25,
+    "tag_gain": 0.15,
+    "tone_gain": 0.1,
+    "taboo_threshold": 0.6,
+    "taboo_penalty": 0.2,
+    "alpha_length": 0.5,
+    "top_n_prune": 10
+  }
+}
+```
+
+응답 예시:
+```json
+{
+  "preferences": {
+    "liked_categories": {"감사": 0.95, "일상": 0.88, "가족": 0.72},
+    "liked_tags": {"감사": 0.91, "하루": 0.68, "좋은 순간": 0.65},
+    "preferred_tone": {"따뜻한": 0.78},
+    "taboo_topics": []
+  },
+  "engagement_stats": {
+    "avg_length": 38.75
+  },
+  "meta": {
+    "applied_decay": 0.9,
+    "alpha_length": 0.5,
+    "updated_from": "incremental"
+  }
+}
+```
+
+설명:
+- 답변 분석 결과를 바탕으로 사용자의 선호도(liked_categories, liked_tags, preferred_tone)와 금기 주제(taboo_topics)를 계산합니다.
+- 참여도 통계(avg_length)는 EMA(지수 이동 평균) 방식으로 갱신됩니다.
+- 가중치는 감쇠(decay), 카테고리/태그/톤 가산(gain), 독성 임계값(taboo_threshold) 등으로 조정 가능합니다.
+- 계산된 프로필은 BE에서 DB에 저장하며, AI 서버는 계산만 수행합니다.
 
 ### 멤버 할당
 ```
@@ -246,9 +326,47 @@ curl -X POST "http://localhost:8001/api/v1/analysis/answer/api" \
     "question_content": "가장 좋아하는 음식이 무엇인가요?",
     "question_category": "음식",
     "question_tags": ["일상", "취향"],
-    "question_tone": "편안",
-    "subject_member_id": null,
-    "family_id": 0
+    "question_tone": "편안"
+  }'
+```
+
+#### 멤버 프로필 분석
+```bash
+curl -X POST "http://localhost:8001/api/v1/member/profile/analysis" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "analysis": {
+      "summary": "전반적으로 긍정적이고 감사 표현이 많음",
+      "categories": ["감사", "일상"],
+      "scores": {
+        "sentiment": 0.8,
+        "emotion": {"joy": 0.7, "neutral": 0.3},
+        "relevance_to_question": 0.9,
+        "relevance_to_category": 0.85,
+        "toxicity": 0.0,
+        "length": 42,
+        "keywords": ["감사", "하루", "좋은 순간"]
+      }
+    },
+    "current_profile": {
+      "liked_categories": {"가족": 0.8, "일상": 0.6},
+      "liked_tags": {"감사": 0.7},
+      "preferred_tone": {"따뜻한": 0.5},
+      "taboo_topics": []
+    },
+    "current_engagement": {
+      "avg_length": 35.5
+    },
+    "weights": {
+      "decay": 0.9,
+      "category_gain": 0.25,
+      "tag_gain": 0.15,
+      "tone_gain": 0.1,
+      "taboo_threshold": 0.6,
+      "taboo_penalty": 0.2,
+      "alpha_length": 0.5,
+      "top_n_prune": 10
+    }
   }'
 ```
 
