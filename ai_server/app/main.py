@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 from app.routers import question_router
 from app.routers import analysis_router
+from app.routers import profile_router
 from app.core.config import settings
 
 # 환경 변수 로드
@@ -37,6 +38,7 @@ app.add_middleware(
 # 라우터 등록 (기본 OpenAI 질문 생성만 제공)
 app.include_router(question_router.router, prefix="/api/v1", tags=["기본 질문"])
 app.include_router(analysis_router.router, prefix="/api/v1", tags=["답변 분석"])
+app.include_router(profile_router.router, prefix="/api/v1", tags=["사용자 프로필"])
 
 @app.get("/")
 async def root():

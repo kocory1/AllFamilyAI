@@ -12,13 +12,13 @@ class Settings(BaseSettings):
     
     # 서버 설정
     host: str = "0.0.0.0"
-    port: int = 8001
+    port: int = 8000  # EC2 인바운드 규칙과 일치
     
     # 로깅 설정
     log_level: str = "INFO"
     
     # AI 모델 설정
-    default_model: str = "gpt-4.1-nano"  # gpt-4.1-nano, gpt-4o-mini, gpt-3.5-turbo, gpt-4o
+    default_model: str = "gpt-5-nano"  
     max_tokens: int = 100
     temperature: float = 0.8
     
@@ -27,5 +27,15 @@ class Settings(BaseSettings):
     question_categories: list = [
         "가족", "추억", "일상", "꿈", "관계", "감정", "취미", "미래"
     ]
+    
+    # 프로필 갱신 설정 (member_profile 업데이트 기본값)
+    profile_decay: float = 0.9  # 기존 가중치 감쇠율
+    profile_category_gain: float = 0.25  # 카테고리 가산치
+    profile_tag_gain: float = 0.15  # 태그 가산치
+    profile_tone_gain: float = 0.1  # 톤 가산치
+    profile_taboo_threshold: float = 0.6  # 독성 점수 금기 임계값
+    profile_taboo_penalty: float = 0.2  # 금기 주제 감점
+    profile_alpha_length: float = 0.5  # 평균 답변 길이 EMA 계수
+    profile_top_n_prune: int = 10  # 선호 카테고리/태그 유지 상위 N개
     
 settings = Settings() 

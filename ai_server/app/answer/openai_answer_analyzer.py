@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 from app.adapters.openai_client import OpenAIClient
 from app.core.config import settings
+from app.utils.score_sanitizer import ScoreSanitizer
 from app.answer.base import AnswerAnalyzer
 from app.answer.models import (
     AnswerAnalysisRequest,
@@ -68,6 +69,9 @@ class OpenAIAnswerAnalyzer(AnswerAnalyzer):
             except Exception:
                 pass
 
+        # Post-process: clamp and round numeric scores to spec ranges
+        scores = ScoreSanitizer.sanitize(scores)
+
         version = f"ans-v1.0:{settings.default_model}:{datetime.now().date().isoformat()}"
 
         return AnswerAnalysisResponse(
@@ -115,7 +119,15 @@ class OpenAIAnswerAnalyzer(AnswerAnalyzer):
 1) 질문/카테고리/태그/톤 맥락에 맞춰 분석하세요.
 2) 한국어로 간결히 요약(summary) 작성.
 3) JSON 외의 텍스트를 출력하지 마세요.
+4) 형식/스케일 제약을 지키세요:
+   - sentiment는 답변의 감정 표현을 기반으로 -1.0(극부정) ~ 1.0(극긍정) 범위, 소수 둘째자리로 반올림.
+   - emotion.{joy,sadness,anger,fear,neutral}, relevance_to_* , toxicity는 0~1 범위, 소수 둘째자리로 반올림.
+   - length는 0 이상 정수.
+   - categories/keywords는 문자열 배열.
+   - 지정 키 이외의 필드는 추가하지 마세요.
 """
+
+    
 
     async def _call_openai_json(self, prompt: str, params: dict) -> str:
         return self.client.chat_completion(

@@ -206,6 +206,46 @@
         }
       }
     },
+    "/api/v1/member/profile/analysis": {
+      "post": {
+        "tags": ["사용자 프로필"],
+        "summary": "사용자 프로필 분석",
+        "description": "답변 분석 결과를 입력으로 받아 preferences/engagement(avg_length)을 계산합니다.",
+        "operationId": "compute_member_profile_api_v1_member_profile_analysis_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberProfileComputeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberProfileSummary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/": {
       "get": {
         "summary": "Root",
@@ -394,6 +434,97 @@
           "loc": {"type": "array", "items": {"anyOf": [{"type": "string"}, {"type": "integer"}]}, "title": "Location"},
           "msg": {"type": "string", "title": "Message"},
           "type": {"type": "string", "title": "Error Type"}
+        }
+      },
+      "EmotionScoresInput": {
+        "type": "object",
+        "title": "EmotionScoresInput",
+        "properties": {
+          "joy": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "sadness": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "anger": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "fear": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "neutral": {"anyOf": [{"type": "number"}, {"type": "null"}]}
+        }
+      },
+      "AnalysisScoresInput": {
+        "type": "object",
+        "title": "AnalysisScoresInput",
+        "properties": {
+          "sentiment": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "emotion": {"anyOf": [{"$ref": "#/components/schemas/EmotionScoresInput"}, {"type": "null"}]},
+          "relevance_to_question": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "relevance_to_category": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "toxicity": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "length": {"anyOf": [{"type": "integer"}, {"type": "null"}]}
+        }
+      },
+      "AnswerAnalysisLite": {
+        "type": "object",
+        "title": "AnswerAnalysisLite",
+        "properties": {
+          "categories": {"anyOf": [{"type": "array", "items": {"type": "string"}}, {"type": "null"}]},
+          "scores": {"anyOf": [{"$ref": "#/components/schemas/AnalysisScoresInput"}, {"type": "null"}]},
+          "keywords": {"anyOf": [{"type": "array", "items": {"type": "string"}}, {"type": "null"}]}
+        }
+      },
+      "PreferencesMap": {
+        "type": "object",
+        "title": "PreferencesMap",
+        "properties": {
+          "liked_categories": {"type": "object", "additionalProperties": {"type": "number"}},
+          "liked_tags": {"type": "object", "additionalProperties": {"type": "number"}},
+          "preferred_tone": {"type": "object", "additionalProperties": {"type": "number"}},
+          "taboo_topics": {"type": "array", "items": {"type": "string"}}
+        }
+      },
+      "EngagementStats": {
+        "type": "object",
+        "title": "EngagementStats",
+        "properties": {
+          "avg_length": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+          "answer_rate_30d": {"anyOf": [{"type": "number"}, {"type": "null"}]}
+        }
+      },
+      "CurrentProfileInput": {
+        "type": "object",
+        "title": "CurrentProfileInput",
+        "properties": {
+          "preferences": {"$ref": "#/components/schemas/PreferencesMap"},
+          "engagement_stats": {"$ref": "#/components/schemas/EngagementStats"}
+        }
+      },
+      "Weights": {
+        "type": "object",
+        "title": "Weights",
+        "properties": {
+          "decay": {"type": "number", "default": 0.9},
+          "category_gain": {"type": "number", "default": 0.25},
+          "tag_gain": {"type": "number", "default": 0.15},
+          "tone_gain": {"type": "number", "default": 0.1},
+          "taboo_threshold": {"type": "number", "default": 0.6},
+          "taboo_penalty": {"type": "number", "default": 0.2},
+          "alpha_length": {"type": "number", "default": 0.5}
+        }
+      },
+      "MemberProfileComputeRequest": {
+        "type": "object",
+        "title": "MemberProfileComputeRequest",
+        "required": ["analysis"],
+        "properties": {
+          "analysis": {"$ref": "#/components/schemas/AnswerAnalysisLite"},
+          "current_profile": {"anyOf": [{"$ref": "#/components/schemas/CurrentProfileInput"}, {"type": "null"}]},
+          "weights": {"anyOf": [{"$ref": "#/components/schemas/Weights"}, {"type": "null"}]}
+        }
+      },
+      "MemberProfileSummary": {
+        "type": "object",
+        "title": "MemberProfileSummary",
+        "required": ["preferences", "engagement_stats"],
+        "properties": {
+          "preferences": {"type": "object"},
+          "engagement_stats": {"type": "object"},
+          "meta": {"type": "object"}
         }
       }
     }
