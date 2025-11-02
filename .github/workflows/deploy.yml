@@ -65,11 +65,11 @@ jobs:
             echo "PROFILE_TOP_N_PRUNE=10" >> .env
             
             # 서버 백그라운드 실행 (SSH 세션과 완전 분리)
-            # nohup은 절대 경로 사용 필요
-            nohup ~/onsikgu_ai/ai_server/venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 > server.log 2>&1 &
-            SERVER_PID=$!
-            disown $SERVER_PID
-            echo "서버 PID: $SERVER_PID"
+            # setsid로 새로운 세션 생성하여 SSH 종료와 완전히 독립
+            cd ~/onsikgu_ai/ai_server
+            setsid nohup ~/onsikgu_ai/ai_server/venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 > server.log 2>&1 < /dev/null &
+            sleep 2
+            echo "서버가 새로운 세션에서 시작되었습니다."
             
             # 서버 시작 확인
             sleep 5
