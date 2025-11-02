@@ -65,8 +65,8 @@ jobs:
             echo "PROFILE_TOP_N_PRUNE=10" >> .env
             
             # 서버 백그라운드 실행 (SSH 세션과 완전 분리)
-            source venv/bin/activate
-            nohup venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 > server.log 2>&1 &
+            # nohup은 절대 경로 사용 필요
+            nohup ~/onsikgu_ai/ai_server/venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 > server.log 2>&1 &
             SERVER_PID=$!
             disown $SERVER_PID
             echo "서버 PID: $SERVER_PID"
