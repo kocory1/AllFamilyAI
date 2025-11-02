@@ -16,71 +16,29 @@ jobs:
       - name: 체크아웃
         uses: actions/checkout@v4
 
-      - name: EC2 배포
+      - name: 배포 스크립트 전송
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: ".github/scripts/deploy.sh"
+          target: "~/"
+          strip_components: 2
+
+      - name: EC2 배포 실행
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # 기존 서버 종료
-            pkill -f "uvicorn app.main:app" || true
-            sleep 2
+            chmod +x ~/deploy.sh
+            ~/deploy.sh "${{ secrets.OPENAI_API_KEY }}" > ~/deploy.log 2>&1 &
             
-            # 기존 프로젝트 완전 삭제
-            rm -rf ~/onsikgu_ai
-            
-            # 프로젝트 새로 클론
-            cd ~
-            git clone https://github.com/kocory1/AllFamilyAI.git onsikgu_ai
-            cd onsikgu_ai/ai_server
-            
-            # python3-venv 설치 (처음 한 번만 필요하지만 안전하게)
-            sudo apt install -y python3.12-venv
-            
-            # 가상환경 생성
-            python3 -m venv venv
-            
-            # 가상환경 활성화 및 의존성 설치
-            source venv/bin/activate
-            pip install --upgrade pip
-            pip install -r requirements.txt
-            
-            # 환경변수 파일 생성
-            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
-            echo "HOST=0.0.0.0" >> .env
-            echo "PORT=8000" >> .env
-            echo "LOG_LEVEL=INFO" >> .env
-            echo "DEFAULT_MODEL=gpt-5-nano" >> .env
-            echo "MAX_TOKENS=200" >> .env
-            echo "TEMPERATURE=0.8" >> .env
-            echo "MAX_QUESTION_LENGTH=200" >> .env
-            echo "PROFILE_DECAY=0.9" >> .env
-            echo "PROFILE_CATEGORY_GAIN=0.25" >> .env
-            echo "PROFILE_TAG_GAIN=0.15" >> .env
-            echo "PROFILE_TONE_GAIN=0.1" >> .env
-            echo "PROFILE_TABOO_THRESHOLD=0.6" >> .env
-            echo "PROFILE_TABOO_PENALTY=0.2" >> .env
-            echo "PROFILE_ALPHA_LENGTH=0.5" >> .env
-            echo "PROFILE_TOP_N_PRUNE=10" >> .env
-            
-            # 서버 백그라운드 실행 (SSH 세션과 완전 분리)
-            # setsid로 새로운 세션 생성하여 SSH 종료와 완전히 독립
-            cd ~/onsikgu_ai/ai_server
-            setsid nohup ~/onsikgu_ai/ai_server/venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 > server.log 2>&1 < /dev/null &
-            sleep 2
-            echo "서버가 새로운 세션에서 시작되었습니다."
-            
-            # 서버 시작 확인
-            sleep 5
-            if pgrep -f "uvicorn app.main:app" > /dev/null; then
-              echo "✅ 서버가 성공적으로 시작되었습니다."
-              echo "📝 로그: tail -f ~/onsikgu_ai/ai_server/server.log"
-            else
-              echo "❌ 서버 시작 실패! 로그 확인:"
-              tail -30 server.log
-              exit 1
-            fi
+            # 배포 스크립트가 백그라운드에서 실행되도록 하고 SSH 세션 즉시 종료
+            echo "배포 스크립트가 백그라운드에서 실행 중입니다."
+            echo "로그 확인: ssh로 접속 후 tail -f ~/deploy.log"
 
       - name: 배포 완료 알림
         if: success()
