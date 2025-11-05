@@ -26,7 +26,7 @@ class OpenAIAnswerAnalyzer(AnswerAnalyzer):
 
         params = {
             "model": settings.default_model,
-            "max_completion_tokens": 600,
+            "max_completion_tokens": 3000,  # reasoning 모델은 내부 사고에 토큰을 많이 사용
             "language": request.language,
             "top_k": 5,
             "thresholds": {"toxicity": 0.6},
