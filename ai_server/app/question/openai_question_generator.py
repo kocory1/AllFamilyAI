@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Optional
+import logging
 
 from app.core.config import settings
 from app.question.base import QuestionGenerator
@@ -8,6 +9,8 @@ from app.question.models import (
     QuestionGenerateRequest,
     QuestionInstanceResponse,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class OpenAIQuestionGenerator(QuestionGenerator):
@@ -18,8 +21,13 @@ class OpenAIQuestionGenerator(QuestionGenerator):
         self, request: QuestionGenerateRequest
     ) -> QuestionInstanceResponse:
         prompt = self._build_prompt(request)
+        logger.info(f"[QuestionGen] 프롬프트 생성 완료 - 길이: {len(prompt)}")
+        
         response = await self._call_openai(prompt)
+        logger.info(f"[QuestionGen] OpenAI 응답 받음 - 길이: {len(response)}, 내용: '{response[:100]}'")
+        
         content = self._parse_response(response)
+        logger.info(f"[QuestionGen] 파싱 완료 - content: '{content}'")
 
         confidence, meta = self._evaluate_generation(
             content=content,

@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import datetime
 from app.adapters.openai_client import OpenAIClient
 from app.core.config import settings
@@ -10,6 +11,8 @@ from app.answer.models import (
     AnswerAnalysisRaw,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class OpenAIAnswerAnalyzer(AnswerAnalyzer):
     name = "openai"
@@ -19,6 +22,7 @@ class OpenAIAnswerAnalyzer(AnswerAnalyzer):
 
     async def analyze(self, request: AnswerAnalysisRequest) -> AnswerAnalysisResponse:
         prompt = self._build_prompt(request)
+        logger.info(f"[AnswerAnalyzer] 프롬프트 생성 완료 - 길이: {len(prompt)}")
 
         params = {
             "model": settings.default_model,
@@ -43,6 +47,8 @@ class OpenAIAnswerAnalyzer(AnswerAnalyzer):
         }
 
         raw_text = await self._call_openai_json(prompt, params)
+        logger.info(f"[AnswerAnalyzer] OpenAI 응답 받음 - 길이: {len(raw_text)}")
+        logger.debug(f"[AnswerAnalyzer] 응답 내용: {raw_text[:500]}")
 
         parse_ok = False
         summary = ""
