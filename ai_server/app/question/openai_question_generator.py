@@ -133,7 +133,7 @@ class OpenAIQuestionGenerator(QuestionGenerator):
         return "\n".join(lines)
 
     async def _call_openai(self, prompt: str) -> str:
-        return self.client.chat_completion(
+        return await self.client.chat_completion(
             [
                 {
                     "role": "system",

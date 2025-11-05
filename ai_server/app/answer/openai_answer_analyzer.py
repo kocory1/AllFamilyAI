@@ -129,7 +129,7 @@ class OpenAIAnswerAnalyzer(AnswerAnalyzer):
     
 
     async def _call_openai_json(self, prompt: str, params: dict) -> str:
-        return self.client.chat_completion(
+        return await self.client.chat_completion(
             [
                 {
                     "role": "system",
