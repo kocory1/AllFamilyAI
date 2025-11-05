@@ -20,11 +20,12 @@ class OpenAIClient:
         temperature: Optional[float] = None,
         response_format: Optional[Dict[str, Any]] = None,
     ) -> str:
+        # gpt-5-nano 등 reasoning 모델은 temperature 커스텀 값을 지원하지 않으므로
+        # temperature 파라미터를 전달하지 않고 모델 기본값 사용
         response = self._client.chat.completions.create(
             model=model or settings.default_model,
             messages=messages,
             max_completion_tokens=max_completion_tokens or settings.max_tokens,
-            temperature=temperature if temperature is not None else settings.temperature,
             response_format=response_format,
         )
         return response.choices[0].message.content.strip()

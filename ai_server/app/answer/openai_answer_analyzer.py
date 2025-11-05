@@ -22,7 +22,6 @@ class OpenAIAnswerAnalyzer(AnswerAnalyzer):
 
         params = {
             "model": settings.default_model,
-            "temperature": 0.2,
             "max_completion_tokens": 600,
             "language": request.language,
             "top_k": 5,
@@ -140,7 +139,6 @@ class OpenAIAnswerAnalyzer(AnswerAnalyzer):
             ],
             model=params["model"],
             max_completion_tokens=params["max_completion_tokens"],
-            temperature=params["temperature"],
             response_format={"type": "json_object"},
         )
 

@@ -37,7 +37,7 @@ class OpenAIQuestionGenerator(QuestionGenerator):
             status="draft",
             generated_by="ai",
             generation_model=settings.default_model,
-            generation_parameters={"max_completion_tokens": settings.max_tokens, "temperature": settings.temperature},
+            generation_parameters={"max_completion_tokens": settings.max_tokens},
             generation_prompt=prompt,
             generation_metadata=meta,
             generation_confidence=confidence,
