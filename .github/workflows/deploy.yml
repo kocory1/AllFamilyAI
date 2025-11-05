@@ -7,6 +7,7 @@ on:
     paths:
       - 'ai_server/**'  # ai_server 디렉토리 변경 시에만
       - '.github/workflows/deploy.yml'
+      - '.github/scripts/**'  # deploy.sh 등 스크립트 변경 시에도 배포
 
 jobs:
   deploy:
