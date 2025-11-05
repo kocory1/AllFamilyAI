@@ -16,14 +16,14 @@ class OpenAIClient:
         messages: List[Dict[str, str]],
         *,
         model: Optional[str] = None,
-        max_tokens: Optional[int] = None,
+        max_completion_tokens: Optional[int] = None,
         temperature: Optional[float] = None,
         response_format: Optional[Dict[str, Any]] = None,
     ) -> str:
         response = self._client.chat.completions.create(
             model=model or settings.default_model,
             messages=messages,
-            max_tokens=max_tokens or settings.max_tokens,
+            max_completion_tokens=max_completion_tokens or settings.max_tokens,
             temperature=temperature if temperature is not None else settings.temperature,
             response_format=response_format,
         )

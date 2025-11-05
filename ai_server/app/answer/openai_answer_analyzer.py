@@ -23,7 +23,7 @@ class OpenAIAnswerAnalyzer(AnswerAnalyzer):
         params = {
             "model": settings.default_model,
             "temperature": 0.2,
-            "max_tokens": 600,
+            "max_completion_tokens": 600,
             "language": request.language,
             "top_k": 5,
             "thresholds": {"toxicity": 0.6},
@@ -139,7 +139,7 @@ class OpenAIAnswerAnalyzer(AnswerAnalyzer):
                 {"role": "user", "content": prompt},
             ],
             model=params["model"],
-            max_tokens=params["max_tokens"],
+            max_completion_tokens=params["max_completion_tokens"],
             temperature=params["temperature"],
             response_format={"type": "json_object"},
         )
