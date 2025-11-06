@@ -22,9 +22,13 @@ service_api = QuestionService(OpenAIQuestionGenerator())
 )
 async def generate_question(request: QuestionGenerateRequest) -> QuestionInstanceResponse:
     try:
-        return await service_api.generate(request)
+        content_preview = request.content[:50] if len(request.content) > 50 else request.content
+        logger.info(f"[질문생성 요청] content: '{content_preview}...', category: {request.category}, tone: {request.tone}")
+        result = await service_api.generate(request)
+        logger.info(f"[질문생성 성공] 생성된 질문: '{result.content}'")
+        return result
     except Exception as e:
-        logger.error(f"질문 생성 실패: {str(e)}")
+        logger.error(f"질문 생성 실패: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"질문 생성에 실패했습니다: {str(e)}")
 
 @router.post(
