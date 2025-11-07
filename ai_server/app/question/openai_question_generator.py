@@ -37,11 +37,7 @@ class OpenAIQuestionGenerator(QuestionGenerator):
         )
 
         return QuestionInstanceResponse(
-            template_id=None,
-            family_id=None,
-            subject_member_id=None,
             content=content,
-            planned_date=None,
             status="draft",
             generated_by="ai",
             generation_model=settings.default_model,

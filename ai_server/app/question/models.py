@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List, Dict, Any
-from datetime import datetime, date
+from datetime import datetime
 
 class ErrorResponse(BaseModel):
     error: str = Field(description="에러 메시지")
@@ -49,7 +49,6 @@ class QuestionGenerateRequest(BaseModel):
 
 class QuestionInstanceResponse(BaseModel):
     content: str = Field(description="생성된 질문 내용")
-    planned_date: Optional[date] = Field(default=None, description="계획 날짜")
     status: str = Field(default="draft", description="상태: draft|scheduled|sent 등")
     generated_by: str = Field(description="생성 주체: ai|manual")
     generation_model: str = Field(description="사용 모델명")
