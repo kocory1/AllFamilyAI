@@ -126,7 +126,7 @@ class OpenAIAnswerAnalyzer(AnswerAnalyzer):
 3) JSON 외의 텍스트를 출력하지 마세요.
 4) 형식/스케일 제약을 지키세요:
    - sentiment는 답변의 감정 표현을 기반으로 -1.0(극부정) ~ 1.0(극긍정) 범위, 소수 둘째자리로 반올림.
-   - emotion.{joy,sadness,anger,fear,neutral}, relevance_to_* , toxicity는 0~1 범위, 소수 둘째자리로 반올림.
+   - emotion.joy/sadness/anger/fear/neutral, relevance_to_* , toxicity는 0~1 범위, 소수 둘째자리로 반올림.
    - length는 0 이상 정수.
    - categories/keywords는 문자열 배열.
    - 지정 키 이외의 필드는 추가하지 마세요.
