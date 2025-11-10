@@ -51,10 +51,17 @@ class OpenAIQuestionGenerator(QuestionGenerator):
     def _build_prompt(self, request: QuestionGenerateRequest) -> str:
         lines = []
         lines.append("당신은 가족과의 자연스러운 대화를 돕는 질문 생성 전문가입니다.")
-        lines.append("아래 정보를 참고하여, 친구처럼 부담 없이 물어보는 짧고 간단한 질문을 만드세요.")
+        
+        # 답변 분석이 있으면 팔로업 모드, 없으면 새 질문 모드
+        if request.answer_analysis:
+            lines.append("사용자가 답변한 내용을 바탕으로, 더 깊이 파고드는 자연스러운 팔로업 질문을 만드세요.")
+            lines.append("⚠️ 중요: 이전 질문을 반복하거나 패러프레이징하지 마세요. 답변 내용에서 새로운 질문을 만드세요.")
+        else:
+            lines.append("아래 주제로 친구처럼 부담 없이 물어보는 짧고 간단한 질문을 만드세요.")
+        
         lines.append("")
-        lines.append("=== 기반 문구 ===")
-        lines.append(f"본문: {request.content}")
+        lines.append("=== 이전 질문 ===")
+        lines.append(f"{request.content}")
         lines.append("")
         # 맥락 섹션(존재하는 항목만)
         ctx = []
@@ -75,53 +82,38 @@ class OpenAIQuestionGenerator(QuestionGenerator):
             lines.extend(ctx)
             lines.append("")
 
-        # 분석 섹션(선택)
+        # 답변 분석 섹션 (팔로업 모드)
         if request.answer_analysis:
-            lines.append("=== 답변 분석 힌트(선택) ===")
+            lines.append("=== 📌 사용자의 답변 내용 (핵심!) ===")
             summary = request.answer_analysis.summary
             categories = request.answer_analysis.categories
             scores = request.answer_analysis.scores
             keywords = request.answer_analysis.keywords
+            
             if summary:
-                # 요약은 '참고용'으로만 제공하고, 문구 재사용 금지 지침을 아래에 명시
-                lines.append(f"요약(참고용): {summary}")
-            if categories:
-                lines.append(f"분류: {', '.join(categories)}")
+                lines.append(f"답변 요약: {summary}")
             if keywords:
-                lines.append(f"키워드: {', '.join(keywords)}")
-            if scores:
-                # 전체 스코어를 JSON 유사 형태로 그대로 노출
-                import json
-                payload = {}
-                if scores.sentiment is not None:
-                    payload["sentiment"] = scores.sentiment
-                if scores.toxicity is not None:
-                    payload["toxicity"] = scores.toxicity
-                if scores.relevance_to_question is not None:
-                    payload["relevance_to_question"] = scores.relevance_to_question
-                if scores.relevance_to_category is not None:
-                    payload["relevance_to_category"] = scores.relevance_to_category
-                if scores.length is not None:
-                    payload["length"] = scores.length
-                if scores.emotion is not None:
-                    emo = {}
-                    if scores.emotion.joy is not None:
-                        emo["joy"] = scores.emotion.joy
-                    if scores.emotion.sadness is not None:
-                        emo["sadness"] = scores.emotion.sadness
-                    if scores.emotion.anger is not None:
-                        emo["anger"] = scores.emotion.anger
-                    if scores.emotion.fear is not None:
-                        emo["fear"] = scores.emotion.fear
-                    if scores.emotion.neutral is not None:
-                        emo["neutral"] = scores.emotion.neutral
-                    if emo:
-                        payload["emotion"] = emo
-                if payload:
-                    lines.append("점수(참고용): " + json.dumps(payload, ensure_ascii=False))
-            # 요약 활용 방식에 대한 추가 지침(복사 금지, 심화 방향)
-            lines.append("참고 지침: 요약과 점수는 맥락 파악용이며, 동일 표현을 복사하지 말고 새로운 심화 질문으로 재구성하세요.")
-            lines.append("참고 지침: '요약에 따르면' 같은 메타 언급 없이 자연스러운 질문만 출력하세요.")
+                lines.append(f"🔑 핵심 키워드: {', '.join(keywords)}")
+            if categories:
+                lines.append(f"주제: {', '.join(categories)}")
+            if scores and scores.emotion:
+                # 감정 분석 - 가장 높은 감정만 표시
+                emo = scores.emotion
+                emotions = []
+                if emo.sadness and emo.sadness > 0.4:
+                    emotions.append("슬픔/그리움")
+                if emo.joy and emo.joy > 0.4:
+                    emotions.append("기쁨")
+                if emo.anger and emo.anger > 0.4:
+                    emotions.append("분노")
+                if emotions:
+                    lines.append(f"💭 감정: {', '.join(emotions)}")
+            
+            lines.append("")
+            lines.append("👉 팔로업 방향:")
+            lines.append("- 위 키워드와 감정을 활용하여 더 깊이 들어가는 질문 만들기")
+            lines.append("- 이전 질문과 완전히 다른 각도로 접근하기")
+            lines.append("- 구체적인 경험이나 감정을 물어보기")
             lines.append("")
 
         # 생성 규칙
@@ -130,17 +122,22 @@ class OpenAIQuestionGenerator(QuestionGenerator):
         lines.append("2) 자연스러운 말투: '~나요?', '~어요?', '~있어요?' 같은 편안한 의문형")
         lines.append("3) 금지 표현: '떠올리시고', '말씀해 주세요', '자세히 설명', '조금 더' 같은 형식적 표현")
         lines.append("4) 직접적으로: 친구에게 묻듯이 핵심만 물어보기")
-        lines.append("5) 상투적 표현 금지: 일상 대화처럼 자연스럽게")
+        lines.append("5) ⚠️ 이전 질문 반복 금지: 같은 내용을 다시 묻지 말고, 답변에서 새로운 각도 찾기")
         lines.append("")
-        lines.append("좋은 예시:")
-        lines.append("- 최근 가족과 함께한 소소한 기쁨이 있었나요?")
-        lines.append("- 요즘 가족과 어떤 시간을 보내고 있어요?")
-        lines.append("- 가족 중에 가장 닮고 싶은 사람이 있나요?")
-        lines.append("")
-        lines.append("나쁜 예시:")
-        lines.append("- 가족과 함께한 최근의 작은 기쁨을 떠올리시고, 그때 느낀 감정을 조금 더 자세히 말씀해 주세요.")
-        lines.append("- 가족 구성원 중 본인이 가장 닮고 싶어하는 사람에 대해 구체적으로 설명해 주실 수 있나요?")
-        lines.append("")
+        
+        if request.answer_analysis:
+            lines.append("좋은 팔로업 예시:")
+            lines.append("- 이전: '요즘 가족과 어떤 하루를 보내나요?' / 답변: '본가에 못 가서 그립다'")
+            lines.append("  → 좋음: '본가의 어떤 모습이 가장 그리운가요?'")
+            lines.append("  → 나쁨: '가족과 함께 보내는 요즘 하루가 어때요?' (이전 질문 반복!)")
+            lines.append("")
+        else:
+            lines.append("좋은 예시:")
+            lines.append("- 최근 가족과 함께한 소소한 기쁨이 있었나요?")
+            lines.append("- 요즘 가족과 어떤 시간을 보내고 있어요?")
+            lines.append("- 가족 중에 가장 닮고 싶은 사람이 있나요?")
+            lines.append("")
+        
         lines.append("질문:")
         return "\n".join(lines)
 
@@ -151,7 +148,9 @@ class OpenAIQuestionGenerator(QuestionGenerator):
                     "role": "system",
                     "content": (
                         "당신은 가족과의 자연스러운 대화를 돕는 질문 생성 전문가입니다. "
-                        "친구에게 묻듯이 짧고 간단하며 부담 없는 질문을 만듭니다. "
+                        "답변 내용을 기반으로 더 깊이 파고드는 팔로업 질문을 만들 때는 "
+                        "절대 이전 질문을 반복하거나 패러프레이징하지 마세요. "
+                        "답변에서 나온 키워드, 감정, 구체적 상황을 활용해서 완전히 새로운 각도로 질문하세요. "
                         "'~나요?', '~어요?' 같은 자연스러운 의문형을 사용하고, "
                         "'떠올리시고', '말씀해 주세요', '자세히' 같은 형식적 표현은 절대 사용하지 않습니다."
                     ),
