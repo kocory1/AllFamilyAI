@@ -50,9 +50,8 @@ class OpenAIQuestionGenerator(QuestionGenerator):
 
     def _build_prompt(self, request: QuestionGenerateRequest) -> str:
         lines = []
-        lines.append("당신은 가족 유대감을 증진시키는 질문 기반 심리상담가입니다.")
-        lines.append("큰 고민이 필요없는 답변하기 쉬운 질문을 생성해 주세요. 아래 정보가 있다면 참고하여 추가 팔로우 업 질문을 생성하세요.")
-        lines.append("질문은 한 문장으로 생성하되, 해요체의 친근하고 간결한 표현으로 작성해 주세요.")
+        lines.append("당신은 가족과의 자연스러운 대화를 돕는 질문 생성 전문가입니다.")
+        lines.append("아래 정보를 참고하여, 친구처럼 부담 없이 물어보는 짧고 간단한 질문을 만드세요.")
         lines.append("")
         lines.append("=== 기반 문구 ===")
         lines.append(f"본문: {request.content}")
@@ -127,12 +126,20 @@ class OpenAIQuestionGenerator(QuestionGenerator):
 
         # 생성 규칙
         lines.append("=== 생성 규칙 ===")
-        lines.append("1) 존댓말 사용, 질문은 단 한 문장")
-        lines.append("2) 상투적·일반론 금지, 요약/키워드/점수는 참고만 하며 표현을 그대로 재사용하지 않음")
-        lines.append("3) 주어진 내용과 분석을 바탕으로 심화·개인화된 개방형 질문 생성")
-        lines.append("4) 제공된 카테고리/톤/태그/분위기와 자연스럽게 일치")
-        lines.append(f"5) {settings.max_question_length}자 이내")
-        lines.append("6) 설명/접두어 없이 질문만 출력, 불필요한 따옴표·번호 제거")
+        lines.append("1) 짧고 간결하게: 한 문장, 50자 이내 권장")
+        lines.append("2) 자연스러운 말투: '~나요?', '~어요?', '~있어요?' 같은 편안한 의문형")
+        lines.append("3) 금지 표현: '떠올리시고', '말씀해 주세요', '자세히 설명', '조금 더' 같은 형식적 표현")
+        lines.append("4) 직접적으로: 친구에게 묻듯이 핵심만 물어보기")
+        lines.append("5) 상투적 표현 금지: 일상 대화처럼 자연스럽게")
+        lines.append("")
+        lines.append("좋은 예시:")
+        lines.append("- 최근 가족과 함께한 소소한 기쁨이 있었나요?")
+        lines.append("- 요즘 가족과 어떤 시간을 보내고 있어요?")
+        lines.append("- 가족 중에 가장 닮고 싶은 사람이 있나요?")
+        lines.append("")
+        lines.append("나쁜 예시:")
+        lines.append("- 가족과 함께한 최근의 작은 기쁨을 떠올리시고, 그때 느낀 감정을 조금 더 자세히 말씀해 주세요.")
+        lines.append("- 가족 구성원 중 본인이 가장 닮고 싶어하는 사람에 대해 구체적으로 설명해 주실 수 있나요?")
         lines.append("")
         lines.append("질문:")
         return "\n".join(lines)
@@ -143,9 +150,10 @@ class OpenAIQuestionGenerator(QuestionGenerator):
                 {
                     "role": "system",
                     "content": (
-                        "당신은 가족 유대감을 증진시키는 질문 생성 전문가입니다. "
-                        "주어진 내용을 바탕으로 더 깊이 파고드는 심화·개인화된 팔로업 질문을 한 문장으로 만듭니다. "
-                        "상투적 표현은 피하고, 상대가 스스로를 더 이야기하게 하는 개방형 질문을 선호합니다."
+                        "당신은 가족과의 자연스러운 대화를 돕는 질문 생성 전문가입니다. "
+                        "친구에게 묻듯이 짧고 간단하며 부담 없는 질문을 만듭니다. "
+                        "'~나요?', '~어요?' 같은 자연스러운 의문형을 사용하고, "
+                        "'떠올리시고', '말씀해 주세요', '자세히' 같은 형식적 표현은 절대 사용하지 않습니다."
                     ),
                 },
                 {"role": "user", "content": prompt},
