@@ -113,6 +113,7 @@ class OpenAIQuestionGenerator(QuestionGenerator):
             lines.append("👉 팔로업 전략:")
             lines.append("- 키워드를 직접 언급하지 말고 자연스럽게 우회하기")
             lines.append("- 부정적 감정이면 긍정적 주제로 전환하기 (그리움 → 현재 즐거운 일)")
+            lines.append("- 긍정적이면 살짝만 더 파고드는 심화 질문 생성")
             lines.append("- 무겁거나 형식적인 질문 금지 ('떠오르나요', '기억', '순간' 같은 표현 피하기)")
             lines.append("- 가볍고 일상적인 질문으로 대화 이어가기")
             lines.append("")
@@ -134,8 +135,8 @@ class OpenAIQuestionGenerator(QuestionGenerator):
             lines.append("- 답변: '요새 본가에 못간지 좀 되어서 그립다' (그리움, 부정적)")
             lines.append("  → ❌ 나쁨: '그리움이 가장 강해지는 순간은 언제예요?' (무겁고 형식적)")
             lines.append("  → ❌ 나쁨: '유학 중 그리움이 생길 때 어떤 기억이 떠오르나요?' (키워드 직접 언급, AI같음)")
-            lines.append("  → ✅ 좋음: '요즘은 어떻게 지내고 있어요?' (주제 전환, 가벼움)")
-            lines.append("  → ✅ 좋음: '최근에 재밌었던 일 있어요?' (긍정적 전환)")
+            lines.append("  → ✅ 좋음: '요즘 주말에는 어떻게 지내고 있어요?' (주제 전환, 가벼움)")
+            lines.append("  → ✅ 좋음: '유학에서 재밌었던 일 있어요?' (주제에 대한 긍정적 전환)")
             lines.append("")
         else:
             lines.append("좋은 예시:")
