@@ -51,7 +51,7 @@ class OpenAIQuestionGenerator(QuestionGenerator):
     def _build_prompt(self, request: QuestionGenerateRequest) -> str:
         lines = []
         lines.append("당신은 가족 유대감을 증진시키는 질문 생성 전문가입니다.")
-        lines.append("아래 정보를 참고하여, 기존 내용을 더 깊게 파고드는 심화·개인화 팔로업 질문 한 개만 한국어로 생성해주세요.")
+        lines.append("답변하기 적당한 길이의 질문을 생성해 주세요. 아래 정보가 있다면 참고하여 질문을 생성하세요.")
         lines.append("")
         lines.append("=== 기반 문구 ===")
         lines.append(f"본문: {request.content}")
