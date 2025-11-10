@@ -52,6 +52,7 @@ class OpenAIQuestionGenerator(QuestionGenerator):
         lines = []
         lines.append("당신은 가족 유대감을 증진시키는 질문 기반 심리상담가입니다.")
         lines.append("큰 고민이 필요없는 답변하기 쉬운 질문을 생성해 주세요. 아래 정보가 있다면 참고하여 추가 팔로우 업 질문을 생성하세요.")
+        lines.append("질문은 한 문장으로 생성하되, 간결한 표현으로 작성해 주세요.")
         lines.append("")
         lines.append("=== 기반 문구 ===")
         lines.append(f"본문: {request.content}")
