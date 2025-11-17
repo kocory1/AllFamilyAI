@@ -38,4 +38,10 @@ class Settings(BaseSettings):
     profile_alpha_length: float = 0.5  # 평균 답변 길이 EMA 계수
     profile_top_n_prune: int = 10  # 선호 카테고리/태그 유지 상위 N개
     
+    # ChromaDB 설정 (RAG용 벡터 DB)
+    chroma_persist_directory: str = "/home/ubuntu/onsikgu_data/chroma"  # 파일 기반 저장 경로 (배포 환경)
+    chroma_collection_name: str = "family_answers"  # 컬렉션 이름
+    embedding_model: str = "text-embedding-3-small"  # OpenAI 임베딩 모델
+    rag_top_k: int = 5  # RAG 검색 시 반환할 최대 결과 수 (초기 단계: 풍부한 맥락 제공)
+    
 settings = Settings() 

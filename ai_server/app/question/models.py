@@ -43,20 +43,30 @@ class QuestionGenerateRequest(BaseModel):
     category: Optional[str] = Field(default=None, description="카테고리")
     tags: Optional[List[str]] = Field(default=None, description="태그 목록")
     subject_required: Optional[bool] = Field(default=False, alias="subjectRequired", description="주제 인물 필요 여부")
+    subject_member_id: Optional[str] = Field(default=None, alias="subjectMemberId", description="주제 대상 멤버 ID")
     mood: Optional[str] = Field(default=None, description="원하는 분위기(선택)")
     # 답변 분석 힌트(선택): summary/categories/scores/keywords 등 일부 또는 전부 포함 가능
     answer_analysis: Optional[AnswerAnalysisHint] = Field(default=None, alias="answerAnalysis", description="답변 분석 힌트")
+    
+    # RAG 사용 여부 (선택적)
+    use_rag: bool = Field(
+        default=True,
+        alias="useRag",
+        description="RAG(과거 답변 맥락) 사용 여부. true(기본): 자동 판단, false: 기존 방식"
+    )
 
 class QuestionInstanceResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    
     content: str = Field(description="생성된 질문 내용")
     status: str = Field(default="draft", description="상태: draft|scheduled|sent 등")
-    generated_by: str = Field(description="생성 주체: ai|manual")
-    generation_model: str = Field(description="사용 모델명")
-    generation_parameters: Dict[str, Any] = Field(description="모델 호출 파라미터")
-    generation_prompt: str = Field(description="프롬프트 원문")
-    generation_metadata: Dict[str, Any] = Field(description="생성 메타데이터")
-    generation_confidence: float = Field(description="생성 신뢰도(0~1)")
-    generated_at: datetime = Field(description="생성 시각")
+    generated_by: str = Field(alias="generatedBy", description="생성 주체: ai|manual")
+    generation_model: str = Field(alias="generationModel", description="사용 모델명")
+    generation_parameters: Dict[str, Any] = Field(alias="generationParameters", description="모델 호출 파라미터")
+    generation_prompt: str = Field(alias="generationPrompt", description="프롬프트 원문")
+    generation_metadata: Dict[str, Any] = Field(alias="generationMetadata", description="생성 메타데이터")
+    generation_confidence: float = Field(alias="generationConfidence", description="생성 신뢰도(0~1)")
+    generated_at: datetime = Field(alias="generatedAt", description="생성 시각")
 
 # === 멤버 할당 스키마 ===
 class AssignMemberInput(BaseModel):

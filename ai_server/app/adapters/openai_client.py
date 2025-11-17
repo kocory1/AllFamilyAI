@@ -50,4 +50,34 @@ class OpenAIClient:
             logger.error(f"[OpenAI] API 호출 실패: {type(e).__name__}: {str(e)}")
             raise
 
+    async def create_embedding(
+        self,
+        text: str,
+        model: str = "text-embedding-3-small"
+    ):
+        """
+        텍스트를 벡터 임베딩으로 변환
+        
+        Args:
+            text: 임베딩할 텍스트
+            model: 임베딩 모델 (기본값: text-embedding-3-small)
+        
+        Returns:
+            OpenAI Embedding Response
+        """
+        try:
+            logger.debug(f"[OpenAI Embedding] 요청 - model: {model}, text 길이: {len(text)}")
+            
+            response = await self._client.embeddings.create(
+                input=text,
+                model=model
+            )
+            
+            logger.debug(f"[OpenAI Embedding] 완료 - 차원: {len(response.data[0].embedding)}")
+            return response
+            
+        except Exception as e:
+            logger.error(f"[OpenAI Embedding] 실패: {type(e).__name__}: {str(e)}")
+            raise
+
 

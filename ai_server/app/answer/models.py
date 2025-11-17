@@ -12,6 +12,9 @@ class AnswerAnalysisRequest(BaseModel):
     question_category: str = Field(alias="questionCategory", description="질문 카테고리")
     question_tags: List[str] = Field(default_factory=list, alias="questionTags", description="질문/템플릿 태그")
     question_tone: Optional[str] = Field(default=None, alias="questionTone", description="질문 톤/스타일")
+    
+    # RAG용 추가 필드
+    user_id: str = Field(alias="userId", description="사용자 ID (벡터 DB 저장용)")
 
 
 class AnswerAnalysisRaw(BaseModel):

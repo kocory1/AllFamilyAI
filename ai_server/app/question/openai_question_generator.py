@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 import logging
 
 from app.core.config import settings
@@ -18,10 +18,19 @@ class OpenAIQuestionGenerator(QuestionGenerator):
         self.client = OpenAIClient()
 
     async def generate(
-        self, request: QuestionGenerateRequest
+        self,
+        request: QuestionGenerateRequest,
+        past_answers: Optional[List[dict]] = None  # 🆕 RAG 맥락
     ) -> QuestionInstanceResponse:
-        prompt = self._build_prompt(request)
-        logger.info(f"[QuestionGen] 프롬프트 생성 완료 - 길이: {len(prompt)}")
+        # RAG 활성화 여부 판단
+        rag_enabled = past_answers is not None and len(past_answers) > 0
+        
+        prompt = self._build_prompt(request, past_answers)
+        logger.info(
+            f"[QuestionGen] 프롬프트 생성 완료 - "
+            f"길이: {len(prompt)}, RAG={rag_enabled}, "
+            f"context_count={len(past_answers) if past_answers else 0}"
+        )
         
         response = await self._call_openai(prompt)
         logger.info(f"[QuestionGen] OpenAI 응답 받음 - 길이: {len(response)}, 내용: '{response[:100]}'")
@@ -35,6 +44,12 @@ class OpenAIQuestionGenerator(QuestionGenerator):
             tone=request.tone,
             max_len=settings.max_question_length
         )
+        
+        # 🆕 RAG 정보 추가 (camelCase로 BE 호환)
+        meta["ragEnabled"] = rag_enabled
+        meta["ragContextCount"] = len(past_answers) if past_answers else 0
+        if rag_enabled:
+            meta["ragVersion"] = "v1"  # RAG 버전 (추후 개선 추적용)
 
         return QuestionInstanceResponse(
             content=content,
@@ -43,12 +58,16 @@ class OpenAIQuestionGenerator(QuestionGenerator):
             generation_model=settings.default_model,
             generation_parameters={"max_completion_tokens": settings.max_tokens},
             generation_prompt=prompt,
-            generation_metadata=meta,
+            generation_metadata=meta,  # RAG 정보 포함!
             generation_confidence=confidence,
             generated_at=datetime.now()
         )
 
-    def _build_prompt(self, request: QuestionGenerateRequest) -> str:
+    def _build_prompt(
+        self,
+        request: QuestionGenerateRequest,
+        past_answers: Optional[List[dict]] = None  # 🆕 RAG 맥락
+    ) -> str:
         lines = []
         lines.append("당신은 가족과의 자연스러운 대화를 돕는 질문 생성 전문가입니다.")
         
@@ -60,6 +79,44 @@ class OpenAIQuestionGenerator(QuestionGenerator):
             lines.append("아래 주제로 친구처럼 부담 없이 물어보는 짧고 간단한 질문을 만드세요.")
         
         lines.append("")
+        
+        # 🆕 과거 대화 맥락 (RAG)
+        if past_answers and len(past_answers) > 0:
+            lines.append("=== 📚 과거 대화 맥락 (참고용) ===")
+            lines.append("사용자가 이전에 답변한 내용입니다. 이를 참고하여 더 개인화된 질문을 만드세요.")
+            lines.append("")
+            
+            for idx, item in enumerate(past_answers, 1):
+                question = item.get("question", "")
+                answer = item.get("answer", "")
+                timestamp = item.get("timestamp", "")
+                
+                # 상대적 시간 표시 (선택)
+                time_str = ""
+                if timestamp:
+                    try:
+                        from datetime import datetime
+                        past_time = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+                        now = datetime.now(past_time.tzinfo)
+                        delta = now - past_time
+                        if delta.days > 0:
+                            time_str = f"({delta.days}일 전)"
+                        else:
+                            time_str = "(오늘)"
+                    except:
+                        pass
+                
+                lines.append(f"{idx}. {time_str}")
+                lines.append(f"   Q: {question}")
+                lines.append(f"   A: {answer}")
+                lines.append("")
+            
+            lines.append("👉 위 맥락을 참고하여:")
+            lines.append("- 사용자가 관심 있어하는 주제를 반영하세요")
+            lines.append("- 이전 답변에서 언급된 구체적인 상황을 활용하세요")
+            lines.append("- 단, 과거 질문을 그대로 반복하지 마세요")
+            lines.append("")
+        
         lines.append("=== 이전 질문 ===")
         lines.append(f"{request.content}")
         lines.append("")
@@ -178,18 +235,19 @@ class OpenAIQuestionGenerator(QuestionGenerator):
     def _evaluate_generation(self, content: str, language: str, tone: Optional[str], max_len: int) -> tuple[float, dict]:
         try:
             score = 1.0
+            # camelCase로 BE 호환
             meta: dict = {
                 "length": len(content),
                 "language": language,
                 "tone": tone,
                 "rules": {
-                    "length_ok": len(content) <= max_len,
-                    "ends_question": content.strip().endswith("?") or content.strip().endswith("요") or content.strip().endswith("가요"),
+                    "lengthOk": len(content) <= max_len,
+                    "endsQuestion": content.strip().endswith("?") or content.strip().endswith("요") or content.strip().endswith("가요"),
                 }
             }
-            if not meta["rules"]["length_ok"]:
+            if not meta["rules"]["lengthOk"]:
                 score -= 0.2
-            if not meta["rules"]["ends_question"]:
+            if not meta["rules"]["endsQuestion"]:
                 score -= 0.1
             score = max(0.0, min(1.0, score))
             return score, meta

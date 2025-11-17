@@ -13,32 +13,45 @@ echo "1. 기존 서버 종료 중..."
 pkill -f "uvicorn app.main:app" || true
 sleep 2
 
-# 기존 프로젝트 완전 삭제
-echo "2. 기존 프로젝트 삭제 중..."
+# 데이터 디렉토리 확인 (프로젝트 외부, 영구 보존)
+echo "2. 데이터 디렉토리 확인 중..."
+if [ -d ~/onsikgu_data/chroma ]; then
+  echo "   ✅ 기존 데이터 디렉토리 발견! (데이터 보존됨)"
+  echo "   📊 현재 데이터 크기: $(du -sh ~/onsikgu_data/chroma 2>/dev/null | cut -f1 || echo '계산 불가')"
+else
+  echo "   🆕 새로운 데이터 디렉토리 생성 중..."
+  mkdir -p ~/onsikgu_data/chroma
+  chmod 755 ~/onsikgu_data/chroma
+  echo "   ✅ 데이터 디렉토리 생성 완료"
+fi
+echo "   데이터 경로: ~/onsikgu_data/chroma"
+
+# 기존 프로젝트 완전 삭제 (데이터는 외부 폴더에 있으므로 안전!)
+echo "3. 기존 프로젝트 삭제 중..."
 rm -rf ~/onsikgu_ai
 
 # 프로젝트 새로 클론
-echo "3. 프로젝트 클론 중..."
+echo "4. 프로젝트 클론 중..."
 cd ~
 git clone https://github.com/kocory1/AllFamilyAI.git onsikgu_ai
 cd onsikgu_ai/ai_server
 
 # python3-venv 설치
-echo "4. Python venv 설치 확인 중..."
+echo "5. Python venv 설치 확인 중..."
 sudo apt install -y python3.12-venv
 
 # 가상환경 생성
-echo "5. 가상환경 생성 중..."
+echo "6. 가상환경 생성 중..."
 python3 -m venv venv
 
 # 가상환경 활성화 및 의존성 설치
-echo "6. 의존성 설치 중..."
+echo "7. 의존성 설치 중..."
 source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 
 # 환경변수 파일 생성
-echo "7. 환경변수 설정 중..."
+echo "8. 환경변수 설정 중..."
 cat > .env << EOF
 OPENAI_API_KEY=${OPENAI_API_KEY}
 HOST=0.0.0.0
@@ -56,10 +69,15 @@ PROFILE_TABOO_THRESHOLD=0.6
 PROFILE_TABOO_PENALTY=0.2
 PROFILE_ALPHA_LENGTH=0.5
 PROFILE_TOP_N_PRUNE=10
+# ChromaDB 설정 (RAG용 벡터 DB)
+CHROMA_PERSIST_DIRECTORY=/home/ubuntu/onsikgu_data/chroma
+CHROMA_COLLECTION_NAME=family_answers
+EMBEDDING_MODEL=text-embedding-3-small
+RAG_TOP_K=5
 EOF
 
 # 서버 시작 (별도 스크립트로 분리하여 백그라운드 실행)
-echo "8. 서버 시작 중..."
+echo "9. 서버 시작 중..."
 cd ~/onsikgu_ai/ai_server
 
 # 서버 시작 스크립트 생성
