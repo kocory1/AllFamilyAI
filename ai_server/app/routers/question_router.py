@@ -40,36 +40,40 @@ async def generate_question(request: QuestionGenerateRequest) -> QuestionInstanc
     if not request.use_rag:
         logger.info("[RAG 비활성화] useRag=false")
     else:
-        # RAG 시도
-        user_id = request.subject_member_id or "unknown"
+        # RAG 시도 (질문을 받을 사용자 = subject_member_id)
+        user_id = request.subject_member_id
         
-        try:
-            # 1. 답변 개수 확인
-            answer_count = vector_service.collection.count(
-                where={"user_id": user_id}
-            )
-            logger.info(f"[답변 개수 확인] user_id={user_id}, count={answer_count}")
-            
-            # Early return: 답변 < 5개면 기본 방식
-            if answer_count < 5:
-                logger.info(f"[RAG 비활성화] 답변 부족 (count={answer_count} < 5)")
-            else:
-                # 2. RAG 검색
-                past_answers = await vector_service.search_similar_answers(
-                    user_id=user_id,
-                    query=request.content or request.category or "",
-                    top_k=settings.rag_top_k,
-                    category=request.category
+        # subject_member_id가 없으면 RAG 불가
+        if not user_id:
+            logger.warning("[RAG 비활성화] subjectMemberId 없음")
+        else:
+            try:
+                # 1. 답변 개수 확인
+                answer_count = vector_service.collection.count(
+                    where={"user_id": user_id}
                 )
+                logger.info(f"[답변 개수 확인] user_id={user_id}, count={answer_count}")
                 
-                if past_answers:
-                    logger.info(f"[RAG 활성화] 유사 답변 {len(past_answers)}개 검색됨")
+                # Early return: 답변 < 5개면 기본 방식
+                if answer_count < 5:
+                    logger.info(f"[RAG 비활성화] 답변 부족 (count={answer_count} < 5)")
                 else:
-                    logger.info("[RAG 비활성화] 검색 결과 없음")
-        
-        except Exception as e:
-            logger.error(f"[RAG 검색 실패] error={str(e)}")
-            # past_answers=None으로 기본 방식 사용
+                    # 2. RAG 검색
+                    past_answers = await vector_service.search_similar_answers(
+                        user_id=user_id,
+                        query=request.content or request.category or "",
+                        top_k=settings.rag_top_k,
+                        category=request.category
+                    )
+                    
+                    if past_answers:
+                        logger.info(f"[RAG 활성화] 유사 답변 {len(past_answers)}개 검색됨")
+                    else:
+                        logger.info("[RAG 비활성화] 검색 결과 없음")
+            
+            except Exception as e:
+                logger.error(f"[RAG 검색 실패] error={str(e)}")
+                # past_answers=None으로 기본 방식 사용
     
     # 질문 생성 (past_answers 있으면 RAG, 없으면 기존)
     try:

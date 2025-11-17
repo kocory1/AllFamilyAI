@@ -43,7 +43,7 @@ class QuestionGenerateRequest(BaseModel):
     category: Optional[str] = Field(default=None, description="카테고리")
     tags: Optional[List[str]] = Field(default=None, description="태그 목록")
     subject_required: Optional[bool] = Field(default=False, alias="subjectRequired", description="주제 인물 필요 여부")
-    subject_member_id: Optional[str] = Field(default=None, alias="subjectMemberId", description="주제 대상 멤버 ID")
+    subject_member_id: Optional[str] = Field(default=None, alias="subjectMemberId", description="질문 대상 멤버 ID")
     mood: Optional[str] = Field(default=None, description="원하는 분위기(선택)")
     # 답변 분석 힌트(선택): summary/categories/scores/keywords 등 일부 또는 전부 포함 가능
     answer_analysis: Optional[AnswerAnalysisHint] = Field(default=None, alias="answerAnalysis", description="답변 분석 힌트")
