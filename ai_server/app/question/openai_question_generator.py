@@ -198,7 +198,7 @@ class OpenAIQuestionGenerator(QuestionGenerator):
             lines.append("- 가족 중에 가장 닮고 싶은 사람이 있나요?")
             lines.append("")
         
-        lines.append("질문:")
+        lines.append("위 가이드라인을 따라 자연스러운 질문 1개만 생성하세요:")
         return "\n".join(lines)
 
     async def _call_openai(self, prompt: str) -> str:
