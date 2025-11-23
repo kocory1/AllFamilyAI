@@ -26,7 +26,7 @@ class OpenAIClient:
         # gpt-5-nano 등 reasoning 모델은 temperature 커스텀 값을 지원하지 않으므로
         # temperature 파라미터를 전달하지 않고 모델 기본값 사용
         model_name = model or settings.default_model
-        logger.info(f"[OpenAI] 호출 시작 - model: {model_name}, max_tokens: {max_completion_tokens or settings.max_tokens}")
+        logger.info(f"[OpenAI] 호출 시작 - model={model_name}, max_tokens={max_completion_tokens or settings.max_tokens}")
         
         try:
             response = await self._client.chat.completions.create(
@@ -37,17 +37,17 @@ class OpenAIClient:
             )
             
             content = response.choices[0].message.content
-            logger.info(f"[OpenAI] 응답 받음 - content 길이: {len(content) if content else 0}")
+            logger.info(f"[OpenAI] 응답 받음 - content_length={len(content) if content else 0}")
             logger.debug(f"[OpenAI] 응답 내용: {content}")
             
             if not content:
-                logger.warning(f"[OpenAI] 빈 응답 받음! response object: {response}")
+                logger.warning(f"[OpenAI] 빈 응답 받음 - response={response}")
                 return ""
             
             return content.strip()
             
         except Exception as e:
-            logger.error(f"[OpenAI] API 호출 실패: {type(e).__name__}: {str(e)}")
+            logger.error(f"[OpenAI] API 호출 실패 - error={str(e)}")
             raise
 
     async def create_embedding(
@@ -66,18 +66,18 @@ class OpenAIClient:
             OpenAI Embedding Response
         """
         try:
-            logger.debug(f"[OpenAI Embedding] 요청 - model: {model}, text 길이: {len(text)}")
+            logger.debug(f"[OpenAI Embedding] 요청 - model={model}, text_length={len(text)}")
             
             response = await self._client.embeddings.create(
                 input=text,
                 model=model
             )
             
-            logger.debug(f"[OpenAI Embedding] 완료 - 차원: {len(response.data[0].embedding)}")
+            logger.debug(f"[OpenAI Embedding] 완료 - dimension={len(response.data[0].embedding)}")
             return response
             
         except Exception as e:
-            logger.error(f"[OpenAI Embedding] 실패: {type(e).__name__}: {str(e)}")
+            logger.error(f"[OpenAI Embedding] 실패 - error={str(e)}")
             raise
 
 

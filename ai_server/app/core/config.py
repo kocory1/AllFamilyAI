@@ -43,5 +43,6 @@ class Settings(BaseSettings):
     chroma_collection_name: str = "family_answers"  # 컬렉션 이름
     embedding_model: str = "text-embedding-3-small"  # OpenAI 임베딩 모델
     rag_top_k: int = 5  # RAG 검색 시 반환할 최대 결과 수 (초기 단계: 풍부한 맥락 제공)
+    rag_min_answers: int = 5  # RAG 활성화를 위한 최소 답변 개수
     
 settings = Settings() 

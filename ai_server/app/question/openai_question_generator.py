@@ -1,7 +1,6 @@
-from datetime import datetime
 from typing import Optional, List
 import logging
-
+from datetime import datetime
 from app.core.config import settings
 from app.question.base import QuestionGenerator
 from app.adapters.openai_client import OpenAIClient
@@ -27,16 +26,16 @@ class OpenAIQuestionGenerator(QuestionGenerator):
         
         prompt = self._build_prompt(request, past_answers)
         logger.info(
-            f"[QuestionGen] 프롬프트 생성 완료 - "
-            f"길이: {len(prompt)}, RAG={rag_enabled}, "
+            f"[질문 생성] 프롬프트 생성 완료 - "
+            f"length={len(prompt)}, rag_enabled={rag_enabled}, "
             f"context_count={len(past_answers) if past_answers else 0}"
         )
         
         response = await self._call_openai(prompt)
-        logger.info(f"[QuestionGen] OpenAI 응답 받음 - 길이: {len(response)}, 내용: '{response[:100]}'")
+        logger.info(f"[질문 생성] OpenAI 응답 받음 - length={len(response)}, preview='{response[:100]}'")
         
         content = self._parse_response(response)
-        logger.info(f"[QuestionGen] 파싱 완료 - content: '{content}'")
+        logger.info(f"[질문 생성] 파싱 완료 - content='{content}'")
 
         confidence, meta = self._evaluate_generation(
             content=content,
@@ -53,14 +52,12 @@ class OpenAIQuestionGenerator(QuestionGenerator):
 
         return QuestionInstanceResponse(
             content=content,
-            status="draft",
             generated_by="ai",
             generation_model=settings.default_model,
             generation_parameters={"max_completion_tokens": settings.max_tokens},
             generation_prompt=prompt,
             generation_metadata=meta,  # RAG 정보 포함!
-            generation_confidence=confidence,
-            generated_at=datetime.now()
+            generation_confidence=confidence
         )
 
     def _build_prompt(
@@ -95,7 +92,6 @@ class OpenAIQuestionGenerator(QuestionGenerator):
                 time_str = ""
                 if timestamp:
                     try:
-                        from datetime import datetime
                         past_time = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
                         now = datetime.now(past_time.tzinfo)
                         delta = now - past_time

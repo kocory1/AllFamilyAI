@@ -74,6 +74,7 @@ CHROMA_PERSIST_DIRECTORY=/home/ubuntu/onsikgu_data/chroma
 CHROMA_COLLECTION_NAME=family_answers
 EMBEDDING_MODEL=text-embedding-3-small
 RAG_TOP_K=5
+RAG_MIN_ANSWERS=5
 EOF
 
 # 서버 시작 (별도 스크립트로 분리하여 백그라운드 실행)

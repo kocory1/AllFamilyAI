@@ -1,0 +1,1003 @@
+[
+  {
+    "templateId": "T001",
+    "content": "오늘 하루 중 가장 기억에 남는 순간은?",
+    "category": "일상",
+    "tags": ["하루", "일상", "기억"],
+    "tone": "편안한",
+    "mood": "가벼운",
+    "subjectRequired": false,
+    "priority": 1
+  },
+  {
+    "templateId": "T002",
+    "content": "요즘 아침에 일어나면 제일 먼저 뭐해요?",
+    "category": "일상",
+    "tags": ["아침", "습관", "루틴"],
+    "tone": "친근한",
+    "mood": "편안한",
+    "subjectRequired": false,
+    "priority": 1
+  },
+  {
+    "templateId": "T003",
+    "content": "최근에 맛있게 먹은 음식이 있나요?",
+    "category": "일상",
+    "tags": ["음식", "맛집", "일상"],
+    "tone": "밝은",
+    "mood": "가벼운",
+    "subjectRequired": false,
+    "priority": 1
+  },
+  {
+    "templateId": "T004",
+    "content": "요즘 주말은 주로 어떻게 보내요?",
+    "category": "일상",
+    "tags": ["주말", "여가", "일상"],
+    "tone": "편안한",
+    "mood": "가벼운",
+    "subjectRequired": false,
+    "priority": 1
+  },
+  {
+    "templateId": "T005",
+    "content": "오늘 가장 웃었던 순간이 언제예요?",
+    "category": "일상",
+    "tags": ["웃음", "하루", "긍정"],
+    "tone": "밝은",
+    "mood": "유쾌한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T006",
+    "content": "요즘 출퇴근길에 뭐하며 시간 보내요?",
+    "category": "일상",
+    "tags": ["출퇴근", "일상", "시간"],
+    "tone": "편안한",
+    "mood": "가벼운",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T007",
+    "content": "최근에 새로 시작한 습관이 있나요?",
+    "category": "일상",
+    "tags": ["습관", "시작", "변화"],
+    "tone": "격려하는",
+    "mood": "긍정적",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T008",
+    "content": "요즘 저녁 시간은 어떻게 보내요?",
+    "category": "일상",
+    "tags": ["저녁", "일상", "여가"],
+    "tone": "편안한",
+    "mood": "편안한",
+    "subjectRequired": false,
+    "priority": 1
+  },
+  {
+    "templateId": "T009",
+    "content": "오늘 날씨 어때요? 기분이 달라졌나요?",
+    "category": "일상",
+    "tags": ["날씨", "기분", "일상"],
+    "tone": "친근한",
+    "mood": "가벼운",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T010",
+    "content": "요즘 즐겨 듣는 노래가 있어요?",
+    "category": "취미",
+    "tags": ["음악", "노래", "취미"],
+    "tone": "밝은",
+    "mood": "가벼운",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T011",
+    "content": "최근에 본 영화나 드라마 중 재밌었던 거 있어요?",
+    "category": "취미",
+    "tags": ["영화", "드라마", "여가"],
+    "tone": "편안한",
+    "mood": "유쾌한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T012",
+    "content": "요즘 숙면 잘 취하고 있나요?",
+    "category": "일상",
+    "tags": ["수면", "건강", "일상"],
+    "tone": "걱정하는",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T013",
+    "content": "오늘 점심은 뭐 먹었어요?",
+    "category": "일상",
+    "tags": ["음식", "점심", "일상"],
+    "tone": "친근한",
+    "mood": "가벼운",
+    "subjectRequired": false,
+    "priority": 1
+  },
+  {
+    "templateId": "T014",
+    "content": "요즘 출근길은 어때요?",
+    "category": "일상",
+    "tags": ["출근", "일상", "직장"],
+    "tone": "편안한",
+    "mood": "가벼운",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T015",
+    "content": "최근에 산 물건 중 가장 만족스러운 게 뭐예요?",
+    "category": "일상",
+    "tags": ["쇼핑", "물건", "만족"],
+    "tone": "밝은",
+    "mood": "유쾌한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T016",
+    "content": "요즘 몸 상태는 어때요?",
+    "category": "일상",
+    "tags": ["건강", "몸", "일상"],
+    "tone": "걱정하는",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T017",
+    "content": "오늘 날씨에 어울리는 음식이 뭘까요?",
+    "category": "일상",
+    "tags": ["날씨", "음식", "일상"],
+    "tone": "친근한",
+    "mood": "가벼운",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T018",
+    "content": "요즘 집에서 가장 좋아하는 공간은?",
+    "category": "일상",
+    "tags": ["집", "공간", "일상"],
+    "tone": "편안한",
+    "mood": "편안한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T019",
+    "content": "최근에 읽은 책이나 기사가 있나요?",
+    "category": "취미",
+    "tags": ["독서", "책", "학습"],
+    "tone": "편안한",
+    "mood": "차분한",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T020",
+    "content": "요즘 가장 기다려지는 시간이 언제예요?",
+    "category": "일상",
+    "tags": ["기대", "일상", "시간"],
+    "tone": "밝은",
+    "mood": "긍정적",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T021",
+    "content": "어릴 적 가장 좋아했던 놀이가 뭐였어요?",
+    "category": "추억",
+    "tags": ["어린시절", "놀이", "추억"],
+    "tone": "그리운",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T022",
+    "content": "학창시절 가장 친했던 친구 생각나요?",
+    "category": "추억",
+    "tags": ["학창시절", "친구", "추억"],
+    "tone": "그리운",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T023",
+    "content": "첫 월급 받았을 때 기분이 어땠어요?",
+    "category": "추억",
+    "tags": ["첫월급", "직장", "추억"],
+    "tone": "편안한",
+    "mood": "그리운",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T024",
+    "content": "처음 혼자 여행 갔을 때 어디로 갔나요?",
+    "category": "추억",
+    "tags": ["여행", "혼자", "추억"],
+    "tone": "편안한",
+    "mood": "그리운",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T025",
+    "content": "어릴 적 가장 무서워했던 게 뭐예요?",
+    "category": "추억",
+    "tags": ["어린시절", "공포", "추억"],
+    "tone": "친근한",
+    "mood": "편안한",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T026",
+    "content": "학교 다닐 때 가장 좋아한 과목은?",
+    "category": "추억",
+    "tags": ["학교", "공부", "추억"],
+    "tone": "편안한",
+    "mood": "그리운",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T027",
+    "content": "20대 때 가장 열정적이었던 순간은?",
+    "category": "추억",
+    "tags": ["20대", "열정", "추억"],
+    "tone": "격려하는",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T028",
+    "content": "처음 배운 요리가 뭐였어요?",
+    "category": "추억",
+    "tags": ["요리", "배움", "추억"],
+    "tone": "편안한",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T029",
+    "content": "첫사랑 생각나는 순간이 있나요?",
+    "category": "추억",
+    "tags": ["첫사랑", "연애", "추억"],
+    "tone": "그리운",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 4
+  },
+  {
+    "templateId": "T030",
+    "content": "어릴 적 꿈꿨던 직업이 뭐였어요?",
+    "category": "추억",
+    "tags": ["어린시절", "꿈", "직업"],
+    "tone": "편안한",
+    "mood": "그리운",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T031",
+    "content": "학창시절 가장 기억에 남는 선생님은?",
+    "category": "추억",
+    "tags": ["학교", "선생님", "추억"],
+    "tone": "그리운",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T032",
+    "content": "처음 운전했을 때 어땠어요?",
+    "category": "추억",
+    "tags": ["운전", "첫경험", "추억"],
+    "tone": "친근한",
+    "mood": "편안한",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T033",
+    "content": "어릴 적 가장 좋아했던 간식은?",
+    "category": "추억",
+    "tags": ["어린시절", "간식", "음식"],
+    "tone": "편안한",
+    "mood": "그리운",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T034",
+    "content": "졸업 후 처음 취업했을 때 기분은?",
+    "category": "추억",
+    "tags": ["취업", "직장", "추억"],
+    "tone": "편안한",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T035",
+    "content": "20대 때 가장 후회되는 일이 있나요?",
+    "category": "추억",
+    "tags": ["20대", "후회", "반성"],
+    "tone": "진지한",
+    "mood": "차분한",
+    "subjectRequired": false,
+    "priority": 4
+  },
+  {
+    "templateId": "T036",
+    "content": "처음 집 떠나 살 때 어땠어요?",
+    "category": "추억",
+    "tags": ["독립", "집", "추억"],
+    "tone": "편안한",
+    "mood": "그리운",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T037",
+    "content": "어릴 적 여름방학 추억 중 기억나는 거 있어요?",
+    "category": "추억",
+    "tags": ["방학", "여름", "어린시절"],
+    "tone": "그리운",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T038",
+    "content": "학창시절 가장 떨렸던 순간은?",
+    "category": "추억",
+    "tags": ["학교", "긴장", "추억"],
+    "tone": "편안한",
+    "mood": "편안한",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T039",
+    "content": "처음 해외여행 갔을 때 어디로 갔나요?",
+    "category": "추억",
+    "tags": ["여행", "해외", "첫경험"],
+    "tone": "밝은",
+    "mood": "그리운",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T040",
+    "content": "어릴 적 가족과 자주 갔던 장소가 있나요?",
+    "category": "추억",
+    "tags": ["가족", "어린시절", "장소"],
+    "tone": "그리운",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T041",
+    "content": "요즘 마음이 편안한 순간이 언제예요?",
+    "category": "감정",
+    "tags": ["마음", "편안함", "감정"],
+    "tone": "따뜻한",
+    "mood": "편안한",
+    "subjectRequired": false,
+    "priority": 1
+  },
+  {
+    "templateId": "T042",
+    "content": "최근에 누군가에게 고마웠던 일이 있나요?",
+    "category": "감정",
+    "tags": ["감사", "관계", "감정"],
+    "tone": "따뜻한",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T043",
+    "content": "요즘 가장 행복한 순간은 언제예요?",
+    "category": "감정",
+    "tags": ["행복", "감정", "긍정"],
+    "tone": "밝은",
+    "mood": "긍정적",
+    "subjectRequired": false,
+    "priority": 1
+  },
+  {
+    "templateId": "T044",
+    "content": "힘들 때 위로받는 방법이 있나요?",
+    "category": "감정",
+    "tags": ["위로", "힘듦", "방법"],
+    "tone": "걱정하는",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T045",
+    "content": "요즘 감사한 사람이 있다면?",
+    "category": "감정",
+    "tags": ["감사", "사람", "관계"],
+    "tone": "따뜻한",
+    "mood": "따뜻한",
+    "subjectRequired": true,
+    "priority": 2
+  },
+  {
+    "templateId": "T046",
+    "content": "최근에 누군가와 깊은 대화 나눈 적 있어요?",
+    "category": "관계",
+    "tags": ["대화", "관계", "소통"],
+    "tone": "편안한",
+    "mood": "차분한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T047",
+    "content": "요즘 스트레스는 어떻게 풀어요?",
+    "category": "감정",
+    "tags": ["스트레스", "해소", "방법"],
+    "tone": "걱정하는",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T048",
+    "content": "외로움을 느낄 때 뭐 하며 시간 보내요?",
+    "category": "감정",
+    "tags": ["외로움", "감정", "시간"],
+    "tone": "따뜻한",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T049",
+    "content": "요즘 가장 위로가 되는 말이 뭐예요?",
+    "category": "감정",
+    "tags": ["위로", "말", "감정"],
+    "tone": "따뜻한",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T050",
+    "content": "친구들과는 얼마나 자주 만나요?",
+    "category": "관계",
+    "tags": ["친구", "만남", "관계"],
+    "tone": "편안한",
+    "mood": "가벼운",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T051",
+    "content": "요즘 누군가에게 하고 싶은 말이 있나요?",
+    "category": "감정",
+    "tags": ["소통", "말", "감정"],
+    "tone": "따뜻한",
+    "mood": "진지한",
+    "subjectRequired": true,
+    "priority": 3
+  },
+  {
+    "templateId": "T052",
+    "content": "최근에 울었던 적이 있나요?",
+    "category": "감정",
+    "tags": ["눈물", "감정", "슬픔"],
+    "tone": "걱정하는",
+    "mood": "차분한",
+    "subjectRequired": false,
+    "priority": 4
+  },
+  {
+    "templateId": "T053",
+    "content": "요즘 가장 든든한 사람은 누구예요?",
+    "category": "관계",
+    "tags": ["사람", "관계", "의지"],
+    "tone": "따뜻한",
+    "mood": "따뜻한",
+    "subjectRequired": true,
+    "priority": 2
+  },
+  {
+    "templateId": "T054",
+    "content": "화났을 때 어떻게 풀어요?",
+    "category": "감정",
+    "tags": ["화", "감정", "해소"],
+    "tone": "편안한",
+    "mood": "편안한",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T055",
+    "content": "요즘 혼자만의 시간은 어떻게 보내요?",
+    "category": "일상",
+    "tags": ["혼자", "시간", "일상"],
+    "tone": "편안한",
+    "mood": "편안한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T056",
+    "content": "최근에 누군가를 용서한 일이 있나요?",
+    "category": "감정",
+    "tags": ["용서", "관계", "감정"],
+    "tone": "진지한",
+    "mood": "차분한",
+    "subjectRequired": false,
+    "priority": 4
+  },
+  {
+    "templateId": "T057",
+    "content": "요즘 기분이 좋아지는 일이 뭐예요?",
+    "category": "감정",
+    "tags": ["기분", "긍정", "감정"],
+    "tone": "밝은",
+    "mood": "긍정적",
+    "subjectRequired": false,
+    "priority": 1
+  },
+  {
+    "templateId": "T058",
+    "content": "누군가에게 미안한 마음이 있나요?",
+    "category": "감정",
+    "tags": ["미안함", "감정", "관계"],
+    "tone": "진지한",
+    "mood": "차분한",
+    "subjectRequired": false,
+    "priority": 4
+  },
+  {
+    "templateId": "T059",
+    "content": "요즘 자신에게 해주고 싶은 말이 있다면?",
+    "category": "감정",
+    "tags": ["자신", "격려", "감정"],
+    "tone": "따뜻한",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T060",
+    "content": "최근에 누군가의 따뜻함을 느낀 적 있어요?",
+    "category": "관계",
+    "tags": ["따뜻함", "관계", "감동"],
+    "tone": "따뜻한",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T061",
+    "content": "올해 꼭 이루고 싶은 목표가 있나요?",
+    "category": "미래",
+    "tags": ["목표", "계획", "미래"],
+    "tone": "격려하는",
+    "mood": "긍정적",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T062",
+    "content": "5년 후 자신의 모습을 상상해본 적 있어요?",
+    "category": "미래",
+    "tags": ["미래", "상상", "계획"],
+    "tone": "편안한",
+    "mood": "긍정적",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T063",
+    "content": "언젠가 꼭 가보고 싶은 곳이 있나요?",
+    "category": "미래",
+    "tags": ["여행", "꿈", "미래"],
+    "tone": "밝은",
+    "mood": "긍정적",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T064",
+    "content": "은퇴 후 하고 싶은 일이 뭐예요?",
+    "category": "미래",
+    "tags": ["은퇴", "계획", "미래"],
+    "tone": "편안한",
+    "mood": "차분한",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T065",
+    "content": "새로 배우고 싶은 게 있다면?",
+    "category": "미래",
+    "tags": ["배움", "도전", "미래"],
+    "tone": "격려하는",
+    "mood": "긍정적",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T066",
+    "content": "버킷리스트 중 가장 먼저 하고 싶은 건?",
+    "category": "미래",
+    "tags": ["버킷리스트", "꿈", "계획"],
+    "tone": "밝은",
+    "mood": "긍정적",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T067",
+    "content": "10년 후 어떤 사람이 되고 싶어요?",
+    "category": "미래",
+    "tags": ["미래", "성장", "꿈"],
+    "tone": "진지한",
+    "mood": "차분한",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T068",
+    "content": "올해 안에 꼭 해보고 싶은 게 있나요?",
+    "category": "미래",
+    "tags": ["목표", "계획", "올해"],
+    "tone": "격려하는",
+    "mood": "긍정적",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T069",
+    "content": "언젠가 살아보고 싶은 도시가 있나요?",
+    "category": "미래",
+    "tags": ["도시", "이사", "꿈"],
+    "tone": "편안한",
+    "mood": "긍정적",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T070",
+    "content": "나중에 자녀에게 해주고 싶은 말이 있나요?",
+    "category": "미래",
+    "tags": ["자녀", "가족", "미래"],
+    "tone": "따뜻한",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 4
+  },
+  {
+    "templateId": "T071",
+    "content": "노후에 어떤 삶을 살고 싶어요?",
+    "category": "미래",
+    "tags": ["노후", "계획", "미래"],
+    "tone": "편안한",
+    "mood": "차분한",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T072",
+    "content": "새로운 취미를 시작한다면 뭘 해보고 싶어요?",
+    "category": "미래",
+    "tags": ["취미", "도전", "미래"],
+    "tone": "밝은",
+    "mood": "긍정적",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T073",
+    "content": "1년 뒤 지금보다 달라진 모습이 있을까요?",
+    "category": "미래",
+    "tags": ["변화", "성장", "미래"],
+    "tone": "격려하는",
+    "mood": "긍정적",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T074",
+    "content": "언젠가 꼭 도전하고 싶은 게 있나요?",
+    "category": "미래",
+    "tags": ["도전", "꿈", "미래"],
+    "tone": "격려하는",
+    "mood": "긍정적",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T075",
+    "content": "미래의 자신에게 해주고 싶은 말은?",
+    "category": "미래",
+    "tags": ["자신", "미래", "격려"],
+    "tone": "따뜻한",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T076",
+    "content": "요즘 취미생활은 뭐 하고 있어요?",
+    "category": "취미",
+    "tags": ["취미", "여가", "일상"],
+    "tone": "편안한",
+    "mood": "가벼운",
+    "subjectRequired": false,
+    "priority": 1
+  },
+  {
+    "templateId": "T077",
+    "content": "쉬는 날 가장 하고 싶은 일이 뭐예요?",
+    "category": "취미",
+    "tags": ["휴일", "여가", "취미"],
+    "tone": "밝은",
+    "mood": "가벼운",
+    "subjectRequired": false,
+    "priority": 1
+  },
+  {
+    "templateId": "T078",
+    "content": "최근에 시작한 운동이나 활동이 있나요?",
+    "category": "취미",
+    "tags": ["운동", "활동", "시작"],
+    "tone": "격려하는",
+    "mood": "긍정적",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T079",
+    "content": "요즘 가장 즐겨보는 유튜브 채널은?",
+    "category": "취미",
+    "tags": ["유튜브", "영상", "취미"],
+    "tone": "친근한",
+    "mood": "가벼운",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T080",
+    "content": "스트레스 풀 때 즐겨하는 활동이 있나요?",
+    "category": "취미",
+    "tags": ["스트레스", "활동", "해소"],
+    "tone": "편안한",
+    "mood": "편안한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T081",
+    "content": "최근에 갔던 전시회나 공연이 있나요?",
+    "category": "취미",
+    "tags": ["전시회", "공연", "문화"],
+    "tone": "편안한",
+    "mood": "차분한",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T082",
+    "content": "요즘 빠져있는 게임이나 취미가 있어요?",
+    "category": "취미",
+    "tags": ["게임", "취미", "여가"],
+    "tone": "친근한",
+    "mood": "유쾌한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T083",
+    "content": "주말에 주로 어디 가는 걸 좋아해요?",
+    "category": "취미",
+    "tags": ["주말", "장소", "여가"],
+    "tone": "편안한",
+    "mood": "가벼운",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T084",
+    "content": "최근에 새로 알게 된 맛집이 있나요?",
+    "category": "취미",
+    "tags": ["맛집", "음식", "외식"],
+    "tone": "밝은",
+    "mood": "유쾌한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T085",
+    "content": "요즘 관심 있는 분야가 있다면?",
+    "category": "취미",
+    "tags": ["관심", "분야", "학습"],
+    "tone": "편안한",
+    "mood": "긍정적",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T086",
+    "content": "혼자 시간 보낼 때 주로 뭐 해요?",
+    "category": "취미",
+    "tags": ["혼자", "시간", "취미"],
+    "tone": "편안한",
+    "mood": "편안한",
+    "subjectRequired": false,
+    "priority": 1
+  },
+  {
+    "templateId": "T087",
+    "content": "최근에 사진 찍으러 간 곳이 있나요?",
+    "category": "취미",
+    "tags": ["사진", "장소", "취미"],
+    "tone": "편안한",
+    "mood": "가벼운",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T088",
+    "content": "요즘 자주 듣는 팟캐스트나 라디오 있어요?",
+    "category": "취미",
+    "tags": ["팟캐스트", "라디오", "취미"],
+    "tone": "친근한",
+    "mood": "가벼운",
+    "subjectRequired": false,
+    "priority": 3
+  },
+  {
+    "templateId": "T089",
+    "content": "집에서 가장 자주 하는 취미는?",
+    "category": "취미",
+    "tags": ["집", "취미", "일상"],
+    "tone": "편안한",
+    "mood": "편안한",
+    "subjectRequired": false,
+    "priority": 1
+  },
+  {
+    "templateId": "T090",
+    "content": "요즘 관심 있는 운동이나 스포츠 있나요?",
+    "category": "취미",
+    "tags": ["운동", "스포츠", "건강"],
+    "tone": "격려하는",
+    "mood": "긍정적",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T091",
+    "content": "가족과 마지막으로 함께한 게 언제예요?",
+    "category": "가족",
+    "tags": ["가족", "시간", "추억"],
+    "tone": "따뜻한",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 1
+  },
+  {
+    "templateId": "T092",
+    "content": "부모님께 최근에 연락드렸나요?",
+    "category": "가족",
+    "tags": ["부모님", "연락", "가족"],
+    "tone": "따뜻한",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T093",
+    "content": "형제자매 중 가장 닮은 사람은 누구예요?",
+    "category": "가족",
+    "tags": ["형제", "자매", "가족"],
+    "tone": "편안한",
+    "mood": "가벼운",
+    "subjectRequired": true,
+    "priority": 2
+  },
+  {
+    "templateId": "T094",
+    "content": "가족들과 가장 자주 나누는 대화 주제는?",
+    "category": "가족",
+    "tags": ["가족", "대화", "소통"],
+    "tone": "편안한",
+    "mood": "편안한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T095",
+    "content": "명절이나 가족 모임은 어떻게 보내요?",
+    "category": "가족",
+    "tags": ["명절", "모임", "가족"],
+    "tone": "편안한",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T096",
+    "content": "부모님께 배운 것 중 가장 소중한 건?",
+    "category": "가족",
+    "tags": ["부모님", "배움", "가르침"],
+    "tone": "따뜻한",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T097",
+    "content": "가족에게 감사한 순간이 있었나요?",
+    "category": "가족",
+    "tags": ["가족", "감사", "감정"],
+    "tone": "따뜻한",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T098",
+    "content": "가족들과 함께하고 싶은 여행지가 있나요?",
+    "category": "가족",
+    "tags": ["가족", "여행", "계획"],
+    "tone": "밝은",
+    "mood": "긍정적",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T099",
+    "content": "어릴 적 가족과의 추억 중 가장 특별한 건?",
+    "category": "가족",
+    "tags": ["가족", "추억", "어린시절"],
+    "tone": "그리운",
+    "mood": "따뜻한",
+    "subjectRequired": false,
+    "priority": 2
+  },
+  {
+    "templateId": "T100",
+    "content": "가족에게 하고 싶은 말이 있다면?",
+    "category": "가족",
+    "tags": ["가족", "소통", "감정"],
+    "tone": "따뜻한",
+    "mood": "진지한",
+    "subjectRequired": false,
+    "priority": 3
+  }
+]
+

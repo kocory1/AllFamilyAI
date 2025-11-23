@@ -23,7 +23,7 @@ async def compute_member_profile(request: MemberProfileComputeRequest) -> Member
         # 저장은 BE에서 수행. 본 엔드포인트는 계산(요약)만 반환
         return service_api.compute(request)
     except Exception as e:
-        logger.error(f"member_profile 계산 실패: {str(e)}")
+        logger.error(f"[프로필 계산 실패] error={str(e)}")
         raise HTTPException(status_code=500, detail=f"member_profile 계산 실패: {str(e)}")
 
 

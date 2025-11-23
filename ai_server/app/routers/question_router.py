@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from typing import Optional
 import logging
 
@@ -7,6 +7,7 @@ from app.question.openai_question_generator import OpenAIQuestionGenerator
 from app.question.service.question_service import QuestionService
 from app.question.service.assignment_service import AssignmentService
 from app.vector.chroma_service import ChromaVectorService
+from app.dependencies import get_vector_service
 from app.core.config import settings
 
 # 로거 설정
@@ -15,7 +16,6 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/questions", tags=["기본 질문"])
 
 service_api = QuestionService(OpenAIQuestionGenerator())
-vector_service = ChromaVectorService()  # 🆕 VectorService 초기화
 
 @router.post(
     "/api",
@@ -27,11 +27,14 @@ vector_service = ChromaVectorService()  # 🆕 VectorService 초기화
         "useRag=false: 항상 기본 방식 사용."
     )
 )
-async def generate_question(request: QuestionGenerateRequest) -> QuestionInstanceResponse:
+async def generate_question(
+    request: QuestionGenerateRequest,
+    vector_service: ChromaVectorService = Depends(get_vector_service)
+) -> QuestionInstanceResponse:
     content_preview = request.content[:50] if len(request.content) > 50 else request.content
     logger.info(
-        f"[질문 생성 요청] content: '{content_preview}...', "
-        f"category: {request.category}, use_rag: {request.use_rag}"
+        f"[질문 생성 요청] content='{content_preview}...', "
+        f"category={request.category}, use_rag={request.use_rag}"
     )
     
     past_answers = None
@@ -54,9 +57,9 @@ async def generate_question(request: QuestionGenerateRequest) -> QuestionInstanc
                 )
                 logger.info(f"[답변 개수 확인] user_id={user_id}, count={answer_count}")
                 
-                # Early return: 답변 < 5개면 기본 방식
-                if answer_count < 5:
-                    logger.info(f"[RAG 비활성화] 답변 부족 (count={answer_count} < 5)")
+                # Early return: 답변 < 최소 개수면 기본 방식
+                if answer_count < settings.rag_min_answers:
+                    logger.info(f"[RAG 비활성화] 답변 부족 (count={answer_count} < {settings.rag_min_answers})")
                 else:
                     # 2. RAG 검색
                     past_answers = await vector_service.search_similar_answers(
@@ -83,8 +86,8 @@ async def generate_question(request: QuestionGenerateRequest) -> QuestionInstanc
         )
         
         logger.info(
-            f"[질문 생성 완료] content: '{result.content}', "
-            f"rag_used: {result.generation_metadata.get('ragEnabled', False)}"
+            f"[질문 생성 완료] content='{result.content}', "
+            f"rag_used={result.generation_metadata.get('ragEnabled', False)}"
         )
         
         return result
@@ -95,15 +98,6 @@ async def generate_question(request: QuestionGenerateRequest) -> QuestionInstanc
             status_code=500,
             detail=f"질문 생성에 실패했습니다: {str(e)}"
         )
-
-@router.post(
-    "/instance/langchain",
-    response_model=QuestionInstanceResponse,
-    summary="(준비중) LangChain 기반 질문 생성",
-    description="LangChain 구현은 준비 중입니다."
-)
-async def create_question_instance_langchain(request: QuestionGenerateRequest) -> QuestionInstanceResponse:
-    raise HTTPException(status_code=501, detail="LangChain 구현은 준비 중입니다.")
 
 
 @router.post(

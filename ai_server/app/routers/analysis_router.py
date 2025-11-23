@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 import logging
 from datetime import datetime
 
@@ -6,13 +6,13 @@ from app.answer.models import AnswerAnalysisRequest, AnswerAnalysisResponse
 from app.answer.openai_answer_analyzer import OpenAIAnswerAnalyzer
 from app.answer.service.answer_service import AnswerService
 from app.vector.chroma_service import ChromaVectorService
+from app.dependencies import get_vector_service
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/analysis", tags=["답변 분석"])
 
 service_api = AnswerService(OpenAIAnswerAnalyzer())
-vector_service = ChromaVectorService()  # VectorService 초기화
 
 @router.post(
     "/answer/api",
@@ -20,7 +20,10 @@ vector_service = ChromaVectorService()  # VectorService 초기화
     summary="답변 분석",
     description="질문/카테고리/태그/톤 맥락을 반영해 답변을 분석하고 JSON 스키마로 반환합니다. 분석 후 ChromaDB에 자동 저장됩니다."
 )
-async def analyze_answer(request: AnswerAnalysisRequest) -> AnswerAnalysisResponse:
+async def analyze_answer(
+    request: AnswerAnalysisRequest,
+    vector_service: ChromaVectorService = Depends(get_vector_service)
+) -> AnswerAnalysisResponse:
     logger.info(f"[답변 분석 요청] user_id={request.user_id}, answer_length={len(request.answer_text)}")
     
     try:
@@ -53,14 +56,3 @@ async def analyze_answer(request: AnswerAnalysisRequest) -> AnswerAnalysisRespon
     except Exception as e:
         logger.error(f"[답변 분석 실패] user_id={request.user_id}, error={str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"답변 분석에 실패했습니다: {str(e)}")
-
-@router.post(
-    "/answer/langchain",
-    response_model=AnswerAnalysisResponse,
-    summary="(준비중) LangChain 기반 답변 분석",
-    description="LangChain 구현은 준비 중입니다."
-)
-async def analyze_answer_langchain(request: AnswerAnalysisRequest) -> AnswerAnalysisResponse:
-    raise HTTPException(status_code=501, detail="LangChain 구현은 준비 중입니다.")
-
-

@@ -45,9 +45,9 @@ app.add_middleware(
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     body = await request.body()
-    logger.error(f"[422 Validation Error] {request.method} {request.url.path}")
-    logger.error(f"요청 본문: {body.decode('utf-8') if body else 'empty'}")
-    logger.error(f"검증 실패 상세: {exc.errors()}")
+    logger.error(f"[422 Validation Error] method={request.method}, path={request.url.path}")
+    logger.error(f"[422 Validation Error] body={body.decode('utf-8') if body else 'empty'}")
+    logger.error(f"[422 Validation Error] errors={exc.errors()}")
     return JSONResponse(
         status_code=422,
         content={
