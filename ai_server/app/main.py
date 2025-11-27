@@ -54,7 +54,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             "detail": exc.errors(),
             "message": "요청 데이터 검증에 실패했습니다."
         },
-    )
+)
 
 # 라우터 등록 (기본 OpenAI 질문 생성만 제공)
 app.include_router(question_router.router, prefix="/api/v1", tags=["기본 질문"])

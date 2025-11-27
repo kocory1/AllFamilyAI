@@ -11,8 +11,8 @@ class Settings(BaseSettings):
     openai_api_key: str
     
     # 서버 설정
-    host: str = "0.0.0.0"
-    port: int = 8000  # EC2 인바운드 규칙과 일치
+    host: str = "127.0.0.1"  # nginx 리버스 프록시 사용 시 localhost만 리스닝
+    port: int = 8000  # nginx가 80/443 포트에서 리스닝하고 8000으로 프록시
     
     # 로깅 설정
     log_level: str = "INFO"

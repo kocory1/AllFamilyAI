@@ -35,7 +35,7 @@ async def generate_question(
     logger.info(
         f"[질문 생성 요청] content='{content_preview}...', "
         f"category={request.category}, use_rag={request.use_rag}"
-    )
+)
     
     past_answers = None
     

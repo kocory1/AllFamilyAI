@@ -50,11 +50,47 @@ source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 
+# nginx 설치 및 설정
+echo "8. nginx 설치 및 설정 중..."
+if ! command -v nginx &> /dev/null; then
+  echo "   📦 nginx 설치 중..."
+  sudo apt update
+  sudo apt install -y nginx
+  echo "   ✅ nginx 설치 완료"
+else
+  echo "   ✅ nginx 이미 설치됨"
+fi
+
+# nginx 설정 파일 복사
+echo "   📝 nginx 설정 파일 적용 중..."
+sudo cp ~/onsikgu_ai/.github/scripts/nginx_onsikgu.conf /etc/nginx/sites-available/onsikgu_ai
+
+# 심볼릭 링크 생성 (활성화)
+if [ ! -L /etc/nginx/sites-enabled/onsikgu_ai ]; then
+  sudo ln -s /etc/nginx/sites-available/onsikgu_ai /etc/nginx/sites-enabled/
+  echo "   ✅ nginx 사이트 활성화 완료"
+fi
+
+# 기본 nginx 사이트 비활성화 (충돌 방지)
+if [ -L /etc/nginx/sites-enabled/default ]; then
+  sudo rm /etc/nginx/sites-enabled/default
+  echo "   ✅ 기본 사이트 비활성화 완료"
+fi
+
+# nginx 설정 테스트
+if sudo nginx -t; then
+  echo "   ✅ nginx 설정 검증 완료"
+  sudo systemctl reload nginx || sudo systemctl restart nginx
+  echo "   ✅ nginx 재시작 완료"
+else
+  echo "   ⚠️  nginx 설정 오류 발생 (계속 진행)"
+fi
+
 # 환경변수 파일 생성
-echo "8. 환경변수 설정 중..."
+echo "9. 환경변수 설정 중..."
 cat > .env << EOF
 OPENAI_API_KEY=${OPENAI_API_KEY}
-HOST=0.0.0.0
+HOST=127.0.0.1
 PORT=8000
 LOG_LEVEL=INFO
 DEFAULT_MODEL=gpt-5-nano
@@ -78,14 +114,14 @@ RAG_MIN_ANSWERS=5
 EOF
 
 # 서버 시작 (별도 스크립트로 분리하여 백그라운드 실행)
-echo "9. 서버 시작 중..."
+echo "10. 서버 시작 중..."
 cd ~/onsikgu_ai/ai_server
 
 # 서버 시작 스크립트 생성
 cat > ~/start_server.sh << 'STARTEOF'
 #!/bin/bash
 cd ~/onsikgu_ai/ai_server
-~/onsikgu_ai/ai_server/venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 > server.log 2>&1
+~/onsikgu_ai/ai_server/venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 > server.log 2>&1
 STARTEOF
 
 chmod +x ~/start_server.sh

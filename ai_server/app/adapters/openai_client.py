@@ -31,10 +31,10 @@ class OpenAIClient:
         try:
             response = await self._client.chat.completions.create(
                 model=model_name,
-                messages=messages,
+            messages=messages,
                 max_completion_tokens=max_completion_tokens or settings.max_tokens,
-                response_format=response_format,
-            )
+            response_format=response_format,
+        )
             
             content = response.choices[0].message.content
             logger.info(f"[OpenAI] 응답 받음 - content_length={len(content) if content else 0}")

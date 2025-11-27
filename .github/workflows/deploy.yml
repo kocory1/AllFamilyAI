@@ -23,7 +23,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: ".github/scripts/deploy.sh"
+          source: ".github/scripts/*"
           target: "~/"
           strip_components: 2
 
@@ -44,6 +44,7 @@ jobs:
       - name: 배포 완료 알림
         if: success()
         run: |
-          echo "🚀 배포 완료: http://43.200.88.177:8000"
-          echo "📝 Health Check: http://43.200.88.177:8000/health"
+          echo "🚀 배포 완료: http://3.38.113.60"
+          echo "📝 Health Check: http://3.38.113.60/health"
+          echo "📚 API 문서: http://3.38.113.60/docs"
 
