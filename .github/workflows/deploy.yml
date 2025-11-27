@@ -23,6 +23,10 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          timeout: 60s
+          command_timeout: 120s
+          debug: true
           source: ".github/scripts/*"
           target: "~/"
           strip_components: 2
@@ -33,6 +37,10 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          timeout: 60s
+          command_timeout: 300s
+          debug: true
           script: |
             chmod +x ~/deploy.sh
             ~/deploy.sh "${{ secrets.OPENAI_API_KEY }}" > ~/deploy.log 2>&1 &
