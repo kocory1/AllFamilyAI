@@ -128,8 +128,6 @@ class OpenAIQuestionGenerator(QuestionGenerator):
             ctx.append(f"태그: {', '.join(request.tags)}")
         if request.subject_required is not None:
             ctx.append(f"주제 인물 필요: {request.subject_required}")
-        if request.mood:
-            ctx.append(f"분위기: {request.mood}")
         if ctx:
             lines.append("=== 맥락 ===")
             lines.extend(ctx)
