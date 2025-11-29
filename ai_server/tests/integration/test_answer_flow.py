@@ -293,5 +293,8 @@ class TestAnswerAPI:
                 
                 if response.status_code == 200:
                     data = response.json()
-                    assert 0.0 <= data["sentiment"] <= 1.0
+                    # sentiment는 scores 안에 있음
+                    assert "scores" in data
+                    assert "sentiment" in data["scores"]
+                    assert -1.0 <= data["scores"]["sentiment"] <= 1.0
                     print(f"  ✅ {case['name']} 통과")
