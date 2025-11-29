@@ -51,10 +51,21 @@ async def generate_question(
             logger.warning("[RAG 비활성화] subjectMemberId 없음")
         else:
             try:
-                # 1. 답변 개수 확인
-                answer_count = vector_service.collection.count(
-                    where={"user_id": user_id}
+                # 1. 답변 개수 확인 (ChromaDB 버전 호환)
+                # 구버전: count()는 where 미지원 -> get()으로 조회 후 카운트
+                results = vector_service.collection.get(
+                    where={"user_id": user_id},
+                    limit=1  # 개수만 확인하므로 1개만
                 )
+                answer_count = len(results['ids']) if results and 'ids' in results else 0
+                
+                # 전체 개수가 필요하다면 get()의 limit을 없애거나 크게 설정
+                if answer_count > 0:  # 최소 1개 이상 있으면 전체 개수 확인
+                    all_results = vector_service.collection.get(
+                        where={"user_id": user_id}
+                    )
+                    answer_count = len(all_results['ids']) if all_results and 'ids' in all_results else 0
+                
                 logger.info(f"[답변 개수 확인] user_id={user_id}, count={answer_count}")
                 
                 # Early return: 답변 < 최소 개수면 기본 방식

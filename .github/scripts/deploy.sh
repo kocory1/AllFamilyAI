@@ -48,7 +48,7 @@ python3 -m venv venv
 echo "7. 의존성 설치 중..."
 source venv/bin/activate
 pip install --upgrade pip
-pip install -r requirements.txt
+pip install --upgrade -r requirements.txt  # --upgrade 추가로 최신 버전 강제 설치
 
 # nginx 설치 및 설정
 echo "8. nginx 설치 및 설정 중..."
