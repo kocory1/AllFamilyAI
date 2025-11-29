@@ -113,33 +113,62 @@ RAG_TOP_K=5
 RAG_MIN_ANSWERS=5
 EOF
 
-# 서버 시작 (별도 스크립트로 분리하여 백그라운드 실행)
+# 서버 시작 (nohup으로 간단하게)
 echo "10. 서버 시작 중..."
 cd ~/onsikgu_ai/ai_server
 
-# 서버 시작 스크립트 생성
-cat > ~/start_server.sh << 'STARTEOF'
-#!/bin/bash
-cd ~/onsikgu_ai/ai_server
-~/onsikgu_ai/ai_server/venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 > server.log 2>&1
-STARTEOF
+# nohup으로 백그라운드 실행 (로그를 server.log로 명확히 저장)
+nohup ~/onsikgu_ai/ai_server/venv/bin/python -m uvicorn app.main:app \
+  --host 127.0.0.1 \
+  --port 8000 \
+  > ~/onsikgu_ai/ai_server/server.log 2>&1 &
 
-chmod +x ~/start_server.sh
-
-# 백그라운드에서 서버 시작 (nohup + setsid + 리다이렉션)
-nohup setsid bash ~/start_server.sh < /dev/null > /dev/null 2>&1 &
-
+echo "   서버 PID: $!"
 sleep 3
+
+# Health Check (재시도 로직)
+echo "11. Health Check 시작 (최대 50초 대기)..."
+MAX_RETRIES=10
+RETRY_INTERVAL=5
+
+for i in $(seq 1 $MAX_RETRIES); do
+  echo "   Health check attempt $i/$MAX_RETRIES..."
+  
+  if curl -f http://localhost:8000/health > /dev/null 2>&1; then
+    echo "   ✅ Server is up!"
+    echo "   ✅ Health Check 성공 (시도 횟수: $i/$MAX_RETRIES)"
+    break
+  fi
+  
+  if [ $i -eq $MAX_RETRIES ]; then
+    echo "   ❌ Server failed to start after 50s."
+    echo ""
+    echo "=========================================="
+    echo "🔍 서버 로그 (마지막 20줄):"
+    echo "=========================================="
+    tail -20 ~/onsikgu_ai/ai_server/server.log
+    echo "=========================================="
+    echo ""
+    echo "전체 로그: tail -f ~/onsikgu_ai/ai_server/server.log"
+    exit 1
+  fi
+  
+  sleep $RETRY_INTERVAL
+done
 
 # 서버 시작 확인
 if pgrep -f "uvicorn app.main:app" > /dev/null; then
-  echo "✅ 서버가 성공적으로 시작되었습니다."
+  echo "✅ 서버가 정상적으로 실행 중입니다."
 else
-  echo "⚠️  서버 시작 대기 중... (로그 확인: tail -f ~/onsikgu_ai/ai_server/server.log)"
+  echo "⚠️  서버 프로세스를 찾을 수 없습니다. (로그 확인 필요)"
+  exit 1
 fi
 
 echo "=========================================="
 echo "배포 완료!"
+echo "📍 서버: http://3.38.113.60"
+echo "📝 Health: http://3.38.113.60/health"
+echo "📚 API 문서: http://3.38.113.60/docs"
 echo "로그 확인: tail -f ~/onsikgu_ai/ai_server/server.log"
 echo "완료 시간: $(date)"
 echo "=========================================="

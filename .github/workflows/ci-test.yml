@@ -1,0 +1,66 @@
+name: CI Test (Pre-deployment)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: 유닛 테스트 실행
+    runs-on: ubuntu-latest
+    
+    # Working Directory 중복 제거
+    defaults:
+      run:
+        working-directory: ./ai_server
+    
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v3
+      
+      - name: Python 설정
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: 의존성 캐시
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('ai_server/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      
+      - name: 의존성 설치
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Linting (ruff) - 코드 품질 검증
+        run: |
+          pip install ruff
+          ruff check app/
+        # 초기 단계: continue-on-error 유지 (경고만)
+        # 추후 삭제 권장: 코드 품질 강제
+        continue-on-error: true
+      
+      - name: 유닛 테스트 실행 (Mock)
+        run: |
+          pytest tests/unit/ -v --tb=short -m "not integration"
+        env:
+          # Mock이므로 더미 키 사용
+          OPENAI_API_KEY: "test-key-dummy"
+          CHROMA_PERSIST_DIRECTORY: "/tmp/chroma_test"
+          CHROMA_COLLECTION_NAME: "test_collection"
+      
+      - name: 테스트 결과 요약
+        if: always()
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "✅ 모든 테스트 통과!"
+          else
+            echo "❌ 테스트 실패 - 배포 중단"
+            exit 1
+          fi

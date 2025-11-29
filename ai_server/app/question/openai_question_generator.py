@@ -1,42 +1,45 @@
-from typing import Optional, List
+"""OpenAI를 활용한 질문 생성 전략 구현체
+
+시니어 피드백 반영:
+- Helper 메서드로 _build_prompt 리팩토링 (가독성/유지보수성)
+- RAG 컨텍스트 길이 제한 (최대 5개)
+- System Prompt 강화 (가족 대화 맥락)
+"""
 import logging
+from typing import Optional, List
 from datetime import datetime
-from app.core.config import settings
+
 from app.question.base import QuestionGenerator
+from app.question.models import QuestionGenerateRequest, QuestionInstanceResponse
 from app.adapters.openai_client import OpenAIClient
-from app.question.models import (
-    QuestionGenerateRequest,
-    QuestionInstanceResponse,
-)
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
 
 class OpenAIQuestionGenerator(QuestionGenerator):
-    def __init__(self) -> None:
+    def __init__(self):
         self.client = OpenAIClient()
-
+    
     async def generate(
         self,
         request: QuestionGenerateRequest,
-        past_answers: Optional[List[dict]] = None  # 🆕 RAG 맥락
+        past_answers: Optional[List[dict]] = None
     ) -> QuestionInstanceResponse:
-        # RAG 활성화 여부 판단
+        """질문 생성"""
+        # RAG 활성화 여부
         rag_enabled = past_answers is not None and len(past_answers) > 0
         
+        # 프롬프트 생성
         prompt = self._build_prompt(request, past_answers)
-        logger.info(
-            f"[질문 생성] 프롬프트 생성 완료 - "
-            f"length={len(prompt)}, rag_enabled={rag_enabled}, "
-            f"context_count={len(past_answers) if past_answers else 0}"
-        )
         
+        # OpenAI 호출
         response = await self._call_openai(prompt)
-        logger.info(f"[질문 생성] OpenAI 응답 받음 - length={len(response)}, preview='{response[:100]}'")
         
+        # 응답 파싱
         content = self._parse_response(response)
-        logger.info(f"[질문 생성] 파싱 완료 - content='{content}'")
-
+        
+        # 신뢰도 평가
         confidence, meta = self._evaluate_generation(
             content=content,
             language=request.language or "ko",
@@ -44,79 +47,167 @@ class OpenAIQuestionGenerator(QuestionGenerator):
             max_len=settings.max_question_length
         )
         
-        # 🆕 RAG 정보 추가 (camelCase로 BE 호환)
+        # RAG 메타데이터 추가
         meta["ragEnabled"] = rag_enabled
         meta["ragContextCount"] = len(past_answers) if past_answers else 0
         if rag_enabled:
-            meta["ragVersion"] = "v1"  # RAG 버전 (추후 개선 추적용)
-
+            meta["ragVersion"] = "v1"
+        
         return QuestionInstanceResponse(
             content=content,
             generated_by="ai",
             generation_model=settings.default_model,
-            generation_parameters={"max_completion_tokens": settings.max_tokens},
+            generation_parameters={
+                "max_completion_tokens": settings.max_tokens
+            },
             generation_prompt=prompt,
-            generation_metadata=meta,  # RAG 정보 포함!
+            generation_metadata=meta,
             generation_confidence=confidence
         )
-
+    
+    def _build_rag_context(self, past_answers: List[dict]) -> str:
+        """
+        RAG 컨텍스트 섹션 생성
+        
+        개선:
+        - 최대 5개로 제한 (토큰/비용 절감, Lost in the Middle 방지)
+        - 명확한 주석 추가
+        """
+        if not past_answers or len(past_answers) == 0:
+            return ""
+        
+        lines = []
+        lines.append("=== 📚 과거 대화 맥락 (참고용) ===")
+        lines.append("사용자가 이전에 답변한 내용입니다. 이를 참고하여 더 개인화된 질문을 만드세요.")
+        lines.append("")
+        
+        # 최대 5개로 제한 (비용/성능 최적화)
+        # 서비스 레이어에서 top_k로 이미 필터링했지만, 추가 보호
+        limited_answers = past_answers[:5]
+        
+        for idx, item in enumerate(limited_answers, 1):
+            question = item.get("question", "")
+            answer = item.get("answer", "")
+            timestamp = item.get("timestamp", "")
+            
+            # 상대적 시간 표시
+            time_str = ""
+            if timestamp:
+                try:
+                    past_time = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+                    now = datetime.now(past_time.tzinfo)
+                    delta = now - past_time
+                    if delta.days > 0:
+                        time_str = f"({delta.days}일 전)"
+                    else:
+                        time_str = "(오늘)"
+                except:
+                    pass
+            
+            lines.append(f"{idx}. {time_str}")
+            lines.append(f"   Q: {question}")
+            lines.append(f"   A: {answer}")
+            lines.append("")
+        
+        # 5개 초과 시 알림
+        if len(past_answers) > 5:
+            lines.append(f"💡 (총 {len(past_answers)}개 답변 중 상위 5개만 표시)")
+            lines.append("")
+        
+        lines.append("👉 위 맥락을 참고하여:")
+        lines.append("- 사용자가 관심 있어하는 주제를 반영하세요")
+        lines.append("- 이전 답변에서 언급된 구체적인 상황을 활용하세요")
+        lines.append("- 단, 과거 질문을 그대로 반복하지 마세요")
+        lines.append("")
+        
+        return "\n".join(lines)
+    
+    def _build_answer_analysis_context(self, request: QuestionGenerateRequest) -> str:
+        """답변 분석 컨텍스트 섹션 생성 (팔로업 모드)"""
+        if not request.answer_analysis:
+            return ""
+        
+        lines = []
+        lines.append("=== 📌 사용자의 답변 내용 (핵심!) ===")
+        
+        analysis = request.answer_analysis
+        summary = analysis.summary
+        categories = analysis.categories
+        scores = analysis.scores
+        keywords = analysis.keywords
+        
+        if summary:
+            lines.append(f"답변 요약: {summary}")
+        if keywords:
+            lines.append(f"🔑 핵심 키워드: {', '.join(keywords)}")
+        if categories:
+            lines.append(f"주제: {', '.join(categories)}")
+        
+        # 감정 분석
+        if scores and scores.emotion:
+            emo = scores.emotion
+            emotions = []
+            if emo.sadness and emo.sadness > 0.4:
+                emotions.append("슬픔/그리움")
+            if emo.joy and emo.joy > 0.4:
+                emotions.append("기쁨")
+            if emo.anger and emo.anger > 0.4:
+                emotions.append("분노")
+            if emotions:
+                lines.append(f"💭 감정: {', '.join(emotions)}")
+        
+        lines.append("")
+        lines.append("👉 팔로업 전략:")
+        lines.append("- 키워드를 직접 언급하지 말고 자연스럽게 우회하기")
+        lines.append("- 부정적 감정이면 긍정적 주제로 전환하기")
+        lines.append("- 긍정적이면 살짝만 더 파고드는 심화 질문 생성")
+        lines.append("- 무겁거나 형식적인 질문 금지")
+        lines.append("- 가볍고 일상적인 질문으로 대화 이어가기")
+        lines.append("")
+        
+        return "\n".join(lines)
+    
+    def _build_generation_rules(self) -> str:
+        """질문 생성 규칙 섹션"""
+        lines = []
+        lines.append("=== 생성 규칙 ===")
+        lines.append("1) 짧고 간결하게: 한 문장, 40자 이내 권장")
+        lines.append("2) 자연스러운 말투: '~나요?', '~어요?', '~있어요?' 같은 편안한 의문형")
+        lines.append("3) ⚠️ 금지 표현:")
+        lines.append("   - 형식적: '떠올리시고', '말씀해 주세요', '자세히', '구체적으로'")
+        lines.append("   - 무거움: '순간', '기억', '떠오르나요', '느꼈나요'")
+        lines.append("   - 키워드 직접 언급: 답변에 나온 단어를 그대로 질문에 넣지 말기")
+        lines.append("4) 물음표(?)로 끝나야 합니다")
+        lines.append("")
+        
+        return "\n".join(lines)
+    
     def _build_prompt(
         self,
         request: QuestionGenerateRequest,
-        past_answers: Optional[List[dict]] = None  # 🆕 RAG 맥락
+        past_answers: Optional[List[dict]] = None
     ) -> str:
+        """
+        질문 생성 프롬프트 조립
+        
+        리팩토링: Helper 메서드로 섹션 분리 (가독성/유지보수성 향상)
+        """
         lines = []
-        lines.append("당신은 가족과의 자연스러운 대화를 돕는 질문 생성 전문가입니다.")
-        
-        # 답변 분석이 있으면 팔로업 모드, 없으면 새 질문 모드
-        if request.answer_analysis:
-            lines.append("사용자가 답변한 내용을 바탕으로, 더 깊이 파고드는 자연스러운 팔로업 질문을 만드세요.")
-            lines.append("⚠️ 중요: 이전 질문을 반복하거나 패러프레이징하지 마세요. 답변 내용에서 새로운 질문을 만드세요.")
-        else:
-            lines.append("아래 주제로 친구처럼 부담 없이 물어보는 짧고 간단한 질문을 만드세요.")
-        
+        lines.append("=== 🎯 미션 ===")
+        lines.append("가족 간의 대화를 이어주는 자연스러운 질문을 만들어주세요.")
         lines.append("")
         
-        # 🆕 과거 대화 맥락 (RAG)
-        if past_answers and len(past_answers) > 0:
-            lines.append("=== 📚 과거 대화 맥락 (참고용) ===")
-            lines.append("사용자가 이전에 답변한 내용입니다. 이를 참고하여 더 개인화된 질문을 만드세요.")
-            lines.append("")
-            
-            for idx, item in enumerate(past_answers, 1):
-                question = item.get("question", "")
-                answer = item.get("answer", "")
-                timestamp = item.get("timestamp", "")
-                
-                # 상대적 시간 표시 (선택)
-                time_str = ""
-                if timestamp:
-                    try:
-                        past_time = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
-                        now = datetime.now(past_time.tzinfo)
-                        delta = now - past_time
-                        if delta.days > 0:
-                            time_str = f"({delta.days}일 전)"
-                        else:
-                            time_str = "(오늘)"
-                    except:
-                        pass
-                
-                lines.append(f"{idx}. {time_str}")
-                lines.append(f"   Q: {question}")
-                lines.append(f"   A: {answer}")
-                lines.append("")
-            
-            lines.append("👉 위 맥락을 참고하여:")
-            lines.append("- 사용자가 관심 있어하는 주제를 반영하세요")
-            lines.append("- 이전 답변에서 언급된 구체적인 상황을 활용하세요")
-            lines.append("- 단, 과거 질문을 그대로 반복하지 마세요")
-            lines.append("")
+        # RAG 컨텍스트 (최대 5개)
+        rag_context = self._build_rag_context(past_answers or [])
+        if rag_context:
+            lines.append(rag_context)
         
+        # 이전 질문 (베이스)
         lines.append("=== 이전 질문 ===")
         lines.append(f"{request.content}")
         lines.append("")
-        # 맥락 섹션(존재하는 항목만)
+        
+        # 맥락 정보
         ctx = []
         if request.category:
             ctx.append(f"카테고리: {request.category}")
@@ -128,124 +219,122 @@ class OpenAIQuestionGenerator(QuestionGenerator):
             ctx.append(f"태그: {', '.join(request.tags)}")
         if request.subject_required is not None:
             ctx.append(f"주제 인물 필요: {request.subject_required}")
+        
         if ctx:
             lines.append("=== 맥락 ===")
             lines.extend(ctx)
             lines.append("")
-
-        # 답변 분석 섹션 (팔로업 모드)
-        if request.answer_analysis:
-            lines.append("=== 📌 사용자의 답변 내용 (핵심!) ===")
-            summary = request.answer_analysis.summary
-            categories = request.answer_analysis.categories
-            scores = request.answer_analysis.scores
-            keywords = request.answer_analysis.keywords
-            
-            if summary:
-                lines.append(f"답변 요약: {summary}")
-            if keywords:
-                lines.append(f"🔑 핵심 키워드: {', '.join(keywords)}")
-            if categories:
-                lines.append(f"주제: {', '.join(categories)}")
-            if scores and scores.emotion:
-                # 감정 분석 - 가장 높은 감정만 표시
-                emo = scores.emotion
-                emotions = []
-                if emo.sadness and emo.sadness > 0.4:
-                    emotions.append("슬픔/그리움")
-                if emo.joy and emo.joy > 0.4:
-                    emotions.append("기쁨")
-                if emo.anger and emo.anger > 0.4:
-                    emotions.append("분노")
-                if emotions:
-                    lines.append(f"💭 감정: {', '.join(emotions)}")
-            
-            lines.append("")
-            lines.append("👉 팔로업 전략:")
-            lines.append("- 키워드를 직접 언급하지 말고 자연스럽게 우회하기")
-            lines.append("- 부정적 감정이면 긍정적 주제로 전환하기 (그리움 → 현재 즐거운 일)")
-            lines.append("- 긍정적이면 살짝만 더 파고드는 심화 질문 생성")
-            lines.append("- 무겁거나 형식적인 질문 금지 ('떠오르나요', '기억', '순간' 같은 표현 피하기)")
-            lines.append("- 가볍고 일상적인 질문으로 대화 이어가기")
-            lines.append("")
-
-        # 생성 규칙
-        lines.append("=== 생성 규칙 ===")
-        lines.append("1) 짧고 간결하게: 한 문장, 40자 이내 권장")
-        lines.append("2) 자연스러운 말투: '~나요?', '~어요?', '~있어요?' 같은 편안한 의문형")
-        lines.append("3) ⚠️ 금지 표현:")
-        lines.append("   - 형식적: '떠올리시고', '말씀해 주세요', '자세히', '구체적으로', '조금 더'")
-        lines.append("   - 무거움: '순간', '기억', '떠오르나요', '느꼈나요', '생각하나요'")
-        lines.append("   - 키워드 직접 언급: 답변에 나온 단어를 그대로 질문에 넣지 말기")
-        lines.append("4) 감정 전환: 부정적 답변이면 긍정적/가벼운 주제로 바꾸기")
-        lines.append("5) 친구처럼: 카톡하듯이 가볍게 물어보기")
-        lines.append("")
         
-        if request.answer_analysis:
-            lines.append("좋은 팔로업 예시:")
-            lines.append("- 답변: '요새 본가에 못간지 좀 되어서 그립다' (그리움, 부정적)")
-            lines.append("  → ❌ 나쁨: '그리움이 가장 강해지는 순간은 언제예요?' (무겁고 형식적)")
-            lines.append("  → ❌ 나쁨: '유학 중 그리움이 생길 때 어떤 기억이 떠오르나요?' (키워드 직접 언급, AI같음)")
-            lines.append("  → ✅ 좋음: '요즘 주말에는 어떻게 지내고 있어요?' (주제 전환, 가벼움)")
+        # 답변 분석 (팔로업 모드)
+        answer_context = self._build_answer_analysis_context(request)
+        if answer_context:
+            lines.append(answer_context)
+        
+        # 생성 규칙
+        lines.append(self._build_generation_rules())
+        
+        # 예시 (팔로업 모드일 때만)
+        if request.answer_analysis and request.answer_analysis.keywords:
+            lines.append("📝 변환 예시:")
+            lines.append("  → ❌ 나쁨: '유학 생활은 어떠셨나요?' (키워드 직접 언급)")
             lines.append("  → ✅ 좋음: '유학에서 재밌었던 일 있어요?' (주제에 대한 긍정적 전환)")
-            lines.append("")
-        else:
-            lines.append("좋은 예시:")
-            lines.append("- 최근 가족과 함께한 소소한 기쁨이 있었나요?")
-            lines.append("- 요즘 가족과 어떤 시간을 보내고 있어요?")
-            lines.append("- 가족 중에 가장 닮고 싶은 사람이 있나요?")
             lines.append("")
         
         lines.append("위 가이드라인을 따라 자연스러운 질문 1개만 생성하세요:")
+        
         return "\n".join(lines)
-
+    
     async def _call_openai(self, prompt: str) -> str:
+        """
+        OpenAI API 호출
+        
+        개선: System Prompt 강화 (가족 대화 맥락 명확화)
+        """
         return await self.client.chat_completion(
             [
                 {
                     "role": "system",
                     "content": (
-                        "당신은 친구처럼 자연스럽게 대화하는 질문 생성 전문가입니다. "
-                        "카톡으로 친구에게 '요즘 어때?', '재밌는 일 있어?' 묻듯이 가볍고 자연스럽게 질문하세요. "
+                        "당신은 가족 간의 대화를 이어주는 AI 어시스턴트입니다. "
+                        "사용자가 부모님이나 자녀와 대화할 거리를 만들어주는 것이 목표입니다. "
+                        "\n\n"
+                        "친구처럼 자연스럽게 대화하되, 가족 관계에 적합한 따뜻하고 편안한 톤을 유지하세요. "
+                        "카톡으로 가족에게 '요즘 어때?', '재밌는 일 있어?' 묻듯이 가볍고 자연스럽게 질문하세요. "
+                        "\n\n"
                         "절대 하지 말아야 할 것: "
-                        "1) 답변의 키워드를 그대로 질문에 넣기 (예: 답변에 '유학'이 나왔다고 '유학 중...'이라고 묻지 마세요) "
-                        "2) 무겁거나 형식적인 표현 ('순간', '기억', '떠오르나요', '느꼈나요') "
+                        "1) 답변의 키워드를 그대로 질문에 넣기 "
+                        "2) 무겁거나 형식적인 표현 ('순간', '기억', '떠오르나요') "
                         "3) 심리상담 같은 질문 ('어떤 감정이', '어떤 의미가') "
-                        "4) 부정적 감정을 계속 파고들기 (답변이 '그립다'면 '그리움'을 또 묻지 말고 현재 즐거운 일로 전환)"
+                        "4) 부정적 감정을 계속 파고들기"
                     ),
                 },
                 {"role": "user", "content": prompt},
             ]
         )
-
+    
     def _parse_response(self, response: str) -> str:
-        lines = response.strip().split('\n')
+        """
+        LLM 응답 파싱 (방어 로직 포함)
+        - 접두사 제거: '질문:', '답변:', 'Question:', 'Answer:'
+        - 따옴표 제거: ", ', ", ', ', ' 등
+        - 공백 제거
+        - 첫 번째 유효한 줄만 반환
+        """
+        text = response.strip()
+        
+        # 접두사 제거
+        prefixes = ['질문:', '답변:', 'Question:', 'Answer:', '질문 :', '답변 :']
+        for prefix in prefixes:
+            if text.startswith(prefix):
+                text = text[len(prefix):].strip()
+                break
+        
+        # 따옴표 제거 (영문, 한글)
+        quotes = ['"', "'", '"', '"', ''', ''']
+        while text and text[0] in quotes:
+            text = text[1:]
+        while text and text[-1] in quotes:
+            text = text[:-1]
+        
+        text = text.strip()
+        
+        # 첫 번째 유효한 줄 반환
+        lines = text.split('\n')
         for line in lines:
             line = line.strip()
-            if line and not line.startswith('질문:') and not line.startswith('답변:'):
+            if line:
                 return line
-        return response.strip()
-
-    def _evaluate_generation(self, content: str, language: str, tone: Optional[str], max_len: int) -> tuple[float, dict]:
+        
+        return text
+    
+    def _evaluate_generation(
+        self,
+        content: str,
+        language: str,
+        tone: Optional[str],
+        max_len: int
+    ) -> tuple[float, dict]:
+        """생성 품질 평가"""
         try:
             score = 1.0
-            # camelCase로 BE 호환
-            meta: dict = {
-                "length": len(content),
+            
+            meta = {
+                "questionLength": len(content),
+                "hasQuestionMark": "?" in content or content.endswith("요") or content.endswith("가요"),
                 "language": language,
-                "tone": tone,
-                "rules": {
-                    "lengthOk": len(content) <= max_len,
-                    "endsQuestion": content.strip().endswith("?") or content.strip().endswith("요") or content.strip().endswith("가요"),
-                }
+                "tone": tone
             }
-            if not meta["rules"]["lengthOk"]:
+            
+            # 길이 체크
+            if len(content) > max_len:
                 score -= 0.2
-            if not meta["rules"]["endsQuestion"]:
+            
+            # 물음표/어미 체크
+            if not meta["hasQuestionMark"]:
                 score -= 0.1
+            
             score = max(0.0, min(1.0, score))
             return score, meta
+        
         except Exception:
             return 0.5, {"error": "evaluation_failed"}
-
-
