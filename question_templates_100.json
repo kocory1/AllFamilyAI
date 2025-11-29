@@ -97,10 +97,10 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 출퇴근길에 뭐하며 시간 보내요?",
+    "content": "요즘 외출하거나 이동할 때 뭐하며 시간 보내요?",
     "category": "일상",
     "tags": [
-      "출퇴근",
+      "이동",
       "일상",
       "시간"
     ],
@@ -116,18 +116,16 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "최근에 새로 시작한 습관이 있나요?",
+    "content": "나도 모르게 하는 습관이 있나요?",
     "category": "일상",
     "tags": [
-      "습관",
-      "시작",
-      "변화"
+      "습관"
     ],
     "subject_required": false,
     "reuse_scope": null,
     "cooldown_days": null,
     "language": "ko",
-    "tone": "격려하는",
+    "tone": "편안한",
     "is_active": true,
     "archived_at": null,
     "created_at": null
@@ -154,7 +152,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "오늘 날씨 어때요? 기분이 달라졌나요?",
+    "content": "오늘 날씨 어때요? 좋아하는 날씨인가요?",
     "category": "일상",
     "tags": [
       "날씨",
@@ -211,7 +209,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 숙면 잘 취하고 있나요?",
+    "content": "요새 잠은 잘 오나요?",
     "category": "일상",
     "tags": [
       "수면",
@@ -249,12 +247,12 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 출근길은 어때요?",
+    "content": "오늘 외출하셨나요? 외출하셨다면 특별한 일 있었나요?",
     "category": "일상",
     "tags": [
-      "출근",
+      "외출",
       "일상",
-      "직장"
+      "특별한 일"
     ],
     "subject_required": false,
     "reuse_scope": null,
@@ -325,7 +323,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 집에서 가장 좋아하는 공간은?",
+    "content": "집에서 가장 좋아하는 공간은 어디인가요?",
     "category": "일상",
     "tags": [
       "집",
@@ -344,12 +342,12 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "최근에 읽은 책이나 기사가 있나요?",
-    "category": "취미",
+    "content": "최근에 새롭게 알게 된 재미있는 사실이 있나요?",
+    "category": "일상",
     "tags": [
-      "독서",
-      "책",
-      "학습"
+      "정보",
+      "학습",
+      "관심사"
     ],
     "subject_required": false,
     "reuse_scope": null,
@@ -409,22 +407,16 @@
       "추억"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "그리운",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "첫 월급 받았을 때 기분이 어땠어요?",
+    "content": "어렸을 때 기억 중 가장 뿌듯한 순간이 언제였나요",
     "category": "추억",
     "tags": [
-      "첫월급",
-      "직장",
+      "뿌듯한 순간",
+      "기억",
       "추억"
     ],
     "subject_required": false,
@@ -439,21 +431,14 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "처음 혼자 여행 갔을 때 어디로 갔나요?",
+    "content": "처음 여행 갔을 때 어디로 갔나요?",
     "category": "추억",
     "tags": [
       "여행",
-      "혼자",
       "추억"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -466,18 +451,12 @@
       "추억"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "친근한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "학교 다닐 때 가장 좋아한 과목은?",
+    "content": "학교 다닐 때 가장 좋아한 과목은 무엇인가요?",
     "category": "추억",
     "tags": [
       "학교",
@@ -485,32 +464,20 @@
       "추억"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "20대 때 가장 열정적이었던 순간은?",
+    "content": "인생에서 가장 열정적이었던 순간은 언제였나요?",
     "category": "추억",
     "tags": [
-      "20대",
       "열정",
+      "순간",
       "추억"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "격려하는",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -523,32 +490,19 @@
       "추억"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "첫사랑 생각나는 순간이 있나요?",
+    "content": "어렸을 떄 생각나는 순간이 있나요?",
     "category": "추억",
     "tags": [
-      "첫사랑",
-      "연애",
+      "어린 시절",
       "추억"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "그리운",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -561,18 +515,12 @@
       "직업"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "학창시절 가장 기억에 남는 선생님은?",
+    "content": "학창시절 가장 기억에 남는 선생님은 누구인가요?",
     "category": "추억",
     "tags": [
       "학교",
@@ -580,37 +528,25 @@
       "추억"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "그리운",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "처음 운전했을 때 어땠어요?",
+    "content": "처음으로 무언가를 능숙하게 배웠을 때의 기분은 어땠나요?",
     "category": "추억",
     "tags": [
-      "운전",
-      "첫경험",
-      "추억"
+      "기술",
+      "배움",
+      "성취"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "친근한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "어릴 적 가장 좋아했던 간식은?",
+    "content": "어릴 적 가장 좋아했던 간식은 무엇인가요?",
     "category": "추억",
     "tags": [
       "어린시절",
@@ -618,70 +554,45 @@
       "음식"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "졸업 후 처음 취업했을 때 기분은?",
-    "category": "추억",
+    "content": "낯선 환경에 들어갔을 때 본인만의 방법이 있나요?",
+    "category": "감정",
     "tags": [
-      "취업",
-      "직장",
-      "추억"
+      "새로운 시작",
+      "환경",
+      "적응"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "20대 때 가장 후회되는 일이 있나요?",
+    "content": "인생에서 가장 후회되거나 아쉬운 결정이 있나요?",
     "category": "추억",
     "tags": [
-      "20대",
       "후회",
-      "반성"
+      "반성",
+      "결정"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "진지한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "처음 집 떠나 살 때 어땠어요?",
+    "content": "어릴적 동네는 어땠나요?",
     "category": "추억",
     "tags": [
-      "독립",
-      "집",
-      "추억"
+      "동네",
+      "어린시절"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -694,18 +605,12 @@
       "어린시절"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "그리운",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "학창시절 가장 떨렸던 순간은?",
+    "content": "학창시절 가장 떨렸던 순간은 언제인가요?",
     "category": "추억",
     "tags": [
       "학교",
@@ -713,13 +618,7 @@
       "추억"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -732,13 +631,7 @@
       "첫경험"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "밝은",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -751,13 +644,7 @@
       "장소"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "그리운",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -770,13 +657,7 @@
       "감정"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "따뜻한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -789,13 +670,7 @@
       "감정"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "따뜻한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -808,13 +683,7 @@
       "긍정"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "밝은",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -827,18 +696,12 @@
       "방법"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "걱정하는",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 감사한 사람이 있다면?",
+    "content": "요즘 감사한 사람이 있다면 누구인가요?",
     "category": "감정",
     "tags": [
       "감사",
@@ -846,13 +709,7 @@
       "관계"
     ],
     "subject_required": true,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "따뜻한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -865,13 +722,7 @@
       "소통"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -884,13 +735,7 @@
       "방법"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "걱정하는",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -903,13 +748,7 @@
       "시간"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "따뜻한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -922,13 +761,7 @@
       "감정"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "따뜻한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -941,13 +774,7 @@
       "관계"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -960,13 +787,7 @@
       "감정"
     ],
     "subject_required": true,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "따뜻한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -979,13 +800,7 @@
       "슬픔"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "걱정하는",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -998,13 +813,7 @@
       "의지"
     ],
     "subject_required": true,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "따뜻한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -1017,13 +826,7 @@
       "해소"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -1036,13 +839,7 @@
       "일상"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -1055,13 +852,7 @@
       "감정"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "진지한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -1074,13 +865,7 @@
       "감정"
     ],
     "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "밝은",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    "reuse_scope": null
   },
   {
     "id": null,
@@ -1091,34 +876,18 @@
       "미안함",
       "감정",
       "관계"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "진지한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 자신에게 해주고 싶은 말이 있다면?",
+    "content": "요즘 자신에게 해주고 싶은 말이 있다면 무엇인가요?",
     "category": "감정",
     "tags": [
       "자신",
       "격려",
       "감정"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "따뜻한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
@@ -1129,15 +898,7 @@
       "따뜻함",
       "관계",
       "감동"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "따뜻한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
@@ -1148,15 +909,7 @@
       "목표",
       "계획",
       "미래"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "격려하는",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
@@ -1167,15 +920,7 @@
       "미래",
       "상상",
       "계획"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
@@ -1186,72 +931,40 @@
       "여행",
       "꿈",
       "미래"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "밝은",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "은퇴 후 하고 싶은 일이 뭐예요?",
+    "content": "먼 미래에 어떤 삶을 살고 싶어요?",
     "category": "미래",
     "tags": [
-      "은퇴",
+      "노후",
       "계획",
       "미래"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "새로 배우고 싶은 게 있다면?",
+    "content": "새로 배우고 싶은 게 있다면 무엇인가요?",
     "category": "미래",
     "tags": [
       "배움",
       "도전",
       "미래"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "격려하는",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "버킷리스트 중 가장 먼저 하고 싶은 건?",
+    "content": "버킷리스트 중 가장 먼저 하고 싶은 건 무엇인가요?",
     "category": "미래",
     "tags": [
       "버킷리스트",
       "꿈",
       "계획"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "밝은",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
@@ -1262,15 +975,7 @@
       "미래",
       "성장",
       "꿈"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "진지한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
@@ -1281,15 +986,7 @@
       "목표",
       "계획",
       "올해"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "격려하는",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
@@ -1300,15 +997,7 @@
       "도시",
       "이사",
       "꿈"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
@@ -1319,34 +1008,7 @@
       "자녀",
       "가족",
       "미래"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "따뜻한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
-  },
-  {
-    "id": null,
-    "owner_family_id": null,
-    "content": "노후에 어떤 삶을 살고 싶어요?",
-    "category": "미래",
-    "tags": [
-      "노후",
-      "계획",
-      "미래"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
@@ -1357,15 +1019,7 @@
       "취미",
       "도전",
       "미래"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "밝은",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
@@ -1376,15 +1030,7 @@
       "변화",
       "성장",
       "미래"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "격려하는",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
@@ -1395,34 +1041,18 @@
       "도전",
       "꿈",
       "미래"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "격려하는",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "미래의 자신에게 해주고 싶은 말은?",
+    "content": "미래의 자신에게 해주고 싶은 말은 무엇인가요?",
     "category": "미래",
     "tags": [
       "자신",
       "미래",
       "격려"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "따뜻한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
@@ -1433,15 +1063,7 @@
       "취미",
       "여가",
       "일상"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
@@ -1452,15 +1074,7 @@
       "휴일",
       "여가",
       "취미"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "밝은",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
@@ -1471,34 +1085,18 @@
       "운동",
       "활동",
       "시작"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "격려하는",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 가장 즐겨보는 유튜브 채널은?",
+    "content": "요즘 가장 즐겨보는 유튜브 채널은 무엇인가요?",
     "category": "취미",
     "tags": [
       "유튜브",
       "영상",
       "취미"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "친근한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
@@ -1509,34 +1107,18 @@
       "스트레스",
       "활동",
       "해소"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "최근에 갔던 전시회나 공연이 있나요?",
+    "content": "가족과 함께하고싶은 활동이 있나요?",
     "category": "취미",
     "tags": [
-      "전시회",
-      "공연",
-      "문화"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+      "가족",
+      "활동",
+      "취미"
+    ]
   },
   {
     "id": null,
@@ -1547,15 +1129,7 @@
       "게임",
       "취미",
       "여가"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "친근한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
@@ -1566,15 +1140,7 @@
       "주말",
       "장소",
       "여가"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
@@ -1585,34 +1151,18 @@
       "맛집",
       "음식",
       "외식"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "밝은",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 관심 있는 분야가 있다면?",
+    "content": "요즘 관심 있는 분야가 있다면 무엇인가요?",
     "category": "취미",
     "tags": [
       "관심",
       "분야",
       "학습"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
@@ -1623,15 +1173,7 @@
       "혼자",
       "시간",
       "취미"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
@@ -1642,53 +1184,28 @@
       "사진",
       "장소",
       "취미"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 자주 듣는 팟캐스트나 라디오 있어요?",
+    "content": "새로 가지고 싶은 취미가 있나요?",
     "category": "취미",
     "tags": [
-      "팟캐스트",
-      "라디오",
-      "취미"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "친근한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+      "취미",
+      "도전"
+    ]
   },
   {
     "id": null,
     "owner_family_id": null,
-    "content": "집에서 가장 자주 하는 취미는?",
+    "content": "집에서 가장 자주 하는 취미는 무엇인가요?",
     "category": "취미",
     "tags": [
       "집",
       "취미",
       "일상"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   },
   {
     "id": null,
@@ -1699,204 +1216,6 @@
       "운동",
       "스포츠",
       "건강"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "격려하는",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
-  },
-  {
-    "id": null,
-    "owner_family_id": null,
-    "content": "가족과 마지막으로 함께한 게 언제예요?",
-    "category": "가족",
-    "tags": [
-      "가족",
-      "시간",
-      "추억"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "따뜻한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
-  },
-  {
-    "id": null,
-    "owner_family_id": null,
-    "content": "부모님께 최근에 연락드렸나요?",
-    "category": "가족",
-    "tags": [
-      "부모님",
-      "연락",
-      "가족"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "따뜻한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
-  },
-  {
-    "id": null,
-    "owner_family_id": null,
-    "content": "형제자매 중 가장 닮은 사람은 누구예요?",
-    "category": "가족",
-    "tags": [
-      "형제",
-      "자매",
-      "가족"
-    ],
-    "subject_required": true,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
-  },
-  {
-    "id": null,
-    "owner_family_id": null,
-    "content": "가족들과 가장 자주 나누는 대화 주제는?",
-    "category": "가족",
-    "tags": [
-      "가족",
-      "대화",
-      "소통"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
-  },
-  {
-    "id": null,
-    "owner_family_id": null,
-    "content": "명절이나 가족 모임은 어떻게 보내요?",
-    "category": "가족",
-    "tags": [
-      "명절",
-      "모임",
-      "가족"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "편안한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
-  },
-  {
-    "id": null,
-    "owner_family_id": null,
-    "content": "부모님께 배운 것 중 가장 소중한 건?",
-    "category": "가족",
-    "tags": [
-      "부모님",
-      "배움",
-      "가르침"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "따뜻한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
-  },
-  {
-    "id": null,
-    "owner_family_id": null,
-    "content": "가족에게 감사한 순간이 있었나요?",
-    "category": "가족",
-    "tags": [
-      "가족",
-      "감사",
-      "감정"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "따뜻한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
-  },
-  {
-    "id": null,
-    "owner_family_id": null,
-    "content": "가족들과 함께하고 싶은 여행지가 있나요?",
-    "category": "가족",
-    "tags": [
-      "가족",
-      "여행",
-      "계획"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "밝은",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
-  },
-  {
-    "id": null,
-    "owner_family_id": null,
-    "content": "어릴 적 가족과의 추억 중 가장 특별한 건?",
-    "category": "가족",
-    "tags": [
-      "가족",
-      "추억",
-      "어린시절"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "그리운",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
-  },
-  {
-    "id": null,
-    "owner_family_id": null,
-    "content": "가족에게 하고 싶은 말이 있다면?",
-    "category": "가족",
-    "tags": [
-      "가족",
-      "소통",
-      "감정"
-    ],
-    "subject_required": false,
-    "reuse_scope": null,
-    "cooldown_days": null,
-    "language": "ko",
-    "tone": "따뜻한",
-    "is_active": true,
-    "archived_at": null,
-    "created_at": null
+    ]
   }
 ]

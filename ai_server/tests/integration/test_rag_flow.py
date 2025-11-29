@@ -46,7 +46,7 @@ class TestRAGFlow:
                         "answerText": answer,
                         "questionCategory": "일상"
                     },
-                    timeout=30.0
+                    timeout=90.0  # EC2 + gpt-5-nano 고려 (30→90초)
                 )
                 
                 assert response.status_code == 200
@@ -75,7 +75,7 @@ class TestRAGFlow:
                     "subjectMemberId": test_user_id,
                     "useRag": True  # RAG 활성화 (과거 5개 답변 활용)
                 },
-                timeout=30.0
+                timeout=60.0  # RAG 검색 + 질문 생성 고려
             )
             
             assert response.status_code == 200
@@ -120,7 +120,7 @@ class TestRAGFlow:
                     "subjectMemberId": new_user_id,
                     "useRag": True  # RAG 요청하지만 답변 없어서 비활성화
                 },
-                timeout=30.0
+                timeout=60.0
             )
             
             assert response.status_code == 200
