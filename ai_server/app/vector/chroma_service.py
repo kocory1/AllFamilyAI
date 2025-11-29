@@ -141,10 +141,17 @@ class ChromaVectorService(VectorService):
             )
             query_embedding = response.data[0].embedding
             
-            # 2. 필터 구성
-            where_filter = {"user_id": user_id}
+            # 2. 필터 구성 (ChromaDB 0.4+ 버전 호환)
+            # 여러 조건은 $and 연산자로 명시
             if category:
-                where_filter["category"] = category
+                where_filter = {
+                    "$and": [
+                        {"user_id": user_id},
+                        {"category": category}
+                    ]
+                }
+            else:
+                where_filter = {"user_id": user_id}
             
             # 3. 유사도 검색
             results = self.collection.query(
