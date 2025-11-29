@@ -26,7 +26,7 @@ class OpenAIAnswerAnalyzer(AnswerAnalyzer):
 
         params = {
             "model": settings.default_model,
-            "max_completion_tokens": 3000,  # reasoning 모델은 내부 사고에 토큰을 많이 사용
+            "max_completion_tokens": 10000,  # GPT-5 추론 모델: reasoning(사고) + content(출력) 모두 포함
             "language": request.language,
             "top_k": 5,
             "thresholds": {"toxicity": 0.6},

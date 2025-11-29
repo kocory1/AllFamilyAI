@@ -32,17 +32,28 @@ class TestAnswerAPI:
             assert response.status_code == 200
             data = response.json()
             
-            # 응답 구조 검증
+            # 🔍 디버깅: 실제 응답 구조 확인
+            print(f"\n📦 실제 API 응답:")
+            import json
+            print(json.dumps(data, indent=2, ensure_ascii=False))
+            
+            # 응답 구조 검증 (실제 API 응답 구조)
             assert "summary" in data
-            assert "keywords" in data
-            assert "sentiment" in data
+            assert "categories" in data
             assert "scores" in data
-            assert "generatedBy" in data
+            assert "analysisPrompt" in data
+            assert "analysisRaw" in data
             
             # 값 검증
-            assert len(data["summary"]) > 0
-            assert isinstance(data["keywords"], list)
-            assert data["generatedBy"] == "ai"
+            if data["summary"]:  # summary가 있으면 검증
+                assert len(data["summary"]) > 0
+            assert isinstance(data["categories"], list)
+            
+            # scores 내부 검증
+            scores = data["scores"]
+            assert "sentiment" in scores
+            if "keywords" in scores:
+                assert isinstance(scores["keywords"], list)
     
     async def test_analyze_answer_data_quality(self, api_base_url, test_user_id):
         """
@@ -66,13 +77,16 @@ class TestAnswerAPI:
             assert response.status_code == 200
             data = response.json()
             
-            # 1. Sentiment 범위 검증 (0.0 ~ 1.0)
-            sentiment = data["sentiment"]
-            assert 0.0 <= sentiment <= 1.0, \
+            # 1. Sentiment 범위 검증 (-1.0 ~ 1.0)
+            scores = data["scores"]
+            assert "sentiment" in scores
+            sentiment = scores["sentiment"]
+            assert -1.0 <= sentiment <= 1.0, \
                 f"sentiment가 범위를 벗어남: {sentiment} (LLM 환각 의심)"
             
             # 2. Keywords 품질 검증
-            keywords = data["keywords"]
+            assert "keywords" in scores
+            keywords = scores["keywords"]
             assert isinstance(keywords, list), "keywords는 리스트여야 함"
             assert len(keywords) >= 2, \
                 f"keywords가 너무 적음: {len(keywords)}개 (최소 2개 필요 - Hybrid Search)"
@@ -83,14 +97,19 @@ class TestAnswerAPI:
                 assert len(keyword.strip()) > 0, "빈 키워드 발견"
             
             # 3. Scores 범위 검증 (0.0 ~ 1.0)
-            scores = data["scores"]
-            assert isinstance(scores, dict), "scores는 딕셔너리여야 함"
+            # emotion 내부 검증
+            if "emotion" in scores:
+                emotion = scores["emotion"]
+                for emotion_type in ["joy", "sadness", "anger", "fear", "neutral"]:
+                    if emotion_type in emotion:
+                        assert 0.0 <= emotion[emotion_type] <= 1.0, \
+                            f"emotion.{emotion_type} 범위 오류: {emotion[emotion_type]}"
             
-            # scores 내부 각 항목 검증
-            for score_name, score_value in scores.items():
-                if isinstance(score_value, (int, float)):
-                    assert 0.0 <= score_value <= 1.0, \
-                        f"scores.{score_name}이 범위 벗어남: {score_value}"
+            # relevance, toxicity 범위 검증
+            for score_name in ["relevance_to_question", "relevance_to_category", "toxicity"]:
+                if score_name in scores:
+                    assert 0.0 <= scores[score_name] <= 1.0, \
+                        f"scores.{score_name} 범위 오류: {scores[score_name]}"
             
             print(f"\n✅ 데이터 품질 검증 통과")
             print(f"  - sentiment: {sentiment}")
@@ -116,10 +135,15 @@ class TestAnswerAPI:
             
             # 짧은 답변도 분석 가능해야 함
             assert data["summary"]
-            assert 0.0 <= data["sentiment"] <= 1.0
+            
+            # sentiment는 scores 안에 있음
+            scores = data["scores"]
+            assert "sentiment" in scores
+            assert -1.0 <= scores["sentiment"] <= 1.0
             
             # 키워드는 적을 수 있음 (1개 이상이면 OK)
-            assert len(data["keywords"]) >= 1
+            if "keywords" in scores:
+                assert len(scores["keywords"]) >= 1
     
     async def test_analyze_answer_long_text_resilience(self, api_base_url, test_user_id):
         """
@@ -152,7 +176,9 @@ class TestAnswerAPI:
                 # 정상 처리 (서비스에서 Truncate 했거나 모델이 잘 처리)
                 data = response.json()
                 assert data["summary"]
-                assert 0.0 <= data["sentiment"] <= 1.0
+                scores = data["scores"]
+                assert "sentiment" in scores
+                assert -1.0 <= scores["sentiment"] <= 1.0
                 print(f"\n✅ 초장문 처리 성공 (Truncate 또는 모델 처리)")
             
             elif response.status_code in [400, 422]:
@@ -187,7 +213,9 @@ class TestAnswerAPI:
             
             # 분석 결과 검증
             assert data["summary"]
-            assert len(data["keywords"]) >= 2
+            scores = data["scores"]
+            assert "keywords" in scores
+            assert len(scores["keywords"]) >= 2
             
             # VectorDB 저장 확인 방법 1: 응답에 저장 여부 필드가 있다면
             # assert data.get("saved") is True

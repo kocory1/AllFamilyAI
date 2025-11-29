@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     
     # AI 모델 설정
     default_model: str = "gpt-5-nano"  
-    max_tokens: int = 2000  # reasoning 모델은 내부 사고에 토큰을 많이 사용하므로 여유있게 설정
+    max_tokens: int = 10000  # GPT-5 추론 모델: reasoning(사고) + content(출력) 모두 포함
     temperature: float = 0.8
     
     # 질문 생성 설정

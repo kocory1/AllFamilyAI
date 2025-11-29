@@ -150,8 +150,15 @@ async def cleanup_test_data(test_user_id):
     
     # 테스트 종료 후 cleanup (Integration 테스트만)
     try:
-        # 환경 체크 (유닛 테스트 환경 회피)
+        # 원격 테스트 감지 (EC2 등 원격 서버 테스트 시 cleanup 스킵)
         import os
+        test_api_url = os.getenv('TEST_API_URL', 'http://localhost:8000/api/v1')
+        if 'localhost' not in test_api_url and '127.0.0.1' not in test_api_url:
+            print(f"\n[Cleanup 스킵] 원격 테스트 환경 감지: {test_api_url}")
+            print("   💡 Tip: 테스트 데이터는 'test_user_', 'test_rag_' 접두사로 구분됩니다.")
+            return
+        
+        # 환경 체크 (유닛 테스트 환경 회피)
         chroma_dir = os.getenv('CHROMA_PERSIST_DIRECTORY')
         if not chroma_dir or chroma_dir == '/tmp/chroma_test':
             # 유닛 테스트 환경 (Mock 환경) - cleanup 스킵
@@ -199,8 +206,15 @@ async def cleanup_test_data(test_user_id):
 
 @pytest.fixture
 def api_base_url():
-    """API 기본 URL (Integration 테스트용)"""
-    return "http://localhost:8000/api/v1"
+    """
+    API 기본 URL (Integration 테스트용)
+    
+    환경변수 TEST_API_URL로 원격 서버 지정 가능:
+    - 로컬: export TEST_API_URL=http://localhost:8000/api/v1
+    - 원격: export TEST_API_URL=http://3.38.113.60/api/v1
+    """
+    import os
+    return os.getenv("TEST_API_URL", "http://localhost:8000/api/v1")
 
 
 # ====================
