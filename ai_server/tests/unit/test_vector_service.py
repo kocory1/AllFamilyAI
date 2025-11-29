@@ -152,10 +152,23 @@ class TestVectorService:
             category="일상"
         )
         
-        # 검증: where 필터에 category 포함 확인
+        # 검증: where 필터가 $and 연산자로 구성되었는지 확인 (ChromaDB 0.4+)
         call_args = service.collection.query.call_args
-        assert 'category' in call_args.kwargs['where']
-        assert call_args.kwargs['where']['category'] == "일상"
+        where_filter = call_args.kwargs['where']
+        
+        # $and 연산자 사용 확인
+        assert '$and' in where_filter
+        and_conditions = where_filter['$and']
+        assert len(and_conditions) == 2
+        
+        # user_id와 category 조건 확인
+        user_condition = next((c for c in and_conditions if 'user_id' in c), None)
+        category_condition = next((c for c in and_conditions if 'category' in c), None)
+        
+        assert user_condition is not None
+        assert user_condition['user_id'] == test_user_id
+        assert category_condition is not None
+        assert category_condition['category'] == "일상"
     
     def test_collection_count(self, service, test_user_id):
         """[성공] 컬렉션 카운트 조회"""
