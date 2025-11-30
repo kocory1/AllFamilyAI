@@ -158,11 +158,11 @@ class OpenAIQuestionGenerator(QuestionGenerator):
         
         lines.append("")
         lines.append("👉 팔로업 전략:")
-        lines.append("- 키워드를 직접 언급하지 말고 자연스럽게 우회하기")
-        lines.append("- 부정적 감정이면 긍정적 주제로 전환하기")
-        lines.append("- 긍정적이면 살짝만 더 파고드는 심화 질문 생성")
-        lines.append("- 무겁거나 형식적인 질문 금지")
-        lines.append("- 가볍고 일상적인 질문으로 대화 이어가기")
+        lines.append("- 답변에 구체적인 고유명사(영화/노래 제목, 장소, 브랜드 등)가 있다면 반드시 그것에 대해 구체적으로 물어보세요.")
+        lines.append("- 예: '헌터헌터 오프닝' -> '오, 그 애니 재밌나요?' 또는 '어떤 버전 오프닝 좋아하세요?'")
+        lines.append("- ❌ 절대 금지: 구체적인 답변을 무시하고 다시 '노래'나 '취미' 같은 큰 범주로 질문하기")
+        lines.append("- 긍정적 감정이면 그 주제를 더 깊이 파고드세요.")
+        lines.append("- 부정적 감정이면 화제를 자연스럽게 전환하세요.")
         lines.append("")
         
         return "\n".join(lines)
@@ -176,7 +176,7 @@ class OpenAIQuestionGenerator(QuestionGenerator):
         lines.append("3) ⚠️ 금지 표현:")
         lines.append("   - 형식적: '떠올리시고', '말씀해 주세요', '자세히', '구체적으로'")
         lines.append("   - 무거움: '순간', '기억', '떠오르나요', '느꼈나요'")
-        lines.append("   - 키워드 직접 언급: 답변에 나온 단어를 그대로 질문에 넣지 말기")
+        lines.append("   - 앵무새 화법: 답변을 단순히 따라하지 마세요. (단, 구체적인 고유명사는 언급해도 좋습니다)")
         lines.append("4) 물음표(?)로 끝나야 합니다")
         lines.append("")
         
@@ -236,8 +236,9 @@ class OpenAIQuestionGenerator(QuestionGenerator):
         # 예시 (팔로업 모드일 때만)
         if request.answer_analysis and request.answer_analysis.keywords:
             lines.append("📝 변환 예시:")
-            lines.append("  → ❌ 나쁨: '유학 생활은 어떠셨나요?' (키워드 직접 언급)")
-            lines.append("  → ✅ 좋음: '유학에서 재밌었던 일 있어요?' (주제에 대한 긍정적 전환)")
+            lines.append("  → 답변: '헌터헌터 오프닝 듣는 중'")
+            lines.append("  → ❌ 나쁨: '가장 좋아하는 노래가 뭔가요?' (구체적 내용 무시)")
+            lines.append("  → ✅ 좋음: '오, 헌터헌터! 구작이랑 신작 중에 어떤 거 보세요?' (구체적 관심)")
             lines.append("")
         
         lines.append("위 가이드라인을 따라 자연스러운 질문 1개만 생성하세요:")
@@ -262,10 +263,11 @@ class OpenAIQuestionGenerator(QuestionGenerator):
                         "카톡으로 가족에게 '요즘 어때?', '재밌는 일 있어?' 묻듯이 가볍고 자연스럽게 질문하세요. "
                         "\n\n"
                         "절대 하지 말아야 할 것: "
-                        "1) 답변의 키워드를 그대로 질문에 넣기 "
-                        "2) 무겁거나 형식적인 표현 ('순간', '기억', '떠오르나요') "
-                        "3) 심리상담 같은 질문 ('어떤 감정이', '어떤 의미가') "
-                        "4) 부정적 감정을 계속 파고들기"
+                        "1) 구체적인 고유명사가 나왔는데 뜬금없이 포괄적인 질문으로 돌아가기 "
+                        "2) 앵무새처럼 답변 내용을 그대로 읊기 "
+                        "3) 무겁거나 형식적인 표현 ('순간', '기억', '떠오르나요') "
+                        "4) 심리상담 같은 질문 ('어떤 감정이', '어떤 의미가') "
+                        "5) 부정적 감정을 계속 파고들기"
                     ),
                 },
                 {"role": "user", "content": prompt},
