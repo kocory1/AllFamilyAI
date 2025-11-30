@@ -126,6 +126,7 @@ class TestAnswerModels:
             "analysisVersion": "ans-v1.0",
             "summary": "친구와의 저녁 식사",
             "categories": ["일상", "식사"],
+            "keywords": ["친구", "저녁"],
             "scores": {
                 "sentiment": 0.8,
                 "toxicity": 0.1

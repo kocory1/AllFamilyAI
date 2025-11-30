@@ -30,6 +30,7 @@ class TestAnswerAnalyzer:
         return """{
   "summary": "가족과 등산을 다녀온 즐거운 경험",
   "categories": ["일상", "가족", "운동"],
+  "keywords": ["등산", "가족", "즐거움"],
   "scores": {
     "sentiment": 0.8,
     "emotion": {
@@ -64,6 +65,8 @@ class TestAnswerAnalyzer:
         # 3. 검증
         assert result.summary == "가족과 등산을 다녀온 즐거운 경험"
         assert "일상" in result.categories or "가족" in result.categories
+        assert len(result.keywords) >= 2  # keywords는 최상위 필드
+        assert "등산" in result.keywords or "가족" in result.keywords
         
         # ScoreSanitizer가 처리한 scores 검증
         assert result.scores["sentiment"] == 0.8
@@ -99,6 +102,7 @@ class TestAnswerAnalyzer:
 {
   "summary": "테스트 요약",
   "categories": ["테스트"],
+  "keywords": ["테스트", "키워드"],
   "scores": {
     "sentiment": 0.6,
     "toxicity": 0.1
@@ -119,6 +123,7 @@ class TestAnswerAnalyzer:
         assert result.summary == "테스트 요약"
         assert result.analysis_raw.parseOk is True
         assert result.scores["sentiment"] == 0.6
+        assert len(result.keywords) >= 1
     
     def test_build_prompt(self, analyzer, sample_answer_request):
         """프롬프트 생성 테스트"""
@@ -142,6 +147,7 @@ class TestAnswerAnalyzer:
         # 파싱 실패해도 응답 객체는 생성되어야 함
         assert result.summary == ""
         assert result.categories == []
+        assert result.keywords == []
         assert result.analysis_raw.parseOk is False
 
 
@@ -157,20 +163,22 @@ class TestAnswerAnalyzerEdgeCases:
     
     async def test_analyze_with_empty_categories(self, analyzer, sample_answer_request):
         """[엣지] 카테고리가 빈 배열인 경우"""
-        analyzer.client.chat_completion.return_value = '{"summary": "요약", "categories": [], "scores": {}}'
+        analyzer.client.chat_completion.return_value = '{"summary": "요약", "categories": [], "keywords": [], "scores": {}}'
         
         request = AnswerAnalysisRequest(**sample_answer_request)
         result = await analyzer.analyze(request)
         
         assert result.categories == []
+        assert result.keywords == []
         assert result.summary == "요약"
     
     async def test_analyze_with_missing_scores(self, analyzer, sample_answer_request):
         """[엣지] scores가 누락된 경우"""
-        analyzer.client.chat_completion.return_value = '{"summary": "테스트", "categories": ["일상"]}'
+        analyzer.client.chat_completion.return_value = '{"summary": "테스트", "categories": ["일상"], "keywords": ["테스트"]}'
         
         request = AnswerAnalysisRequest(**sample_answer_request)
         result = await analyzer.analyze(request)
         
         assert result.scores == {}
         assert result.summary == "테스트"
+        assert len(result.keywords) >= 1

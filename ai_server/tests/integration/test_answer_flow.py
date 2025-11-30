@@ -40,6 +40,7 @@ class TestAnswerAPI:
             # 응답 구조 검증 (실제 API 응답 구조)
             assert "summary" in data
             assert "categories" in data
+            assert "keywords" in data
             assert "scores" in data
             assert "analysisPrompt" in data
             assert "analysisRaw" in data
@@ -48,12 +49,11 @@ class TestAnswerAPI:
             if data["summary"]:  # summary가 있으면 검증
                 assert len(data["summary"]) > 0
             assert isinstance(data["categories"], list)
+            assert isinstance(data["keywords"], list)
             
             # scores 내부 검증
             scores = data["scores"]
             assert "sentiment" in scores
-            if "keywords" in scores:
-                assert isinstance(scores["keywords"], list)
     
     async def test_analyze_answer_data_quality(self, api_base_url, test_user_id):
         """
@@ -85,8 +85,8 @@ class TestAnswerAPI:
                 f"sentiment가 범위를 벗어남: {sentiment} (LLM 환각 의심)"
             
             # 2. Keywords 품질 검증
-            assert "keywords" in scores
-            keywords = scores["keywords"]
+            assert "keywords" in data
+            keywords = data["keywords"]
             assert isinstance(keywords, list), "keywords는 리스트여야 함"
             assert len(keywords) >= 2, \
                 f"keywords가 너무 적음: {len(keywords)}개 (최소 2개 필요 - Hybrid Search)"
@@ -142,8 +142,8 @@ class TestAnswerAPI:
             assert -1.0 <= scores["sentiment"] <= 1.0
             
             # 키워드는 적을 수 있음 (1개 이상이면 OK)
-            if "keywords" in scores:
-                assert len(scores["keywords"]) >= 1
+            if "keywords" in data:
+                assert len(data["keywords"]) >= 1
     
     async def test_analyze_answer_long_text_resilience(self, api_base_url, test_user_id):
         """
@@ -213,9 +213,8 @@ class TestAnswerAPI:
             
             # 분석 결과 검증
             assert data["summary"]
-            scores = data["scores"]
-            assert "keywords" in scores
-            assert len(scores["keywords"]) >= 2
+            assert "keywords" in data
+            assert len(data["keywords"]) >= 2
             
             # VectorDB 저장 확인 방법 1: 응답에 저장 여부 필드가 있다면
             # assert data.get("saved") is True

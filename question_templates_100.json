@@ -2,7 +2,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "오늘 하루 중 가장 기억에 남는 순간은?",
+    "content": "오늘 하루 중 가장 기억에 남는 순간은 무엇인가요?",
     "category": "일상",
     "tags": [
       "하루",
@@ -21,7 +21,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 아침에 일어나면 제일 먼저 뭐해요?",
+    "content": "요즘 아침에 일어나시면 제일 먼저 무엇을 하시나요?",
     "category": "일상",
     "tags": [
       "아침",
@@ -40,7 +40,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "최근에 맛있게 먹은 음식이 있나요?",
+    "content": "최근에 맛있게 드신 음식이 있으신가요?",
     "category": "일상",
     "tags": [
       "음식",
@@ -59,7 +59,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 주말은 주로 어떻게 보내요?",
+    "content": "요즘 주말은 주로 어떻게 보내시나요?",
     "category": "일상",
     "tags": [
       "주말",
@@ -78,7 +78,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "오늘 가장 웃었던 순간이 언제예요?",
+    "content": "오늘 가장 크게 웃었던 순간은 언제였나요?",
     "category": "일상",
     "tags": [
       "웃음",
@@ -97,7 +97,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 외출하거나 이동할 때 뭐하며 시간 보내요?",
+    "content": "요즘 외출하시거나 이동하실 때 뭐하며 시간을 보내시나요?",
     "category": "일상",
     "tags": [
       "이동",
@@ -116,7 +116,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "나도 모르게 하는 습관이 있나요?",
+    "content": "나도 모르게 하는 습관이 있으신가요?",
     "category": "일상",
     "tags": [
       "습관"
@@ -133,7 +133,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 저녁 시간은 어떻게 보내요?",
+    "content": "요즘 저녁 시간은 어떻게 보내고 계신가요?",
     "category": "일상",
     "tags": [
       "저녁",
@@ -152,7 +152,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "오늘 날씨 어때요? 좋아하는 날씨인가요?",
+    "content": "오늘 날씨는 어떤가요? 좋아하는 날씨이신가요?",
     "category": "일상",
     "tags": [
       "날씨",
@@ -171,7 +171,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 즐겨 듣는 노래가 있어요?",
+    "content": "요즘 즐겨 들으시는 노래가 있으신가요?",
     "category": "취미",
     "tags": [
       "음악",
@@ -190,7 +190,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "최근에 본 영화나 드라마 중 재밌었던 거 있어요?",
+    "content": "최근에 보신 영화나 드라마 중 재밌었던 것이 있으신가요?",
     "category": "취미",
     "tags": [
       "영화",
@@ -209,7 +209,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요새 잠은 잘 오나요?",
+    "content": "요새 잠은 잘 주무시고 계신가요?",
     "category": "일상",
     "tags": [
       "수면",
@@ -228,7 +228,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "오늘 점심은 뭐 먹었어요?",
+    "content": "오늘 점심은 무엇을 드셨나요?",
     "category": "일상",
     "tags": [
       "음식",
@@ -247,12 +247,12 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "오늘 외출하셨나요? 외출하셨다면 특별한 일 있었나요?",
+    "content": "오늘 외출/등교/출근하시는 길은 어떠셨나요?",
     "category": "일상",
     "tags": [
-      "외출",
+      "출근",
       "일상",
-      "특별한 일"
+      "직장"
     ],
     "subject_required": false,
     "reuse_scope": null,
@@ -266,7 +266,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "최근에 산 물건 중 가장 만족스러운 게 뭐예요?",
+    "content": "최근에 산 물건 중 가장 만족스러운 것은 무엇인가요?",
     "category": "일상",
     "tags": [
       "쇼핑",
@@ -285,7 +285,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 몸 상태는 어때요?",
+    "content": "요즘 몸 상태는 어떠신가요?",
     "category": "일상",
     "tags": [
       "건강",
@@ -304,7 +304,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "오늘 날씨에 어울리는 음식이 뭘까요?",
+    "content": "오늘 날씨에 어울리는 음식이 무엇일까요?",
     "category": "일상",
     "tags": [
       "날씨",
@@ -342,7 +342,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "최근에 새롭게 알게 된 재미있는 사실이 있나요?",
+    "content": "최근에 새롭게 알게 된 재미있는 사실이 있으신가요?",
     "category": "일상",
     "tags": [
       "정보",
@@ -361,7 +361,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 가장 기다려지는 시간이 언제예요?",
+    "content": "요즘 가장 기다려지는 시간은 언제인가요?",
     "category": "일상",
     "tags": [
       "기대",
@@ -380,7 +380,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "어릴 적 가장 좋아했던 놀이가 뭐였어요?",
+    "content": "어릴 적 가장 좋아했던 놀이는 무엇이었나요?",
     "category": "추억",
     "tags": [
       "어린시절",
@@ -399,7 +399,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "학창시절 가장 친했던 친구 생각나요?",
+    "content": "학창시절 가장 친했던 친구가 생각나시나요?",
     "category": "추억",
     "tags": [
       "학창시절",
@@ -412,11 +412,11 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "어렸을 때 기억 중 가장 뿌듯한 순간이 언제였나요",
+    "content": "처음으로 스스로 돈을 벌었을 때 기분은 어떠셨나요?",
     "category": "추억",
     "tags": [
-      "뿌듯한 순간",
-      "기억",
+      "첫경험",
+      "돈",
       "추억"
     ],
     "subject_required": false,
@@ -431,10 +431,11 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "처음 여행 갔을 때 어디로 갔나요?",
+    "content": "처음 혼자 여행 가보셨을 때 어디로 가셨나요?",
     "category": "추억",
     "tags": [
       "여행",
+      "혼자",
       "추억"
     ],
     "subject_required": false,
@@ -443,7 +444,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "어릴 적 가장 무서워했던 게 뭐예요?",
+    "content": "어릴 적 가장 무서워했던 것은 무엇인가요?",
     "category": "추억",
     "tags": [
       "어린시절",
@@ -456,7 +457,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "학교 다닐 때 가장 좋아한 과목은 무엇인가요?",
+    "content": "학교 다닐 때 가장 좋아한 과목은 무엇이었나요?",
     "category": "추억",
     "tags": [
       "학교",
@@ -482,7 +483,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "처음 배운 요리가 뭐였어요?",
+    "content": "처음 배운 요리가 무엇이었나요?",
     "category": "추억",
     "tags": [
       "요리",
@@ -495,7 +496,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "어렸을 떄 생각나는 순간이 있나요?",
+    "content": "어렸을 때 생각나는 순간이 있으신가요?",
     "category": "추억",
     "tags": [
       "어린 시절",
@@ -507,7 +508,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "어릴 적 꿈꿨던 직업이 뭐였어요?",
+    "content": "어릴 적 꿈꿨던 직업은 무엇이었나요?",
     "category": "추억",
     "tags": [
       "어린시절",
@@ -520,7 +521,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "학창시절 가장 기억에 남는 선생님은 누구인가요?",
+    "content": "학창시절 가장 기억에 남는 선생님은 누구이신가요?",
     "category": "추억",
     "tags": [
       "학교",
@@ -533,7 +534,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "처음으로 무언가를 능숙하게 배웠을 때의 기분은 어땠나요?",
+    "content": "처음으로 무언가를 능숙하게 배웠을 때의 기분은 어떠셨나요?",
     "category": "추억",
     "tags": [
       "기술",
@@ -546,7 +547,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "어릴 적 가장 좋아했던 간식은 무엇인가요?",
+    "content": "어릴 적 가장 좋아했던 간식은 무엇이었나요?",
     "category": "추억",
     "tags": [
       "어린시절",
@@ -559,7 +560,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "낯선 환경에 들어갔을 때 본인만의 방법이 있나요?",
+    "content": "낯선 환경에 들어섰을 때 본인만의 방법이 있나요?",
     "category": "감정",
     "tags": [
       "새로운 시작",
@@ -572,7 +573,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "인생에서 가장 후회되거나 아쉬운 결정이 있나요?",
+    "content": "인생에서 가장 후회되거나 아쉬운 결정이 있으신가요?",
     "category": "추억",
     "tags": [
       "후회",
@@ -585,7 +586,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "어릴적 동네는 어땠나요?",
+    "content": "어릴 적 동네는 어떠했나요?",
     "category": "추억",
     "tags": [
       "동네",
@@ -597,7 +598,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "어릴 적 여름방학 추억 중 기억나는 거 있어요?",
+    "content": "어릴 적 여름방학 추억 중 기억나는 것이 있으신가요?",
     "category": "추억",
     "tags": [
       "방학",
@@ -610,7 +611,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "학창시절 가장 떨렸던 순간은 언제인가요?",
+    "content": "학창시절 가장 떨렸던 순간은 언제였나요?",
     "category": "추억",
     "tags": [
       "학교",
@@ -623,7 +624,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "처음 해외여행 갔을 때 어디로 갔나요?",
+    "content": "처음 해외여행 가보셨을 때 어디로 가셨나요?",
     "category": "추억",
     "tags": [
       "여행",
@@ -649,7 +650,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 마음이 편안한 순간이 언제예요?",
+    "content": "요즘 마음이 편안한 순간은 언제인가요?",
     "category": "감정",
     "tags": [
       "마음",
@@ -662,7 +663,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "최근에 누군가에게 고마웠던 일이 있나요?",
+    "content": "최근에 누군가에게 고마움을 느꼈던 일이 있으신가요?",
     "category": "감정",
     "tags": [
       "감사",
@@ -675,7 +676,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 가장 행복한 순간은 언제예요?",
+    "content": "요즘 가장 행복한 순간은 언제인가요?",
     "category": "감정",
     "tags": [
       "행복",
@@ -688,7 +689,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "힘들 때 위로받는 방법이 있나요?",
+    "content": "힘들 때 위로를 받는 본인만의 방법이 있으신가요?",
     "category": "감정",
     "tags": [
       "위로",
@@ -701,7 +702,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 감사한 사람이 있다면 누구인가요?",
+    "content": "요즘 감사한 분이 있다면 누구이신가요?",
     "category": "감정",
     "tags": [
       "감사",
@@ -714,7 +715,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "최근에 누군가와 깊은 대화 나눈 적 있어요?",
+    "content": "최근에 누군가와 깊은 대화를 나눠보셨나요?",
     "category": "관계",
     "tags": [
       "대화",
@@ -727,7 +728,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 스트레스는 어떻게 풀어요?",
+    "content": "요즘 스트레스는 어떻게 해소하고 계신가요?",
     "category": "감정",
     "tags": [
       "스트레스",
@@ -740,7 +741,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "외로움을 느낄 때 뭐 하며 시간 보내요?",
+    "content": "외로움을 느낄 때 뭐 하며 시간을 보내시나요?",
     "category": "감정",
     "tags": [
       "외로움",
@@ -753,7 +754,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 가장 위로가 되는 말이 뭐예요?",
+    "content": "요즘 가장 위로가 되는 말씀이 무엇인가요?",
     "category": "감정",
     "tags": [
       "위로",
@@ -766,7 +767,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "친구들과는 얼마나 자주 만나요?",
+    "content": "친구분들과는 얼마나 자주 만나시나요?",
     "category": "관계",
     "tags": [
       "친구",
@@ -779,7 +780,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 누군가에게 하고 싶은 말이 있나요?",
+    "content": "요즘 누군가에게 하고 싶은 말씀이 있으신가요?",
     "category": "감정",
     "tags": [
       "소통",
@@ -792,7 +793,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "최근에 울었던 적이 있나요?",
+    "content": "최근에 눈물을 보이신 적이 있으신가요?",
     "category": "감정",
     "tags": [
       "눈물",
@@ -805,7 +806,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 가장 든든한 사람은 누구예요?",
+    "content": "요즘 가장 든든한 분은 누구이신가요?",
     "category": "관계",
     "tags": [
       "사람",
@@ -818,7 +819,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "화났을 때 어떻게 풀어요?",
+    "content": "화가 났을 때 어떻게 해소하고 계신가요?",
     "category": "감정",
     "tags": [
       "화",
@@ -831,7 +832,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 혼자만의 시간은 어떻게 보내요?",
+    "content": "요즘 혼자만의 시간은 어떻게 보내시나요?",
     "category": "일상",
     "tags": [
       "혼자",
@@ -844,7 +845,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "최근에 누군가를 용서한 일이 있나요?",
+    "content": "최근에 누군가를 용서하신 일이 있으신가요?",
     "category": "감정",
     "tags": [
       "용서",
@@ -857,7 +858,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 기분이 좋아지는 일이 뭐예요?",
+    "content": "요즘 기분이 좋아지는 일은 무엇인가요?",
     "category": "감정",
     "tags": [
       "기분",
@@ -870,7 +871,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "누군가에게 미안한 마음이 있나요?",
+    "content": "누군가에게 미안한 마음이 있으신가요?",
     "category": "감정",
     "tags": [
       "미안함",
@@ -881,7 +882,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 자신에게 해주고 싶은 말이 있다면 무엇인가요?",
+    "content": "요즘 자신에게 해주고 싶은 말씀이 있다면 무엇인가요?",
     "category": "감정",
     "tags": [
       "자신",
@@ -892,7 +893,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "최근에 누군가의 따뜻함을 느낀 적 있어요?",
+    "content": "최근에 누군가의 따뜻함을 느끼신 적 있으신가요?",
     "category": "관계",
     "tags": [
       "따뜻함",
@@ -903,7 +904,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "올해 꼭 이루고 싶은 목표가 있나요?",
+    "content": "올해 꼭 이루고 싶은 목표가 있으신가요?",
     "category": "미래",
     "tags": [
       "목표",
@@ -914,7 +915,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "5년 후 자신의 모습을 상상해본 적 있어요?",
+    "content": "5년 후 자신의 모습을 상상해 보셨나요?",
     "category": "미래",
     "tags": [
       "미래",
@@ -925,7 +926,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "언젠가 꼭 가보고 싶은 곳이 있나요?",
+    "content": "언젠가 꼭 가보고 싶은 곳이 있으신가요?",
     "category": "미래",
     "tags": [
       "여행",
@@ -936,7 +937,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "먼 미래에 어떤 삶을 살고 싶어요?",
+    "content": "먼 미래에 어떤 삶을 살고 싶으신가요?",
     "category": "미래",
     "tags": [
       "노후",
@@ -947,7 +948,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "새로 배우고 싶은 게 있다면 무엇인가요?",
+    "content": "새로 배우고 싶은 것이 있다면 무엇인가요?",
     "category": "미래",
     "tags": [
       "배움",
@@ -958,7 +959,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "버킷리스트 중 가장 먼저 하고 싶은 건 무엇인가요?",
+    "content": "버킷리스트 중 가장 먼저 하고 싶은 것은 무엇인가요?",
     "category": "미래",
     "tags": [
       "버킷리스트",
@@ -969,7 +970,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "10년 후 어떤 사람이 되고 싶어요?",
+    "content": "10년 후 어떤 사람이 되고 싶으신가요?",
     "category": "미래",
     "tags": [
       "미래",
@@ -980,7 +981,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "올해 안에 꼭 해보고 싶은 게 있나요?",
+    "content": "올해 안에 꼭 해보고 싶은 것이 있으신가요?",
     "category": "미래",
     "tags": [
       "목표",
@@ -991,7 +992,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "언젠가 살아보고 싶은 도시가 있나요?",
+    "content": "언젠가 살아보고 싶은 도시가 있으신가요?",
     "category": "미래",
     "tags": [
       "도시",
@@ -1002,7 +1003,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "나중에 자녀에게 해주고 싶은 말이 있나요?",
+    "content": "나중에 자녀에게 해주고 싶은 말씀이 있으신가요?",
     "category": "미래",
     "tags": [
       "자녀",
@@ -1013,7 +1014,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "새로운 취미를 시작한다면 뭘 해보고 싶어요?",
+    "content": "새로운 취미를 시작한다면 뭘 해보고 싶으신가요?",
     "category": "미래",
     "tags": [
       "취미",
@@ -1024,7 +1025,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "1년 뒤 지금보다 달라진 모습이 있을까요?",
+    "content": "1년 뒤 지금보다 달라진 모습이 있으신가요?",
     "category": "미래",
     "tags": [
       "변화",
@@ -1035,7 +1036,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "언젠가 꼭 도전하고 싶은 게 있나요?",
+    "content": "언젠가 꼭 도전하고 싶은 것이 있으신가요?",
     "category": "미래",
     "tags": [
       "도전",
@@ -1046,7 +1047,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "미래의 자신에게 해주고 싶은 말은 무엇인가요?",
+    "content": "미래의 자신에게 해주고 싶은 말씀은 무엇인가요?",
     "category": "미래",
     "tags": [
       "자신",
@@ -1057,7 +1058,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 취미생활은 뭐 하고 있어요?",
+    "content": "요즘 취미생활은 뭐 하고 계신가요?",
     "category": "취미",
     "tags": [
       "취미",
@@ -1068,7 +1069,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "쉬는 날 가장 하고 싶은 일이 뭐예요?",
+    "content": "쉬는 날 가장 하고 싶은 일이 무엇인가요?",
     "category": "취미",
     "tags": [
       "휴일",
@@ -1079,7 +1080,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "최근에 시작한 운동이나 활동이 있나요?",
+    "content": "최근에 시작한 운동이나 활동이 있으신가요?",
     "category": "취미",
     "tags": [
       "운동",
@@ -1101,7 +1102,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "스트레스 풀 때 즐겨하는 활동이 있나요?",
+    "content": "스트레스 풀 때 즐겨하시는 활동이 있으신가요?",
     "category": "취미",
     "tags": [
       "스트레스",
@@ -1112,7 +1113,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "가족과 함께하고싶은 활동이 있나요?",
+    "content": "가족과 함께하고 싶은 활동이 있으신가요?",
     "category": "취미",
     "tags": [
       "가족",
@@ -1123,7 +1124,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 빠져있는 게임이나 취미가 있어요?",
+    "content": "요즘 빠져있는 게임이나 취미가 있으신가요?",
     "category": "취미",
     "tags": [
       "게임",
@@ -1134,7 +1135,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "주말에 주로 어디 가는 걸 좋아해요?",
+    "content": "주말에 주로 어디 가시는 걸 좋아하세요?",
     "category": "취미",
     "tags": [
       "주말",
@@ -1145,7 +1146,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "최근에 새로 알게 된 맛집이 있나요?",
+    "content": "최근에 새로 알게 된 맛집이 있으신가요?",
     "category": "취미",
     "tags": [
       "맛집",
@@ -1167,7 +1168,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "혼자 시간 보낼 때 주로 뭐 해요?",
+    "content": "혼자 시간 보내실 때 주로 뭐 하시나요?",
     "category": "취미",
     "tags": [
       "혼자",
@@ -1178,7 +1179,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "최근에 사진 찍으러 간 곳이 있나요?",
+    "content": "최근에 사진 찍으러 가신 곳이 있으신가요?",
     "category": "취미",
     "tags": [
       "사진",
@@ -1189,7 +1190,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "새로 가지고 싶은 취미가 있나요?",
+    "content": "새로 가지고 싶은 취미가 있으신가요?",
     "category": "취미",
     "tags": [
       "취미",
@@ -1210,7 +1211,7 @@
   {
     "id": null,
     "owner_family_id": null,
-    "content": "요즘 관심 있는 운동이나 스포츠 있나요?",
+    "content": "요즘 관심 있는 운동이나 스포츠가 있으신가요?",
     "category": "취미",
     "tags": [
       "운동",

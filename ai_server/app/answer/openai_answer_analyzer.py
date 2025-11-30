@@ -53,6 +53,7 @@ class OpenAIAnswerAnalyzer(AnswerAnalyzer):
         parse_ok = False
         summary = ""
         categories = []
+        keywords = []
         scores = {}
 
         try:
@@ -60,6 +61,7 @@ class OpenAIAnswerAnalyzer(AnswerAnalyzer):
             parse_ok = True
             summary = data.get("summary") or ""
             categories = data.get("categories") or []
+            keywords = data.get("keywords") or []
             scores = data.get("scores") or {}
         except json.JSONDecodeError:
             try:
@@ -70,6 +72,7 @@ class OpenAIAnswerAnalyzer(AnswerAnalyzer):
                     parse_ok = True
                     summary = data.get("summary") or ""
                     categories = data.get("categories") or []
+                    keywords = data.get("keywords") or []
                     scores = data.get("scores") or {}
             except Exception:
                 pass
@@ -86,6 +89,7 @@ class OpenAIAnswerAnalyzer(AnswerAnalyzer):
             analysis_version=version,
             summary=summary,
             categories=categories,
+            keywords=keywords,
             scores=scores,
             created_at=datetime.now(),
         )
@@ -109,14 +113,14 @@ class OpenAIAnswerAnalyzer(AnswerAnalyzer):
 {{
   "summary": "string",  
   "categories": ["string"],
+  "keywords": ["string"],
   "scores": {{
     "sentiment": -1.0_to_1.0,
     "emotion": {{"joy": 0_to_1, "sadness": 0_to_1, "anger": 0_to_1, "fear": 0_to_1, "neutral": 0_to_1}},
     "relevance_to_question": 0_to_1,
     "relevance_to_category": 0_to_1,
     "toxicity": 0_to_1,
-    "length": int,
-    "keywords": ["string"]
+    "length": int
   }}
 }}
 

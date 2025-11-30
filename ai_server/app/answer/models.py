@@ -31,6 +31,7 @@ class AnswerAnalysisResponse(BaseModel):
     analysis_version: str = Field(alias="analysisVersion", description="분석 버전(모델/규칙 태그)")
     summary: str = Field(description="요약")
     categories: List[str] = Field(description="분석 결과 주제/카테고리")
+    keywords: List[str] = Field(description="키워드 목록")
     scores: Dict[str, Any] = Field(description="분석 점수 집합")
     created_at: datetime = Field(alias="createdAt", description="분석 시각")
 
