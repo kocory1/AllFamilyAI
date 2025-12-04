@@ -75,7 +75,13 @@ class AssignmentService:
             if not prob_list:
                 break
             s = sum(prob_list)
-            prob_list = [p / s for p in prob_list]
+            
+            # [BugFix] 남은 확률의 합이 0이면 균등 분배 (ZeroDivisionError 방지)
+            if s <= 0:
+                remain_n = len(prob_list)
+                prob_list = [1.0 / remain_n for _ in prob_list]
+            else:
+                prob_list = [p / s for p in prob_list]
 
         return MemberAssignResponse(member_ids=selected_ids, version="assign-v1")
 
