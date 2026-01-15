@@ -1,7 +1,5 @@
 # 온식구 AI 데이터베이스 스키마
-
-> 문서 버전: 2026-01-02 (v2.0 - 간결화)
-
+> 문서 버전: 2026-01-10 (v2.2 - MEMBER 역할 세분화 & 질문 우선순위 도입)
 ---
 
 ## 📊 ERD
@@ -26,8 +24,11 @@ erDiagram
     MEMBER {
         bigint id PK
         bigint family_id FK
-        text name
-        text role
+        text nickname
+        text role_type
+        text role_name
+        int order_in_role
+        text label
         date birthday
         timestamptz created_at
         timestamptz updated_at
@@ -46,6 +47,7 @@ erDiagram
         bigint member_id FK
         text content
         int level
+        int priority
         date planned_date
         text status
         int shuffle_count
@@ -128,24 +130,31 @@ CREATE TABLE family (
 |------|------|------|------|
 | `id` | BIGSERIAL | PK | 구성원 고유 ID |
 | `family_id` | BIGINT | FK, NOT NULL | 소속 가족 |
-| `name` | TEXT | NOT NULL | 이름/닉네임 |
-| `role` | TEXT | | 역할: `아빠` \| `엄마` \| `아들` \| `딸` 등 |
+| `nickname` | TEXT | NOT NULL | 화면 표시용 (공주님, 울아빠 등) |
+| `role_type` | TEXT | | 시스템 로직용 (PARENT, CHILD 등) |
+| `role_name` | TEXT | | 정규화된 호칭 (아빠, 엄마, 딸 등) |
+| `order_in_role` | INT | DEFAULT 1 | 순서 (첫째, 둘째 등) |
+| `label` | TEXT | | 관계 맥락 압축 (첫째 딸, 막내, 서울 큰엄마 등) |
 | `birthday` | DATE | | 생년월일 |
 | `created_at` | TIMESTAMPTZ | DEFAULT now() | 가입 시각 |
 | `updated_at` | TIMESTAMPTZ | DEFAULT now() | 수정 시각 |
 
 ```sql
 CREATE TABLE member (
-    id          BIGSERIAL PRIMARY KEY,
-    family_id   BIGINT NOT NULL REFERENCES family(id) ON DELETE CASCADE,
-    name        TEXT NOT NULL,
-    role        TEXT,
-    birthday    DATE,
-    created_at  TIMESTAMPTZ DEFAULT now(),
-    updated_at  TIMESTAMPTZ DEFAULT now()
+    id              BIGSERIAL PRIMARY KEY,
+    family_id       BIGINT NOT NULL REFERENCES family(id) ON DELETE CASCADE,
+    nickname        TEXT NOT NULL,
+    role_type       TEXT,
+    role_name       TEXT,
+    order_in_role   INT DEFAULT 1,
+    label           TEXT,
+    birthday        DATE,
+    created_at      TIMESTAMPTZ DEFAULT now(),
+    updated_at      TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE INDEX idx_member_family ON member(family_id);
+CREATE INDEX idx_member_role_type ON member(role_type);
 ```
 
 ---
@@ -189,6 +198,7 @@ CREATE INDEX idx_question_category ON question(category);
 | `member_id` | BIGINT | FK, NOT NULL | 수신 멤버 (주인공) |
 | `content` | TEXT | NOT NULL | 질문 내용 (템플릿 복사 또는 AI 개인화) |
 | `level` | INT | DEFAULT 1 | 난이도 1~4 |
+| `priority` | INT | DEFAULT 1 | 우선순위 (1:템플릿, 2:본인답변 기반 파생, 3:10:1 가족답변 기반 파생) |
 | `planned_date` | DATE | NOT NULL | 발송 예정일 |
 | `status` | TEXT | DEFAULT 'scheduled' | 상태: `scheduled` \| `sent` \| `answered` \| `skipped` \| `passed` |
 | `shuffle_count` | INT | DEFAULT 0 | 셔플 횟수 (최대 3회) |
@@ -205,22 +215,29 @@ CREATE INDEX idx_question_category ON question(category);
 
 // 수동 입력
 {"generated_by": "manual"}
+
+// 1:1 파생 (P2)
+{"logic_type": "follow_up", "parent_answer_id": 102}
+
+// 10:1 합성 (P3)
+{"logic_type": "synthesis", "source_answer_ids": [101, 102, 108], "ai_insight": "..."}
 ```
 
 **신규 멤버 가입 시 템플릿 복사:**
 ```sql
-INSERT INTO member_question (member_id, content, level, planned_date, status, metadata)
-SELECT 
+INSERT INTO member_question (member_id, content, level, priority, planned_date, status, metadata)
+SELECT
     :new_member_id,
     q.content,
     q.level,
+    1,
     :planned_date,
     'scheduled',
     jsonb_build_object('generated_by', 'template', 'source_question_id', q.id)
 FROM question q
-WHERE q.level <= 2  -- 처음엔 가벼운 질문부터
+WHERE q.level <= 2
 ORDER BY RANDOM()
-LIMIT 30;  -- 한 달치
+LIMIT 30;
 ```
 
 ```sql
@@ -229,19 +246,22 @@ CREATE TABLE member_question (
     member_id       BIGINT NOT NULL REFERENCES member(id) ON DELETE CASCADE,
     content         TEXT NOT NULL,
     level           INT DEFAULT 1 CHECK (level BETWEEN 1 AND 4),
+    priority        INT DEFAULT 1 CHECK (priority BETWEEN 1 AND 3),
     planned_date    DATE NOT NULL,
-    status          TEXT DEFAULT 'scheduled' 
+    status          TEXT DEFAULT 'scheduled'
                     CHECK (status IN ('scheduled', 'sent', 'answered', 'skipped', 'passed')),
     shuffle_count   INT DEFAULT 0,
     metadata        JSONB,
     answered_at     TIMESTAMPTZ,
-    
+
     UNIQUE(member_id, planned_date)
 );
 
 CREATE INDEX idx_member_question_member ON member_question(member_id);
-CREATE INDEX idx_member_question_planned ON member_question(planned_date);
 CREATE INDEX idx_member_question_status ON member_question(status);
+
+-- 디스패치 우선순위 반영 인덱스 (priority 우선, planned_date 다음)
+CREATE INDEX idx_mq_dispatch ON member_question(priority DESC, planned_date ASC);
 ```
 
 ---
@@ -274,7 +294,7 @@ CREATE INDEX idx_member_question_status ON member_question(status);
 CREATE TABLE answer (
     id                  BIGSERIAL PRIMARY KEY,
     member_question_id  BIGINT NOT NULL UNIQUE REFERENCES member_question(id) ON DELETE CASCADE,
-    answer_type         TEXT NOT NULL DEFAULT 'text' 
+    answer_type         TEXT NOT NULL DEFAULT 'text'
                         CHECK (answer_type IN ('text', 'image', 'audio', 'video', 'mixed')),
     content             JSONB NOT NULL,
     created_at          TIMESTAMPTZ DEFAULT now()
@@ -304,7 +324,7 @@ CREATE TABLE reaction (
     member_id   BIGINT NOT NULL REFERENCES member(id) ON DELETE CASCADE,
     emoji       TEXT NOT NULL,
     created_at  TIMESTAMPTZ DEFAULT now(),
-    
+
     UNIQUE(answer_id, member_id)
 );
 
@@ -380,7 +400,7 @@ CREATE TABLE family_report (
     summary     TEXT,
     data        JSONB,
     created_at  TIMESTAMPTZ DEFAULT now(),
-    
+
     UNIQUE(family_id, type, start_date)
 );
 
@@ -392,16 +412,16 @@ CREATE INDEX idx_family_report_family ON family_report(family_id);
 ## 🗂️ 데이터 흐름
 
 ```
-FAMILY ──────────────────────────────────────────────────────┐
-│ lifecycle_status (바쁨/평소/행사/변화)                         │
-│                                                            │
-├── MEMBER                                                   │
-│     └─ name, role, birthday                                │
-│                                                            │
-├── FAMILY_REPORT                                            │
-│     └─ type (WEEKLY/MONTHLY), summary, data                │
-│                                                            │
-└────────────────────────────────────────────────────────────┘
+FAMILY ─────────────────────────────────────────────────────────────────┐
+│ lifecycle_status (바쁨/평소/행사/변화)                                     │
+│                                                                       │
+├── MEMBER                                                              │
+│     └─ nickname, role_type, role_name, order_in_role, label, birthday │
+│                                                                       │
+├── FAMILY_REPORT                                                       │
+│     └─ type (WEEKLY/MONTHLY), summary, data                           │
+│                                                                       │
+└───────────────────────────────────────────────────────────────────────┘
 
 QUESTION (템플릿 풀, 참조용)
 │ content, level, category
@@ -411,9 +431,10 @@ QUESTION (템플릿 풀, 참조용)
 │
 MEMBER_QUESTION ─────────────────────────────────────────────┐
 │ content (질문 내용)                                          │
-│ level (난이도 1~4)                                          │
+│ level (난이도 1~4)                                           │
+│ priority (우선순위 1~3)                                      │
 │ planned_date, status, shuffle_count                        │
-│ metadata (AI 생성 정보)                                      │
+│ metadata (AI 생성/파생/합성 정보)                              │
 │                                                            │
 └── ANSWER ──────────────────────────────────────────────────┤
       │ content (답변 내용, 작성자=질문 주인공)                     │
@@ -431,15 +452,13 @@ MEMBER_QUESTION ─────────────────────�
 | 테이블 | 컬럼 수 | 역할 |
 |--------|:------:|------|
 | FAMILY | 5 | 가족 단위 |
-| MEMBER | 7 | 가족 구성원 |
+| MEMBER | 10 | 가족 구성원 |
 | QUESTION | 5 | 질문 템플릿 (참조용) |
-| MEMBER_QUESTION | 9 | 멤버별 실제 질문 |
+| MEMBER_QUESTION | 10 | 멤버별 실제 질문 |
 | ANSWER | 5 | 답변 |
 | REACTION | 5 | 이모지 리액션 |
 | COMMENT | 9 | 댓글 |
 | FAMILY_REPORT | 8 | 주간/월간 리포트 |
-
-**총 8개 테이블, 53개 컬럼**
 
 ---
 
@@ -448,6 +467,7 @@ MEMBER_QUESTION ─────────────────────�
 | 제약 | 설명 |
 |------|------|
 | `member_question(member_id, planned_date) UNIQUE` | 멤버당 하루 1질문 |
+| `member_question.priority CHECK (1~3)` | 우선순위 범위 |
 | `reaction(answer_id, member_id) UNIQUE` | 답변당 멤버 1리액션 |
 | `family_report(family_id, type, start_date) UNIQUE` | 리포트 중복 방지 |
 | `question.level CHECK (1~4)` | 난이도 범위 |
@@ -463,3 +483,4 @@ MEMBER_QUESTION ─────────────────────�
 | v1.0 | 2025-08-20 | 초기 스키마 |
 | v2.0 | 2026-01-02 | 간결화 - QUESTION을 템플릿 참조용으로 변경, MEMBER_QUESTION이 실제 질문 저장, ANSWER_ANALYSIS 삭제, REACTION/FAMILY_REPORT 추가 |
 | v2.1 | 2026-01-02 | forbidden_keywords 보류, MEMBER_PROFILE 삭제, MEMBER.birthday 추가 |
+| v2.2 | 2026-01-10 | MEMBER 컬럼 세분화(nickname, role_type, label 등) 및 MEMBER_QUESTION 우선순위(priority) 정책 반영 |

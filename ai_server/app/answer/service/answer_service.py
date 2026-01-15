@@ -1,4 +1,3 @@
-from typing import Optional
 from app.answer.base import AnswerAnalyzer
 from app.answer.models import AnswerAnalysisRequest, AnswerAnalysisResponse
 

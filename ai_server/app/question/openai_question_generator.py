@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class OpenAIQuestionGenerator(QuestionGenerator):
     def __init__(self):
         self.client = OpenAIClient()
-    
+
     async def generate(
         self,
         request: QuestionGenerateRequest,
@@ -38,7 +38,7 @@ class OpenAIQuestionGenerator(QuestionGenerator):
         
         # 응답 파싱
         content = self._parse_response(response)
-        
+
         # 신뢰도 평가
         confidence, meta = self._evaluate_generation(
             content=content,
@@ -46,7 +46,7 @@ class OpenAIQuestionGenerator(QuestionGenerator):
             tone=request.tone,
             max_len=settings.max_question_length
         )
-        
+
         # RAG 메타데이터 추가
         meta["ragEnabled"] = rag_enabled
         meta["ragContextCount"] = len(past_answers) if past_answers else 0
@@ -101,7 +101,7 @@ class OpenAIQuestionGenerator(QuestionGenerator):
                         time_str = f"({delta.days}일 전)"
                     else:
                         time_str = "(오늘)"
-                except:
+                except Exception:
                     pass
             
             lines.append(f"{idx}. {time_str}")
@@ -224,12 +224,12 @@ class OpenAIQuestionGenerator(QuestionGenerator):
             lines.append("=== 맥락 ===")
             lines.extend(ctx)
             lines.append("")
-        
+
         # 답변 분석 (팔로업 모드)
         answer_context = self._build_answer_analysis_context(request)
         if answer_context:
             lines.append(answer_context)
-        
+
         # 생성 규칙
         lines.append(self._build_generation_rules())
         
@@ -239,12 +239,12 @@ class OpenAIQuestionGenerator(QuestionGenerator):
             lines.append("  → 답변: '헌터헌터 오프닝 듣는 중'")
             lines.append("  → ❌ 나쁨: '가장 좋아하는 노래가 뭔가요?' (구체적 내용 무시)")
             lines.append("  → ✅ 좋음: '오, 헌터헌터! 구작이랑 신작 중에 어떤 거 보세요?' (구체적 관심)")
-            lines.append("")
+        lines.append("")
         
         lines.append("위 가이드라인을 따라 자연스러운 질문 1개만 생성하세요:")
         
         return "\n".join(lines)
-    
+
     async def _call_openai(self, prompt: str) -> str:
         """
         OpenAI API 호출
@@ -273,7 +273,7 @@ class OpenAIQuestionGenerator(QuestionGenerator):
                 {"role": "user", "content": prompt},
             ]
         )
-    
+
     def _parse_response(self, response: str) -> str:
         """
         LLM 응답 파싱 (방어 로직 포함)
@@ -308,7 +308,7 @@ class OpenAIQuestionGenerator(QuestionGenerator):
                 return line
         
         return text
-    
+
     def _evaluate_generation(
         self,
         content: str,

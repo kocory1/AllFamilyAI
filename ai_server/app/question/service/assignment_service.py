@@ -81,7 +81,7 @@ class AssignmentService:
                 remain_n = len(prob_list)
                 prob_list = [1.0 / remain_n for _ in prob_list]
             else:
-                prob_list = [p / s for p in prob_list]
+            prob_list = [p / s for p in prob_list]
 
         return MemberAssignResponse(member_ids=selected_ids, version="assign-v1")
 

@@ -4,7 +4,6 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 import uvicorn
-import os
 import logging
 from dotenv import load_dotenv
 
