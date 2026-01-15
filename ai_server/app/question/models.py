@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List, Dict, Any
-from datetime import datetime
 
 class ErrorResponse(BaseModel):
     error: str = Field(description="에러 메시지")

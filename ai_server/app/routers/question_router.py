@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException, Depends
-from typing import Optional
 import logging
 
 from app.question.models import (QuestionGenerateRequest, QuestionInstanceResponse, MemberAssignRequest, MemberAssignResponse)
