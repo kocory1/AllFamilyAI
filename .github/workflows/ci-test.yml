@@ -25,35 +25,40 @@ jobs:
         with:
           python-version: '3.11'
       
-      - name: 의존성 캐시
+      - name: Poetry 설치
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      
+      - name: Poetry 캐시
         uses: actions/cache@v3
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('ai_server/requirements.txt') }}
+          path: |
+            ~/.cache/pypoetry
+            ai_server/.venv
+          key: ${{ runner.os }}-poetry-${{ hashFiles('ai_server/poetry.lock') }}
           restore-keys: |
-            ${{ runner.os }}-pip-
+            ${{ runner.os }}-poetry-
       
-      - name: 의존성 설치
+      - name: 의존성 설치 (Poetry)
         run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
+          poetry install --no-interaction --no-ansi
       
       - name: Linting (ruff) - 코드 품질 검증
         run: |
-          pip install ruff
-          ruff check app/
-        # 초기 단계: continue-on-error 유지 (경고만)
-        # 추후 삭제 권장: 코드 품질 강제
-        continue-on-error: true
+          poetry run ruff check app/
       
       - name: 유닛 테스트 실행 (Mock)
         run: |
-          pytest tests/unit/ -v --tb=short -m "not integration"
+          poetry run pytest tests/unit/ -v --tb=short
         env:
           # Mock이므로 더미 키 사용
           OPENAI_API_KEY: "test-key-dummy"
+          LANGCHAIN_TRACING_V2: "false"
+          LANGCHAIN_API_KEY: "test-key-dummy"
+          LANGCHAIN_PROJECT: "test-project"
           CHROMA_PERSIST_DIRECTORY: "/tmp/chroma_test"
-          CHROMA_COLLECTION_NAME: "test_collection"
+          CHROMA_COLLECTION_NAME: "qa_history"
       
       - name: 테스트 결과 요약
         if: always()

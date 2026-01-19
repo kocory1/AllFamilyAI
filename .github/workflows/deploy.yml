@@ -42,7 +42,7 @@ jobs:
           debug: true
           script: |
             chmod +x ~/deploy.sh
-            ~/deploy.sh "${{ secrets.OPENAI_API_KEY }}"
+            ~/deploy.sh "${{ secrets.OPENAI_API_KEY }}" "${{ secrets.LANGCHAIN_API_KEY }}" "${{ secrets.LANGCHAIN_PROJECT }}"
             # & 제거: 포그라운드 실행, exit code 전달
             # deploy.sh 내부의 Health Check 결과가 GitHub Actions에 반영됨
 

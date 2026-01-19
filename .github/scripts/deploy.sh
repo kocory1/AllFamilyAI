@@ -2,6 +2,8 @@
 set -e
 
 OPENAI_API_KEY=$1
+LANGCHAIN_API_KEY=$2
+LANGCHAIN_PROJECT=${3:-"onsikgu-ai"}
 
 echo "=========================================="
 echo "온식구 AI 서버 배포 시작"
@@ -36,22 +38,26 @@ cd ~
 git clone https://github.com/kocory1/AllFamilyAI.git onsikgu_ai
 cd onsikgu_ai/ai_server
 
-# python3-venv 설치
-echo "5. Python venv 설치 확인 중..."
-sudo apt install -y python3.12-venv
+# Poetry 설치
+echo "5. Poetry 설치 확인 중..."
+if ! command -v poetry &> /dev/null; then
+  echo "   📦 Poetry 설치 중..."
+  curl -sSL https://install.python-poetry.org | python3 -
+  export PATH="$HOME/.local/bin:$PATH"
+  echo "   ✅ Poetry 설치 완료"
+else
+  echo "   ✅ Poetry 이미 설치됨"
+fi
 
-# 가상환경 생성
-echo "6. 가상환경 생성 중..."
-python3 -m venv venv
+# Poetry 경로 설정
+export PATH="$HOME/.local/bin:$PATH"
 
-# 가상환경 활성화 및 의존성 설치
-echo "7. 의존성 설치 중..."
-source venv/bin/activate
-pip install --upgrade pip
-pip install --upgrade -r requirements.txt  # --upgrade 추가로 최신 버전 강제 설치
+# 의존성 설치 (Poetry)
+echo "6. 의존성 설치 중 (Poetry)..."
+poetry install --no-interaction --no-ansi --no-dev
 
 # nginx 설치 및 설정
-echo "8. nginx 설치 및 설정 중..."
+echo "7. nginx 설치 및 설정 중..."
 if ! command -v nginx &> /dev/null; then
   echo "   📦 nginx 설치 중..."
   sudo apt update
@@ -87,38 +93,44 @@ else
 fi
 
 # 환경변수 파일 생성
-echo "9. 환경변수 설정 중..."
+echo "8. 환경변수 설정 중..."
 cat > .env << EOF
+# OpenAI API
 OPENAI_API_KEY=${OPENAI_API_KEY}
+
+# Langsmith (AI Tracing)
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY}
+LANGCHAIN_PROJECT=${LANGCHAIN_PROJECT}
+
+# 서버 설정
 HOST=127.0.0.1
 PORT=8000
 LOG_LEVEL=INFO
-DEFAULT_MODEL=gpt-5-nano
+
+# AI 모델 설정
+DEFAULT_MODEL=gpt-4o-mini
 MAX_TOKENS=10000
 TEMPERATURE=0.8
 MAX_QUESTION_LENGTH=90
-PROFILE_DECAY=0.9
-PROFILE_CATEGORY_GAIN=0.25
-PROFILE_TAG_GAIN=0.15
-PROFILE_TONE_GAIN=0.1
-PROFILE_TABOO_THRESHOLD=0.6
-PROFILE_TABOO_PENALTY=0.2
-PROFILE_ALPHA_LENGTH=0.5
-PROFILE_TOP_N_PRUNE=10
+
 # ChromaDB 설정 (RAG용 벡터 DB)
 CHROMA_PERSIST_DIRECTORY=/home/ubuntu/onsikgu_data/chroma
-CHROMA_COLLECTION_NAME=family_answers
+CHROMA_COLLECTION_NAME=qa_history
 EMBEDDING_MODEL=text-embedding-3-small
 RAG_TOP_K=5
 RAG_MIN_ANSWERS=5
 EOF
 
-# 서버 시작 (nohup으로 간단하게)
-echo "10. 서버 시작 중..."
+# 서버 시작 (Poetry 사용)
+echo "9. 서버 시작 중 (Poetry)..."
 cd ~/onsikgu_ai/ai_server
 
-# nohup으로 백그라운드 실행 (로그를 server.log로 명확히 저장)
-nohup ~/onsikgu_ai/ai_server/venv/bin/python -m uvicorn app.main:app \
+# Poetry 경로 확인
+export PATH="$HOME/.local/bin:$PATH"
+
+# nohup으로 백그라운드 실행 (Poetry 사용)
+nohup poetry run uvicorn app.main:app \
   --host 127.0.0.1 \
   --port 8000 \
   > ~/onsikgu_ai/ai_server/server.log 2>&1 &
@@ -127,7 +139,7 @@ echo "   서버 PID: $!"
 sleep 3
 
 # Health Check (재시도 로직)
-echo "11. Health Check 시작 (최대 50초 대기)..."
+echo "10. Health Check 시작 (최대 50초 대기)..."
 MAX_RETRIES=10
 RETRY_INTERVAL=5
 

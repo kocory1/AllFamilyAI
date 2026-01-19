@@ -23,3 +23,7 @@ logs/
 .env.local
 .env.*.local
 
+.cursor/
+
+PLAN.md
+
