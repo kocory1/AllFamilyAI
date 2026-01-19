@@ -54,7 +54,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 # 의존성 설치 (Poetry)
 echo "6. 의존성 설치 중 (Poetry)..."
-poetry install --no-interaction --no-ansi --no-dev
+poetry install --no-interaction --no-ansi --without dev
 
 # nginx 설치 및 설정
 echo "7. nginx 설치 및 설정 중..."
