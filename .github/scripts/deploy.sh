@@ -13,6 +13,7 @@ echo "=========================================="
 # 기존 서버 종료
 echo "1. 기존 서버 종료 중..."
 pkill -f "uvicorn app.main:app" || true
+pkill -f "poetry install" || true  # Poetry 프로세스도 종료
 sleep 2
 
 # 데이터 디렉토리 확인 (프로젝트 외부, 영구 보존)
