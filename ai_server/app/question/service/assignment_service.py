@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import random
-from typing import List
 
 from app.question.models import (
     MemberAssignRequest,
@@ -20,7 +19,7 @@ class AssignmentService:
         candidates = []
 
         opts = request.options or None
-        epsilon = float(getattr(opts, 'epsilon', 0.0) or 0.0)
+        epsilon = float(getattr(opts, "epsilon", 0.0) or 0.0)
 
         # 후보 필터링(제외/쿨다운)
         for m in request.members:
@@ -50,7 +49,7 @@ class AssignmentService:
         rng = random.Random()
 
         pick = min(request.pick_count, n)
-        selected_ids: List[str | int] = []
+        selected_ids: list[str | int] = []
 
         cand_list = candidates[:]  # shallow copy
         prob_list = probs[:]
@@ -75,14 +74,12 @@ class AssignmentService:
             if not prob_list:
                 break
             s = sum(prob_list)
-            
+
             # [BugFix] 남은 확률의 합이 0이면 균등 분배 (ZeroDivisionError 방지)
             if s <= 0:
                 remain_n = len(prob_list)
                 prob_list = [1.0 / remain_n for _ in prob_list]
             else:
-            prob_list = [p / s for p in prob_list]
+                prob_list = [p / s for p in prob_list]
 
         return MemberAssignResponse(member_ids=selected_ids, version="assign-v1")
-
-
