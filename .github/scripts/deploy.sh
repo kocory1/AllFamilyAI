@@ -94,6 +94,7 @@ fi
 
 # 환경변수 파일 생성
 echo "8. 환경변수 설정 중..."
+cd ~/onsikgu_ai/ai_server
 cat > .env << EOF
 # OpenAI API
 OPENAI_API_KEY=${OPENAI_API_KEY}
