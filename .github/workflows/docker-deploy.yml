@@ -107,14 +107,6 @@ jobs:
             echo "시간: $(date)"
             echo "=========================================="
             
-            # 0. 기존 레거시 프로세스 정리
-            echo "🧹 레거시 프로세스 정리 중..."
-            pkill -f "uvicorn app.main:app" || true
-            pkill -f "poetry install" || true
-            pkill -f "poetry run" || true
-            sleep 2
-            echo "   ✅ 레거시 프로세스 종료 완료"
-            
             # 1. 작업 디렉토리
             cd ~/onsikgu_ai
             
