@@ -26,7 +26,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GHCR_PAT }}
       
       - name: Docker 이미지 빌드 & 푸시
         working-directory: ai_server
@@ -120,7 +120,7 @@ jobs:
             
             # 2. GHCR 로그인 (public 이미지면 불필요, private이면 필요)
             echo "🔐 GitHub Container Registry 로그인..."
-            echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            echo "${{ secrets.GHCR_PAT }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
             
             # 3. 최신 이미지 Pull
             echo "📥 최신 이미지 다운로드 중..."
