@@ -87,7 +87,7 @@ async def generate_personal_question(
 
     except Exception as e:
         logger.error(f"[API] 개인 질문 생성 실패: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"질문 생성 실패: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"질문 생성 실패: {str(e)}") from e
 
 
 @router.post(
@@ -141,4 +141,4 @@ async def generate_family_question(
 
     except Exception as e:
         logger.error(f"[API] 가족 질문 생성 실패: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"질문 생성 실패: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"질문 생성 실패: {str(e)}") from e
