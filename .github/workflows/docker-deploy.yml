@@ -21,17 +21,28 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      - name: Docker 이미지 빌드 (ai_server만)
+      - name: GitHub Container Registry 로그인
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Docker 이미지 빌드 & 푸시
         working-directory: ai_server
         run: |
-          docker build -t onsikgu-ai-server:${{ github.sha }} .
-          docker tag onsikgu-ai-server:${{ github.sha }} onsikgu-ai-server:latest
+          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/onsikgu-ai-server
+          IMAGE_TAG=${{ github.sha }}
+          
+          # 빌드
+          docker build -t $IMAGE_NAME:$IMAGE_TAG .
+          docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest
+          
+          # GHCR에 푸시
+          docker push $IMAGE_NAME:$IMAGE_TAG
+          docker push $IMAGE_NAME:latest
       
-      - name: Docker 이미지 저장 (tar)
-        run: |
-          docker save onsikgu-ai-server:latest | gzip > onsikgu-ai-server.tar.gz
-      
-      - name: EC2 디렉토리 준비
+      - name: EC2 디렉토리 준비 & docker-compose.yml 생성
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -39,29 +50,40 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            # 디렉토리 생성
             mkdir -p ~/onsikgu_ai
             mkdir -p ~/onsikgu_data/chroma
-      
-      - name: Docker 이미지 EC2로 전송
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
-          source: "onsikgu-ai-server.tar.gz"
-          target: "/home/ubuntu/onsikgu_ai/"
-      
-      - name: docker-compose.yml 전송
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
-          source: "ai_server/docker-compose.yml"
-          target: "/home/ubuntu/onsikgu_ai/"
-          strip_components: 1
+            
+            # docker-compose.yml 생성
+            cat > ~/onsikgu_ai/docker-compose.yml << 'EOF'
+            version: '3.8'
+            
+            services:
+              ai-server:
+                container_name: onsikgu-ai-server
+                image: ghcr.io/${{ github.repository_owner }}/onsikgu-ai-server:latest
+                ports:
+                  - "8000:8000"
+                volumes:
+                  - ~/onsikgu_data/chroma:/data/chroma
+                env_file:
+                  - .env
+                environment:
+                  - CHROMA_PERSIST_DIRECTORY=/data/chroma
+                restart: unless-stopped
+                healthcheck:
+                  test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+                  interval: 30s
+                  timeout: 10s
+                  retries: 3
+                  start_period: 40s
+                deploy:
+                  resources:
+                    limits:
+                      memory: 2G
+                    reservations:
+                      memory: 512M
+            EOF
       
       - name: EC2에서 컨테이너 배포
         uses: appleboy/ssh-action@master
@@ -96,16 +118,14 @@ jobs:
             # 1. 작업 디렉토리
             cd ~/onsikgu_ai
             
-            # 2. Docker 이미지 로드
-            echo "📦 Docker 이미지 로드 중..."
-            gunzip -c onsikgu-ai-server.tar.gz | docker load
-            rm onsikgu-ai-server.tar.gz
-            echo "   ✅ 이미지 로드 완료"
+            # 2. GHCR 로그인 (public 이미지면 불필요, private이면 필요)
+            echo "🔐 GitHub Container Registry 로그인..."
+            echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
             
-            # 3. 데이터 디렉토리 확인
-            echo "📂 데이터 디렉토리 확인 중..."
-            mkdir -p ~/onsikgu_data/chroma
-            echo "   ✅ 데이터 경로: ~/onsikgu_data/chroma"
+            # 3. 최신 이미지 Pull
+            echo "📥 최신 이미지 다운로드 중..."
+            sudo docker pull ghcr.io/${{ github.repository_owner }}/onsikgu-ai-server:latest
+            echo "   ✅ 이미지 다운로드 완료"
             
             # 4. .env 파일 생성
             echo "📝 환경변수 설정 중..."
