@@ -27,3 +27,5 @@ logs/
 
 PLAN.md
 
+# Disabled files
+*.disabled

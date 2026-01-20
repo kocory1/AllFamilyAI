@@ -1,11 +1,10 @@
 name: Docker Build & Deploy
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI Test (Pre-deployment)"]
+    types: [completed]
     branches: [main]
-    paths:
-      - 'ai_server/**'
-      - '.github/workflows/docker-deploy.yml'
 
 # 중복 배포 방지 (한 번에 하나만 실행)
 concurrency:
@@ -13,60 +12,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    name: 유닛 테스트 실행
-    runs-on: ubuntu-latest
-    
-    defaults:
-      run:
-        working-directory: ai_server
-    
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Python 3.11 설정
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      
-      - name: Poetry 캐싱
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/pypoetry
-            ai_server/.venv
-          key: ${{ runner.os }}-poetry-${{ hashFiles('ai_server/poetry.lock') }}
-      
-      - name: Poetry 설치
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-      
-      - name: 의존성 설치
-        run: |
-          poetry install --no-interaction --no-ansi
-      
-      - name: Linting (ruff)
-        run: |
-          poetry run ruff check app/
-      
-      - name: 유닛 테스트 실행
-        run: |
-          poetry run pytest tests/refactoring/ -v --tb=short
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}
-          LANGCHAIN_PROJECT: onsikgu-ai-test
-
   build-and-deploy:
     name: Docker 빌드 & EC2 배포
-    needs: test  # 테스트 성공 시에만 배포
+    # CI Test 성공 시에만 배포
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     
     steps:
       - uses: actions/checkout@v3
       
-      - name: Docker 이미지 빌드
+      - name: Docker 이미지 빌드 (ai_server만)
         working-directory: ai_server
         run: |
           docker build -t onsikgu-ai-server:${{ github.sha }} .
@@ -76,7 +31,28 @@ jobs:
         run: |
           docker save onsikgu-ai-server:latest | gzip > onsikgu-ai-server.tar.gz
       
-      - name: EC2로 이미지 전송 & 배포
+      - name: Docker 이미지 EC2로 전송
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          source: "onsikgu-ai-server.tar.gz"
+          target: "~/onsikgu_ai/"
+      
+      - name: docker-compose.yml 전송
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          source: "ai_server/docker-compose.yml"
+          target: "~/onsikgu_ai/"
+          strip_components: 1
+      
+      - name: EC2에서 컨테이너 배포
         uses: appleboy/ssh-action@master
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -99,16 +75,20 @@ jobs:
             echo "=========================================="
             
             # 1. 작업 디렉토리
-            cd ~
-            mkdir -p onsikgu_ai/ai_server
-            cd onsikgu_ai/ai_server
+            cd ~/onsikgu_ai
             
-            # 2. 데이터 디렉토리 확인
+            # 2. Docker 이미지 로드
+            echo "📦 Docker 이미지 로드 중..."
+            gunzip -c onsikgu-ai-server.tar.gz | docker load
+            rm onsikgu-ai-server.tar.gz
+            echo "   ✅ 이미지 로드 완료"
+            
+            # 3. 데이터 디렉토리 확인
             echo "📂 데이터 디렉토리 확인 중..."
             mkdir -p ~/onsikgu_data/chroma
             echo "   ✅ 데이터 경로: ~/onsikgu_data/chroma"
             
-            # 3. .env 파일 생성
+            # 4. .env 파일 생성
             echo "📝 환경변수 설정 중..."
             cat > .env << EOF
             # OpenAI API
@@ -129,10 +109,6 @@ jobs:
             EOF
             echo "   ✅ .env 파일 생성 완료"
             
-            # 4. docker-compose.yml 다운로드
-            echo "📥 docker-compose.yml 다운로드 중..."
-            curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/main/ai_server/docker-compose.yml -o docker-compose.yml
-            
             # 5. Docker 설치 확인
             if ! command -v docker &> /dev/null; then
               echo "🐳 Docker 설치 중..."
@@ -150,11 +126,11 @@ jobs:
             
             # 7. 이전 컨테이너 중지 및 정리
             echo "🛑 이전 컨테이너 중지 중..."
-            docker-compose down || true
+            sudo docker-compose down || true
             
-            # 8. 컨테이너 시작
+            # 8. 컨테이너 시작 (빌드 없이 이미지 사용)
             echo "🚀 컨테이너 시작 중..."
-            docker-compose up -d --build
+            sudo docker-compose up -d
             
             # 9. Health Check
             echo "🏥 Health Check 중..."
@@ -171,7 +147,7 @@ jobs:
             
             # 10. 상태 확인
             echo "📊 컨테이너 상태:"
-            docker-compose ps
+            sudo docker-compose ps
             
             echo "=========================================="
             echo "✅ 배포 완료!"
