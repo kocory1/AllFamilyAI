@@ -107,19 +107,24 @@ jobs:
             echo "시간: $(date)"
             echo "=========================================="
             
-            # 1. 작업 디렉토리
+            # 1. Docker 정리 (디스크 공간 확보)
+            echo "🧹 Docker 정리 중..."
+            sudo docker system prune -af --volumes || true
+            echo "   ✅ 정리 완료"
+            
+            # 2. 작업 디렉토리
             cd ~/onsikgu_ai
             
-            # 2. GHCR 로그인 (public 이미지면 불필요, private이면 필요)
+            # 3. GHCR 로그인
             echo "🔐 GitHub Container Registry 로그인..."
             echo "${{ secrets.GHCR_PAT }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
             
-            # 3. 최신 이미지 Pull
+            # 4. 최신 이미지 Pull
             echo "📥 최신 이미지 다운로드 중..."
             sudo docker pull ghcr.io/${{ github.repository_owner }}/onsikgu-ai-server:latest
             echo "   ✅ 이미지 다운로드 완료"
             
-            # 4. .env 파일 생성
+            # 5. .env 파일 생성
             echo "📝 환경변수 설정 중..."
             cat > .env << EOF
             # OpenAI API
@@ -140,7 +145,7 @@ jobs:
             EOF
             echo "   ✅ .env 파일 생성 완료"
             
-            # 5. Docker 설치 확인
+            # 6. Docker 설치 확인
             if ! command -v docker &> /dev/null; then
               echo "🐳 Docker 설치 중..."
               curl -fsSL https://get.docker.com | sh
@@ -148,22 +153,22 @@ jobs:
               newgrp docker
             fi
             
-            # 6. Docker Compose 설치 확인
+            # 7. Docker Compose 설치 확인
             if ! command -v docker-compose &> /dev/null; then
               echo "🐳 Docker Compose 설치 중..."
               sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
               sudo chmod +x /usr/local/bin/docker-compose
             fi
             
-            # 7. 이전 컨테이너 중지 및 정리
+            # 8. 이전 컨테이너 중지 및 정리
             echo "🛑 이전 컨테이너 중지 중..."
             sudo docker-compose down || true
             
-            # 8. 컨테이너 시작 (빌드 없이 이미지 사용)
+            # 9. 컨테이너 시작 (빌드 없이 이미지 사용)
             echo "🚀 컨테이너 시작 중..."
             sudo docker-compose up -d
             
-            # 9. Health Check
+            # 10. Health Check
             echo "🏥 Health Check 중..."
             sleep 10
             
@@ -176,7 +181,7 @@ jobs:
               sleep 5
             done
             
-            # 10. 상태 확인
+            # 11. 상태 확인
             echo "📊 컨테이너 상태:"
             sudo docker-compose ps
             
