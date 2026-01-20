@@ -24,7 +24,7 @@ class PersonalQuestionRequestSchema(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     familyId: int = Field(alias="familyId", description="가족 ID")
-    memberId: int = Field(alias="memberId", description="멤버 ID")
+    memberId: str = Field(alias="memberId", description="멤버 ID (UUID)")
     roleLabel: str = Field(alias="roleLabel", description="역할 레이블 (예: 첫째 딸)")
     baseQuestion: str = Field(alias="baseQuestion", description="기준 질문")
     baseAnswer: str = Field(alias="baseAnswer", description="기준 답변")
@@ -37,7 +37,7 @@ class FamilyQuestionRequestSchema(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     familyId: int = Field(alias="familyId", description="가족 ID")
-    memberId: int = Field(alias="memberId", description="답변한 멤버 ID")
+    memberId: str = Field(alias="memberId", description="답변한 멤버 ID (UUID)")
     roleLabel: str = Field(alias="roleLabel", description="역할 레이블")
     baseQuestion: str = Field(alias="baseQuestion", description="기준 질문")
     baseAnswer: str = Field(alias="baseAnswer", description="기준 답변")
@@ -45,10 +45,18 @@ class FamilyQuestionRequestSchema(BaseModel):
 
 
 class GenerateQuestionResponseSchema(BaseModel):
-    """질문 생성 API 응답 스키마"""
+    """
+    질문 생성 API 응답 스키마
+
+    BE의 member_question 테이블에 바로 insert 가능한 구조
+    """
 
     model_config = ConfigDict(populate_by_name=True)
 
-    question: str = Field(description="생성된 질문")
-    level: int = Field(description="질문 난이도 (1-4)", ge=1, le=4)
+    memberId: str = Field(
+        alias="memberId", description="멤버 ID (UUID, BE에서 받은 값 그대로 반환)"
+    )
+    content: str = Field(description="생성된 질문 원문")
+    level: int = Field(description="질문 난이도 (1-4, AI 자동 추론)", ge=1, le=4)
+    priority: int = Field(description="질문 우선순위 (개인 RAG=2, 가족 RAG=3)", ge=1, le=4)
     metadata: dict[str, Any] = Field(description="생성 메타데이터")

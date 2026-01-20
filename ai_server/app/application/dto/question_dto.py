@@ -17,7 +17,7 @@ class GeneratePersonalQuestionInput:
     """개인 질문 생성 Use Case 입력 DTO"""
 
     family_id: int
-    member_id: int
+    member_id: str  # UUID
     role_label: str
     base_question: str
     base_answer: str

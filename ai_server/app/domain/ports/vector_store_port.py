@@ -40,7 +40,7 @@ class VectorStorePort(ABC):
     @abstractmethod
     async def search_by_member(
         self,
-        member_id: int,
+        member_id: str,  # UUID
         query_doc: QADocument,
         top_k: int = 5,
     ) -> list[QADocument]:
@@ -48,7 +48,7 @@ class VectorStorePort(ABC):
         개인 QA 검색 (member_id 필터)
 
         Args:
-            member_id: 검색 대상 멤버 ID
+            member_id: 검색 대상 멤버 ID (UUID)
             query_doc: 검색 쿼리로 사용할 QA Document
             top_k: 반환할 최대 결과 수
 

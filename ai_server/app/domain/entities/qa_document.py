@@ -22,7 +22,7 @@ class QADocument:
 
     Attributes:
         family_id: 가족 ID
-        member_id: 멤버 ID
+        member_id: 멤버 ID (UUID)
         role_label: 역할 레이블 (예: "첫째 딸", "아빠")
         question: 질문 내용
         answer: 답변 내용
@@ -30,7 +30,7 @@ class QADocument:
     """
 
     family_id: int
-    member_id: int
+    member_id: str  # UUID
     role_label: str
     question: str
     answer: str

@@ -85,10 +85,13 @@ class ChromaVectorStore(VectorStorePort):
             return False
 
     async def search_by_member(
-        self, member_id: int, query_doc: QADocument, top_k: int = 5
+        self, member_id: str, query_doc: QADocument, top_k: int = 5
     ) -> list[QADocument]:
         """
         개인 QA 검색 (Port 구현)
+
+        Args:
+            member_id: 멤버 ID (UUID)
 
         Returns:
             Domain Entity 리스트
