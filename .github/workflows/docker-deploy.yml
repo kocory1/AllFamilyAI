@@ -31,6 +31,17 @@ jobs:
         run: |
           docker save onsikgu-ai-server:latest | gzip > onsikgu-ai-server.tar.gz
       
+      - name: EC2 디렉토리 준비
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            mkdir -p ~/onsikgu_ai
+            mkdir -p ~/onsikgu_data/chroma
+      
       - name: Docker 이미지 EC2로 전송
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -39,7 +50,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           source: "onsikgu-ai-server.tar.gz"
-          target: "~/onsikgu_ai/"
+          target: "/home/ubuntu/onsikgu_ai/"
       
       - name: docker-compose.yml 전송
         uses: appleboy/scp-action@v0.1.7
@@ -49,7 +60,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           source: "ai_server/docker-compose.yml"
-          target: "~/onsikgu_ai/"
+          target: "/home/ubuntu/onsikgu_ai/"
           strip_components: 1
       
       - name: EC2에서 컨테이너 배포
@@ -73,6 +84,14 @@ jobs:
             echo "🐳 Docker 배포 시작"
             echo "시간: $(date)"
             echo "=========================================="
+            
+            # 0. 기존 레거시 프로세스 정리
+            echo "🧹 레거시 프로세스 정리 중..."
+            pkill -f "uvicorn app.main:app" || true
+            pkill -f "poetry install" || true
+            pkill -f "poetry run" || true
+            sleep 2
+            echo "   ✅ 레거시 프로세스 종료 완료"
             
             # 1. 작업 디렉토리
             cd ~/onsikgu_ai
