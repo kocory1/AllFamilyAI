@@ -52,7 +52,7 @@ jobs:
       
       - name: 유닛 테스트 실행
         run: |
-          poetry run pytest tests/unit/ -v --tb=short
+          poetry run pytest tests/refactoring/ -v --tb=short
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}
