@@ -1,0 +1,184 @@
+name: Docker Build & Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ai_server/**'
+      - '.github/workflows/docker-deploy.yml'
+
+# 중복 배포 방지 (한 번에 하나만 실행)
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: 유닛 테스트 실행
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ai_server
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Python 3.11 설정
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Poetry 캐싱
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pypoetry
+            ai_server/.venv
+          key: ${{ runner.os }}-poetry-${{ hashFiles('ai_server/poetry.lock') }}
+      
+      - name: Poetry 설치
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      
+      - name: 의존성 설치
+        run: |
+          poetry install --no-interaction --no-ansi
+      
+      - name: Linting (ruff)
+        run: |
+          poetry run ruff check app/
+      
+      - name: 유닛 테스트 실행
+        run: |
+          poetry run pytest tests/unit/ -v --tb=short
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}
+          LANGCHAIN_PROJECT: onsikgu-ai-test
+
+  build-and-deploy:
+    name: Docker 빌드 & EC2 배포
+    needs: test  # 테스트 성공 시에만 배포
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Docker 이미지 빌드
+        working-directory: ai_server
+        run: |
+          docker build -t onsikgu-ai-server:${{ github.sha }} .
+          docker tag onsikgu-ai-server:${{ github.sha }} onsikgu-ai-server:latest
+      
+      - name: Docker 이미지 저장 (tar)
+        run: |
+          docker save onsikgu-ai-server:latest | gzip > onsikgu-ai-server.tar.gz
+      
+      - name: EC2로 이미지 전송 & 배포
+        uses: appleboy/ssh-action@master
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}
+          LANGCHAIN_PROJECT: ${{ secrets.LANGCHAIN_PROJECT }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          timeout: 10m
+          envs: OPENAI_API_KEY,LANGCHAIN_API_KEY,LANGCHAIN_PROJECT
+          script: |
+            #!/bin/bash
+            set -e
+            
+            echo "=========================================="
+            echo "🐳 Docker 배포 시작"
+            echo "시간: $(date)"
+            echo "=========================================="
+            
+            # 1. 작업 디렉토리
+            cd ~
+            mkdir -p onsikgu_ai/ai_server
+            cd onsikgu_ai/ai_server
+            
+            # 2. 데이터 디렉토리 확인
+            echo "📂 데이터 디렉토리 확인 중..."
+            mkdir -p ~/onsikgu_data/chroma
+            echo "   ✅ 데이터 경로: ~/onsikgu_data/chroma"
+            
+            # 3. .env 파일 생성
+            echo "📝 환경변수 설정 중..."
+            cat > .env << EOF
+            # OpenAI API
+            OPENAI_API_KEY=${OPENAI_API_KEY}
+            
+            # Langsmith
+            LANGCHAIN_TRACING_V2=true
+            LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY}
+            LANGCHAIN_PROJECT=${LANGCHAIN_PROJECT}
+            
+            # ChromaDB
+            CHROMA_PERSIST_DIRECTORY=/data/chroma
+            CHROMA_COLLECTION_NAME=qa_history
+            CHROMA_DATA_PATH=${HOME}/onsikgu_data/chroma
+            
+            # Server
+            ENVIRONMENT=production
+            EOF
+            echo "   ✅ .env 파일 생성 완료"
+            
+            # 4. docker-compose.yml 다운로드
+            echo "📥 docker-compose.yml 다운로드 중..."
+            curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/main/ai_server/docker-compose.yml -o docker-compose.yml
+            
+            # 5. Docker 설치 확인
+            if ! command -v docker &> /dev/null; then
+              echo "🐳 Docker 설치 중..."
+              curl -fsSL https://get.docker.com | sh
+              sudo usermod -aG docker ubuntu
+              newgrp docker
+            fi
+            
+            # 6. Docker Compose 설치 확인
+            if ! command -v docker-compose &> /dev/null; then
+              echo "🐳 Docker Compose 설치 중..."
+              sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+              sudo chmod +x /usr/local/bin/docker-compose
+            fi
+            
+            # 7. 이전 컨테이너 중지 및 정리
+            echo "🛑 이전 컨테이너 중지 중..."
+            docker-compose down || true
+            
+            # 8. 컨테이너 시작
+            echo "🚀 컨테이너 시작 중..."
+            docker-compose up -d --build
+            
+            # 9. Health Check
+            echo "🏥 Health Check 중..."
+            sleep 10
+            
+            for i in {1..10}; do
+              if curl -f http://localhost:8000/health > /dev/null 2>&1; then
+                echo "✅ Health Check 성공!"
+                break
+              fi
+              echo "   시도 $i/10 실패, 5초 후 재시도..."
+              sleep 5
+            done
+            
+            # 10. 상태 확인
+            echo "📊 컨테이너 상태:"
+            docker-compose ps
+            
+            echo "=========================================="
+            echo "✅ 배포 완료!"
+            echo "=========================================="
+      
+      - name: 배포 실패 시 알림
+        if: failure()
+        run: |
+          echo "❌ 배포 실패!"
+          echo "원인: Docker 빌드 또는 Health Check 실패"

@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Poetry
+.venv/
+# poetry.lock  ← 주석 처리 (Docker 빌드에 필요)
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+test-report.xml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+
+# Logs
+*.log
+nohup.out
+server.log
+
+# Environment
+.env
+.env.*
+
+# Data (외부 볼륨으로 마운트)
+data/
+*.db
+*.sqlite
+
+# Documentation
+*.md
+docs/
+*.pdf
+*.pages
+*.hwp
+*.pptx
+
+# Misc
+.DS_Store
+Thumbs.db

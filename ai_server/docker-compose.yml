@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  ai-server:
+    container_name: onsikgu-ai-server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: onsikgu-ai-server:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      # ChromaDB 데이터 영구 보존
+      - ${CHROMA_DATA_PATH:-~/onsikgu_data/chroma}:/data/chroma
+    env_file:
+      - .env
+    environment:
+      # 컨테이너 내부 경로로 오버라이드
+      - CHROMA_PERSIST_DIRECTORY=/data/chroma
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+
+  # nginx (선택사항 - 현재는 별도 설치된 nginx 사용 중)
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: onsikgu-nginx
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ../github/scripts/nginx_onsikgu.conf:/etc/nginx/conf.d/default.conf
+  #   depends_on:
+  #     - ai-server
+  #   restart: unless-stopped

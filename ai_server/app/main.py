@@ -1,4 +1,5 @@
 import logging
+import os
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -9,13 +10,26 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core.config import settings
-from app.routers import question_router
+
+# Clean Architecture Router
+from app.presentation.routers import question_router_v2
 
 # 환경 변수 로드
 load_dotenv()
 
+# Langsmith 환경변수 설정 (Langchain이 자동으로 읽음)
+os.environ["LANGCHAIN_TRACING_V2"] = settings.langchain_tracing_v2
+os.environ["LANGCHAIN_API_KEY"] = settings.langchain_api_key
+os.environ["LANGCHAIN_PROJECT"] = settings.langchain_project
+
 # 로거 설정
 logger = logging.getLogger(__name__)
+
+# Langsmith 활성화 여부 로깅
+if settings.langchain_tracing_v2.lower() == "true":
+    logger.info(f"✅ Langsmith 추적 활성화: project={settings.langchain_project}")
+else:
+    logger.info("⚠️  Langsmith 추적 비활성화 (LANGCHAIN_TRACING_V2=false)")
 
 
 @asynccontextmanager
@@ -55,8 +69,8 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
-# 라우터 등록 (기본 OpenAI 질문 생성만 제공)
-app.include_router(question_router.router, prefix="/api/v1", tags=["기본 질문"])
+# 라우터 등록 (Clean Architecture)
+app.include_router(question_router_v2.router, prefix="/api/v1", tags=["질문 생성"])
 
 
 @app.get("/")
@@ -64,7 +78,11 @@ async def root():
     return {
         "message": "온식구 AI 서버에 오신 것을 환영합니다! 🏠",
         "version": "2.0.0",
-        "features": ["기본 질문 생성"],
+        "architecture": "Clean Architecture (DDD + TDD)",
+        "endpoints": {
+            "personal": "/api/v1/questions/generate/personal",
+            "family": "/api/v1/questions/generate/family",
+        },
     }
 
 

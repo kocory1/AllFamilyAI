@@ -110,18 +110,15 @@ HOST=127.0.0.1
 PORT=8000
 LOG_LEVEL=INFO
 
-# AI 모델 설정
+# AI 모델 설정 
 DEFAULT_MODEL=gpt-4o-mini
 MAX_TOKENS=10000
-TEMPERATURE=0.8
-MAX_QUESTION_LENGTH=90
+TEMPERATURE=0.2
 
 # ChromaDB 설정 (RAG용 벡터 DB)
 CHROMA_PERSIST_DIRECTORY=/home/ubuntu/onsikgu_data/chroma
 CHROMA_COLLECTION_NAME=qa_history
 EMBEDDING_MODEL=text-embedding-3-small
-RAG_TOP_K=5
-RAG_MIN_ANSWERS=5
 EOF
 
 # 서버 시작 (Poetry 사용)

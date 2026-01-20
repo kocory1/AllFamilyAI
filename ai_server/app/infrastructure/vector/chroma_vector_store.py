@@ -1,0 +1,195 @@
+"""
+ChromaDB 기반 벡터 스토어 (Infrastructure)
+
+Clean Architecture:
+- VectorStorePort 인터페이스 구현
+- Domain Entity 입출력
+- ChromaDB 구체 구현 세부사항 캡슐화
+"""
+
+import logging
+from datetime import datetime
+
+from app.domain.entities.qa_document import QADocument
+from app.domain.ports.vector_store_port import VectorStorePort
+
+logger = logging.getLogger(__name__)
+
+
+class ChromaVectorStore(VectorStorePort):
+    """
+    ChromaDB 기반 벡터 스토어 (Port 구현)
+
+    책임:
+    - Domain Entity → ChromaDB 형식 변환
+    - 임베딩 생성
+    - ChromaDB 저장/검색
+    - ChromaDB 형식 → Domain Entity 변환
+    """
+
+    def __init__(self, openai_client, collection):
+        """
+        Args:
+            openai_client: OpenAI 클라이언트 (임베딩용)
+            collection: ChromaDB Collection
+        """
+        self.openai_client = openai_client
+        self.collection = collection
+        logger.info("[ChromaVectorStore] 초기화 완료")
+
+    async def store(self, doc: QADocument) -> bool:
+        """
+        Domain Entity 저장 (Port 구현)
+
+        Args:
+            doc: QADocument Domain Entity
+
+        Returns:
+            저장 성공 여부
+        """
+        try:
+            logger.info(
+                f"[ChromaVectorStore] 저장 시작: family_id={doc.family_id}, "
+                f"member_id={doc.member_id}"
+            )
+
+            # Domain Entity → 임베딩 텍스트
+            embedding_text = self._to_embedding_text(doc)
+
+            # 임베딩 생성
+            response = await self.openai_client.create_embedding(embedding_text)
+            embedding = response.data[0].embedding
+
+            # 메타데이터 생성
+            metadata = {
+                "family_id": doc.family_id,
+                "member_id": doc.member_id,
+                "role_label": doc.role_label,
+                "answered_at": doc.answered_at.isoformat(),
+            }
+
+            # ChromaDB 저장
+            doc_id = f"{doc.family_id}_{doc.member_id}_{int(datetime.now().timestamp() * 1000)}"
+            self.collection.add(
+                ids=[doc_id],
+                embeddings=[embedding],
+                documents=[embedding_text],
+                metadatas=[metadata],
+            )
+
+            logger.info(f"[ChromaVectorStore] 저장 완료: {doc_id}")
+            return True
+
+        except Exception as e:
+            logger.error(f"[ChromaVectorStore] 저장 실패: {e}")
+            return False
+
+    async def search_by_member(
+        self, member_id: int, query_doc: QADocument, top_k: int = 5
+    ) -> list[QADocument]:
+        """
+        개인 QA 검색 (Port 구현)
+
+        Returns:
+            Domain Entity 리스트
+        """
+        try:
+            # 쿼리 임베딩 생성
+            query_text = self._to_embedding_text(query_doc)
+            response = await self.openai_client.create_embedding(query_text)
+            query_embedding = response.data[0].embedding
+
+            # ChromaDB 검색
+            results = self.collection.query(
+                query_embeddings=[query_embedding],
+                n_results=top_k,
+                where={"member_id": member_id},
+                include=["documents", "metadatas"],
+            )
+
+            # ChromaDB 결과 → Domain Entity 변환
+            entities = self._to_domain_entities(results)
+
+            logger.info(
+                f"[ChromaVectorStore] 검색 완료: member_id={member_id}, " f"결과={len(entities)}개"
+            )
+
+            return entities
+
+        except Exception as e:
+            logger.error(f"[ChromaVectorStore] 검색 실패: {e}")
+            return []
+
+    async def search_by_family(
+        self, family_id: int, query_doc: QADocument, top_k: int = 5
+    ) -> list[QADocument]:
+        """가족 QA 검색 (Port 구현)"""
+        try:
+            query_text = self._to_embedding_text(query_doc)
+            response = await self.openai_client.create_embedding(query_text)
+            query_embedding = response.data[0].embedding
+
+            results = self.collection.query(
+                query_embeddings=[query_embedding],
+                n_results=top_k,
+                where={"family_id": family_id},
+                include=["documents", "metadatas"],
+            )
+
+            entities = self._to_domain_entities(results)
+
+            logger.info(
+                f"[ChromaVectorStore] 검색 완료: family_id={family_id}, " f"결과={len(entities)}개"
+            )
+
+            return entities
+
+        except Exception as e:
+            logger.error(f"[ChromaVectorStore] 검색 실패: {e}")
+            return []
+
+    # === Private: Infrastructure 세부사항 ===
+
+    def _to_embedding_text(self, doc: QADocument) -> str:
+        """Domain Entity → 임베딩 텍스트"""
+        year, month, day = doc.get_date_parts()
+        return (
+            f"{year}년 {month}월 {day}일에 {doc.role_label}이(가) 받은 질문: {doc.question}\n"
+            f"답변: {doc.answer}"
+        )
+
+    def _to_domain_entities(self, results: dict) -> list[QADocument]:
+        """ChromaDB 결과 → Domain Entity 리스트"""
+        entities = []
+
+        if results["ids"] and len(results["ids"][0]) > 0:
+            for i in range(len(results["ids"][0])):
+                metadata = results["metadatas"][0][i]
+                document = results["documents"][0][i]
+
+                # 임베딩 텍스트 파싱
+                question, answer = self._parse_embedding_text(document)
+
+                entity = QADocument(
+                    family_id=metadata["family_id"],
+                    member_id=metadata["member_id"],
+                    role_label=metadata["role_label"],
+                    question=question,
+                    answer=answer,
+                    answered_at=datetime.fromisoformat(metadata["answered_at"]),
+                )
+                entities.append(entity)
+
+        return entities
+
+    def _parse_embedding_text(self, text: str) -> tuple[str, str]:
+        """임베딩 텍스트 파싱 → (질문, 답변)"""
+        try:
+            if "받은 질문:" in text and "\n답변:" in text:
+                question_part = text.split("받은 질문:")[1]
+                question, answer = question_part.split("\n답변:")
+                return question.strip(), answer.strip()
+        except Exception as e:
+            logger.warning(f"[파싱 실패] {e}")
+
+        return text, ""
