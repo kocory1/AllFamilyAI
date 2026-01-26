@@ -11,6 +11,7 @@ import chromadb
 from chromadb.config import Settings as ChromaSettings
 
 from app.adapters.openai_client import OpenAIClient
+from app.application.use_cases.family_recent_question import FamilyRecentQuestionUseCase
 from app.application.use_cases.generate_family_question import GenerateFamilyQuestionUseCase
 from app.application.use_cases.generate_personal_question import (
     GeneratePersonalQuestionUseCase,
@@ -157,4 +158,17 @@ def get_family_question_use_case() -> GenerateFamilyQuestionUseCase:
     return GenerateFamilyQuestionUseCase(
         vector_store=get_vector_store(),  # ← Port (인터페이스)
         question_generator=get_family_generator(),  # ← Port (인터페이스)
+    )
+
+
+def get_family_recent_question_use_case() -> FamilyRecentQuestionUseCase:
+    """
+    가족 최근 질문 기반 생성 Use Case (신규 API)
+
+    Clean Architecture 의존성 흐름:
+    Presentation → Application → Domain ← Infrastructure
+    """
+    return FamilyRecentQuestionUseCase(
+        vector_store=get_vector_store(),  # ← Port (인터페이스)
+        question_generator=get_family_generator(),  # ← Port (인터페이스, 가족용 프롬프트)
     )

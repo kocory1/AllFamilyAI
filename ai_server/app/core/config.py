@@ -24,13 +24,15 @@ class Settings(BaseSettings):
     temperature: float = 0.3
 
     # ChromaDB 설정 (RAG용 벡터 DB)
-    chroma_persist_directory: str = (
-        "/home/ubuntu/onsikgu_data/chroma"  # 파일 기반 저장 경로 (배포 환경)
-    )
+    chroma_persist_directory: str = "./data/chroma"  # 로컬 기본값 (배포 시 환경변수로 덮어씀)
     chroma_collection_name: str = "qa_history"  # 컬렉션 이름 (QA 히스토리 단일 컬렉션)
     embedding_model: str = "text-embedding-3-small"  # OpenAI 임베딩 모델
     rag_top_k: int = 5  # RAG 검색 시 반환할 최대 결과 수 (초기 단계: 풍부한 맥락 제공)
     rag_min_answers: int = 5  # RAG 활성화를 위한 최소 답변 개수
+
+    # 질문 생성 설정
+    max_regeneration: int = 3  # 중복 질문 재생성 최대 시도 횟수
+    similarity_threshold: float = 0.9  # 중복 판정 유사도 임계값 (0.0 ~ 1.0)
 
 
 settings = Settings()

@@ -190,6 +190,68 @@ class ChromaVectorStore(VectorStorePort):
             logger.error(f"[ChromaVectorStore] 유사도 검색 실패: {e}")
             return 0.0
 
+    async def get_recent_questions_by_member(
+        self,
+        member_id: str,
+        limit: int = 2,
+    ) -> list[QADocument]:
+        """
+        멤버별 최근 질문 조회 (Port 구현)
+
+        Args:
+            member_id: 멤버 ID (UUID)
+            limit: 반환할 최대 결과 수
+
+        Returns:
+            최근 QADocument 리스트 (answered_at 내림차순)
+        """
+        try:
+            # ChromaDB에서 해당 멤버의 모든 문서 조회
+            # Note: ChromaDB는 메타데이터 정렬을 지원하지 않으므로 Python에서 정렬
+            results = self.collection.get(
+                where={"member_id": member_id},
+                include=["documents", "metadatas"],
+            )
+
+            if not results["ids"]:
+                logger.info(
+                    f"[ChromaVectorStore] 최근 질문 조회: member_id={member_id}, 결과=0개"
+                )
+                return []
+
+            # Domain Entity 변환
+            entities = []
+            for i in range(len(results["ids"])):
+                metadata = results["metadatas"][i]
+                document = results["documents"][i]
+
+                question, answer = self._parse_embedding_text(document)
+
+                entity = QADocument(
+                    family_id=metadata["family_id"],
+                    member_id=metadata["member_id"],
+                    role_label=metadata["role_label"],
+                    question=question,
+                    answer=answer,
+                    answered_at=datetime.fromisoformat(metadata["answered_at"]),
+                )
+                entities.append(entity)
+
+            # answered_at 기준 내림차순 정렬 후 limit 적용
+            entities.sort(key=lambda x: x.answered_at, reverse=True)
+            recent_entities = entities[:limit]
+
+            logger.info(
+                f"[ChromaVectorStore] 최근 질문 조회: member_id={member_id}, "
+                f"전체={len(entities)}개, 반환={len(recent_entities)}개"
+            )
+
+            return recent_entities
+
+        except Exception as e:
+            logger.error(f"[ChromaVectorStore] 최근 질문 조회 실패: {e}")
+            return []
+
     # === Private: Infrastructure 세부사항 ===
 
     def _to_embedding_text(self, doc: QADocument) -> str:

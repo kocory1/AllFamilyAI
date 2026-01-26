@@ -36,13 +36,13 @@ class TestChromaVectorStore:
                     [
                         {
                             "family_id": 1,
-                            "member_id": 10,
+                            "member_id": "member-10",
                             "role_label": "첫째 딸",
                             "answered_at": "2026-01-15T10:00:00",
                         },
                         {
                             "family_id": 1,
-                            "member_id": 10,
+                            "member_id": "member-10",
                             "role_label": "첫째 딸",
                             "answered_at": "2026-01-14T15:30:00",
                         },
@@ -84,7 +84,7 @@ class TestChromaVectorStore:
 
         doc = QADocument(
             family_id=1,
-            member_id=10,
+            member_id="member-10",
             role_label="첫째 딸",
             question="오늘 뭐 했어?",
             answer="친구들과 놀았어요",
@@ -109,7 +109,7 @@ class TestChromaVectorStore:
         # 메타데이터 검증
         metadata = call_kwargs["metadatas"][0]
         assert metadata["family_id"] == 1
-        assert metadata["member_id"] == 10
+        assert metadata["member_id"] == "member-10"
         assert metadata["role_label"] == "첫째 딸"
 
     @pytest.mark.asyncio
@@ -128,7 +128,7 @@ class TestChromaVectorStore:
 
         query_doc = QADocument(
             family_id=1,
-            member_id=10,
+            member_id="member-10",
             role_label="첫째 딸",
             question="테스트",
             answer="테스트",
@@ -136,7 +136,7 @@ class TestChromaVectorStore:
         )
 
         # When: 개인 QA 검색
-        results = await vector_store.search_by_member(10, query_doc, top_k=5)
+        results = await vector_store.search_by_member("member-10", query_doc, top_k=5)
 
         # Then: 검색 결과 검증
         assert len(results) == 2
@@ -148,7 +148,7 @@ class TestChromaVectorStore:
         mock_chroma_collection.query.assert_called_once()
         call_kwargs = mock_chroma_collection.query.call_args.kwargs
         assert call_kwargs["n_results"] == 5
-        assert call_kwargs["where"] == {"member_id": 10}
+        assert call_kwargs["where"] == {"member_id": "member-10"}
 
 
 class TestLangchainPersonalGenerator:
@@ -201,7 +201,7 @@ class TestLangchainPersonalGenerator:
 
                 base_qa = QADocument(
                     family_id=1,
-                    member_id=10,
+                    member_id="member-10",
                     role_label="첫째 딸",
                     question="오늘 뭐 했어?",
                     answer="친구들과 놀았어요",
@@ -285,7 +285,7 @@ class TestInfrastructureIntegration:
 
         input_dto = GeneratePersonalQuestionInput(
             family_id=1,
-            member_id=10,
+            member_id="member-10",
             role_label="첫째 딸",
             base_question="테스트",
             base_answer="테스트",

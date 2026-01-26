@@ -27,7 +27,7 @@ class TestGeneratePersonalQuestionUseCase:
         mock.search_by_member.return_value = [
             QADocument(
                 family_id=1,
-                member_id=10,
+                member_id="member-10",
                 role_label="첫째 딸",
                 question="오늘 학교 어땠어?",
                 answer="재미있었어요!",
@@ -35,7 +35,7 @@ class TestGeneratePersonalQuestionUseCase:
             ),
             QADocument(
                 family_id=1,
-                member_id=10,
+                member_id="member-10",
                 role_label="첫째 딸",
                 question="친구들과 뭐 했어?",
                 answer="같이 놀았어요",
@@ -81,7 +81,7 @@ class TestGeneratePersonalQuestionUseCase:
 
         input_dto = GeneratePersonalQuestionInput(
             family_id=1,
-            member_id=10,
+            member_id="member-10",
             role_label="첫째 딸",
             base_question="오늘 뭐 했어?",
             base_answer="친구들과 놀았어요",
@@ -95,7 +95,7 @@ class TestGeneratePersonalQuestionUseCase:
         assert output.question == "친구들과 어떤 놀이를 했나요?"
         assert output.level.value == 2
         assert output.metadata["rag_count"] == 2
-        assert output.metadata["member_id"] == 10
+        assert output.metadata["member_id"] == "member-10"
 
         # Then: Mock 호출 검증 (순서: RAG → 생성 → 저장)
         mock_vector_store.search_by_member.assert_called_once()
@@ -104,7 +104,7 @@ class TestGeneratePersonalQuestionUseCase:
 
         # Then: 검색 파라미터 검증
         search_call = mock_vector_store.search_by_member.call_args
-        assert search_call.kwargs["member_id"] == 10
+        assert search_call.kwargs["member_id"] == "member-10"
         assert search_call.kwargs["top_k"] == 5
 
     @pytest.mark.asyncio
@@ -127,7 +127,7 @@ class TestGeneratePersonalQuestionUseCase:
 
         input_dto = GeneratePersonalQuestionInput(
             family_id=1,
-            member_id=10,
+            member_id="member-10",
             role_label="첫째 딸",
             base_question="오늘 뭐 했어?",
             base_answer="공부했어요",
@@ -165,7 +165,7 @@ class TestGeneratePersonalQuestionUseCase:
 
         input_dto = GeneratePersonalQuestionInput(
             family_id=1,
-            member_id=10,
+            member_id="member-10",
             role_label="첫째 딸",
             base_question="테스트",
             base_answer="테스트",
@@ -196,7 +196,7 @@ class TestGenerateFamilyQuestionUseCase:
         mock.search_by_family.return_value = [
             QADocument(
                 family_id=1,
-                member_id=10,
+                member_id="member-10",
                 role_label="첫째 딸",
                 question="오늘 저녁 뭐 먹을까?",
                 answer="치킨 먹고 싶어요",
@@ -243,7 +243,7 @@ class TestGenerateFamilyQuestionUseCase:
 
         input_dto = GenerateFamilyQuestionInput(
             family_id=1,
-            member_id=10,
+            member_id="member-10",
             role_label="첫째 딸",
             base_question="오늘 저녁 뭐 먹을까?",
             base_answer="치킨 먹고 싶어요",
@@ -282,7 +282,7 @@ class TestDuplicateQuestionCheck:
         mock.search_by_member.return_value = [
             QADocument(
                 family_id=1,
-                member_id=10,
+                member_id="member-10",
                 role_label="첫째 딸",
                 question="오늘 학교 어땠어?",
                 answer="재미있었어요!",
@@ -328,7 +328,7 @@ class TestDuplicateQuestionCheck:
 
         input_dto = GeneratePersonalQuestionInput(
             family_id=1,
-            member_id=10,
+            member_id="member-10",
             role_label="첫째 딸",
             base_question="오늘 뭐 했어?",
             base_answer="친구랑 놀았어요",
@@ -367,7 +367,7 @@ class TestDuplicateQuestionCheck:
 
         input_dto = GeneratePersonalQuestionInput(
             family_id=1,
-            member_id=10,
+            member_id="member-10",
             role_label="첫째 딸",
             base_question="오늘 뭐 했어?",
             base_answer="친구랑 놀았어요",
@@ -403,7 +403,7 @@ class TestDuplicateQuestionCheck:
 
         input_dto = GeneratePersonalQuestionInput(
             family_id=1,
-            member_id=10,
+            member_id="member-10",
             role_label="첫째 딸",
             base_question="오늘 뭐 했어?",
             base_answer="친구랑 놀았어요",
@@ -418,6 +418,183 @@ class TestDuplicateQuestionCheck:
         assert output.metadata["regeneration_count"] == 0
 
 
+class TestFamilyRecentQuestionUseCase:
+    """가족 최근 질문 기반 Use Case 테스트 (신규 API)"""
+
+    @pytest.fixture
+    def mock_vector_store(self):
+        """VectorStorePort Mock"""
+        from app.domain.entities.qa_document import QADocument
+
+        mock = AsyncMock()
+        mock.search_similar_questions.return_value = 0.3  # 유사도 낮음
+
+        # 멤버별 최근 질문 반환
+        def get_recent_side_effect(member_id: str, limit: int = 2):
+            if member_id == "member-1":
+                return [
+                    QADocument(
+                        family_id=1,
+                        member_id="member-1",
+                        role_label="아빠",
+                        question="오늘 회사 어땠어?",
+                        answer="바빴어",
+                        answered_at=datetime(2026, 1, 19, 18, 0, 0),
+                    ),
+                    QADocument(
+                        family_id=1,
+                        member_id="member-1",
+                        role_label="아빠",
+                        question="점심 뭐 먹었어?",
+                        answer="김치찌개",
+                        answered_at=datetime(2026, 1, 18, 12, 0, 0),
+                    ),
+                ]
+            elif member_id == "member-2":
+                return [
+                    QADocument(
+                        family_id=1,
+                        member_id="member-2",
+                        role_label="엄마",
+                        question="오늘 뭐 했어?",
+                        answer="집 청소했어",
+                        answered_at=datetime(2026, 1, 19, 15, 0, 0),
+                    ),
+                ]
+            return []
+
+        mock.get_recent_questions_by_member.side_effect = get_recent_side_effect
+        return mock
+
+    @pytest.fixture
+    def mock_question_generator(self):
+        """QuestionGeneratorPort Mock"""
+        from app.domain.value_objects.question_level import QuestionLevel
+
+        mock = AsyncMock()
+        mock.generate_question_for_target.return_value = (
+            "아빠, 요즘 회사에서 어떤 프로젝트 하고 계세요?",
+            QuestionLevel(3),
+        )
+        return mock
+
+    @pytest.mark.asyncio
+    async def test_family_recent_question_success(
+        self, mock_vector_store, mock_question_generator
+    ):
+        """[RED] 가족 최근 질문 기반 생성 - 성공 케이스"""
+        # Given
+        from app.application.dto.question_dto import (
+            FamilyRecentQuestionInput,
+            FamilyRecentQuestionOutput,
+        )
+        from app.application.use_cases.family_recent_question import (
+            FamilyRecentQuestionUseCase,
+        )
+
+        use_case = FamilyRecentQuestionUseCase(
+            vector_store=mock_vector_store,
+            question_generator=mock_question_generator,
+        )
+
+        input_dto = FamilyRecentQuestionInput(
+            family_id=1,
+            target_member_id="member-1",
+            target_role_label="아빠",
+            member_ids=["member-1", "member-2"],
+        )
+
+        # When
+        output = await use_case.execute(input_dto)
+
+        # Then: 응답 검증
+        assert output.question == "아빠, 요즘 회사에서 어떤 프로젝트 하고 계세요?"
+        assert output.level.value == 3
+        assert output.metadata["context_count"] == 3  # 2 + 1
+        assert output.metadata["target_member_id"] == "member-1"
+
+        # Then: 각 멤버별 최근 질문 조회 확인
+        assert mock_vector_store.get_recent_questions_by_member.call_count == 2
+
+        # Then: 질문 생성 확인
+        mock_question_generator.generate_question_for_target.assert_called_once()
+
+        # Then: 저장 안 함 확인
+        mock_vector_store.store.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_family_recent_question_regenerate_on_high_similarity(
+        self, mock_vector_store, mock_question_generator
+    ):
+        """[RED] 유사도 높으면 재생성"""
+        from app.domain.value_objects.question_level import QuestionLevel
+        from app.application.dto.question_dto import FamilyRecentQuestionInput
+        from app.application.use_cases.family_recent_question import (
+            FamilyRecentQuestionUseCase,
+        )
+
+        # Given: 첫 번째 질문은 유사도 높음
+        mock_question_generator.generate_question_for_target.side_effect = [
+            ("중복 질문입니다", QuestionLevel(2)),
+            ("새로운 질문입니다", QuestionLevel(3)),
+        ]
+        mock_vector_store.search_similar_questions.side_effect = [0.95, 0.30]
+
+        use_case = FamilyRecentQuestionUseCase(
+            vector_store=mock_vector_store,
+            question_generator=mock_question_generator,
+        )
+
+        input_dto = FamilyRecentQuestionInput(
+            family_id=1,
+            target_member_id="member-1",
+            target_role_label="아빠",
+            member_ids=["member-1"],
+        )
+
+        # When
+        output = await use_case.execute(input_dto)
+
+        # Then
+        assert output.question == "새로운 질문입니다"
+        assert mock_question_generator.generate_question_for_target.call_count == 2
+        assert output.metadata["regeneration_count"] == 1
+
+    @pytest.mark.asyncio
+    async def test_family_recent_question_empty_context(
+        self, mock_question_generator
+    ):
+        """[RED] 최근 질문이 없어도 생성 가능"""
+        from app.application.dto.question_dto import FamilyRecentQuestionInput
+        from app.application.use_cases.family_recent_question import (
+            FamilyRecentQuestionUseCase,
+        )
+
+        # Given: 모든 멤버의 최근 질문이 없음 (새로운 mock 생성)
+        empty_vector_store = AsyncMock()
+        empty_vector_store.get_recent_questions_by_member.return_value = []
+        empty_vector_store.search_similar_questions.return_value = 0.3
+
+        use_case = FamilyRecentQuestionUseCase(
+            vector_store=empty_vector_store,
+            question_generator=mock_question_generator,
+        )
+
+        input_dto = FamilyRecentQuestionInput(
+            family_id=1,
+            target_member_id="member-1",
+            target_role_label="아빠",
+            member_ids=["member-1", "member-2"],
+        )
+
+        # When
+        output = await use_case.execute(input_dto)
+
+        # Then: 컨텍스트 없이도 질문 생성
+        assert output.question is not None
+        assert output.metadata["context_count"] == 0
+
+
 class TestUseCaseDTO:
     """Use Case DTO 테스트"""
 
@@ -428,7 +605,7 @@ class TestUseCaseDTO:
 
         input_dto = GeneratePersonalQuestionInput(
             family_id=1,
-            member_id=10,
+            member_id="member-10",
             role_label="첫째 딸",
             base_question="테스트",
             base_answer="테스트",
@@ -437,7 +614,7 @@ class TestUseCaseDTO:
 
         # Then
         assert input_dto.family_id == 1
-        assert input_dto.member_id == 10
+        assert input_dto.member_id == "member-10"
         assert input_dto.role_label == "첫째 딸"
 
     def test_generate_personal_question_output_dto(self):

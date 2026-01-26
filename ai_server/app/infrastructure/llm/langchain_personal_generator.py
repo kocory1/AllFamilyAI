@@ -119,3 +119,43 @@ class LangchainPersonalGenerator(QuestionGeneratorPort):
 - 답변: {doc.answer}
 - 답변 시각: {year}년 {month}월 {day}일
 - 답변자: {doc.role_label}"""
+
+    async def generate_question_for_target(
+        self,
+        target_member_id: str,
+        target_role_label: str,
+        context: list[QADocument],
+    ) -> tuple[str, QuestionLevel]:
+        """
+        특정 멤버를 대상으로 질문 생성
+
+        Note: 이 메서드는 FamilyRecentQuestionUseCase에서 사용됨
+        """
+        logger.info(
+            f"[LangchainPersonalGenerator] 타겟 질문 생성 시작: " f"target={target_role_label}"
+        )
+
+        # 컨텍스트 포맷팅
+        context_text = self._format_rag_context(context)
+
+        # 기본 프롬프트로 호출 (role_label 기반)
+        response = await self.chain.ainvoke(
+            {
+                "role_label": target_role_label,
+                "rag_context": context_text,
+                "base_qa": f"**대상:** {target_role_label}에게 새로운 질문을 생성해주세요.",
+            }
+        )
+
+        # JSON 파싱
+        parsed = self.parser.parse(response.content)
+
+        if "question" not in parsed or "level" not in parsed:
+            raise ValueError(f"LLM 응답에 필수 필드 없음: {list(parsed.keys())}")
+
+        question = parsed["question"]
+        level = QuestionLevel.from_int(parsed["level"])
+
+        logger.info(f"[LangchainPersonalGenerator] 타겟 질문 생성 완료: {question[:30]}...")
+
+        return question, level
