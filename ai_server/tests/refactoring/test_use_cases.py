@@ -26,7 +26,7 @@ class TestGeneratePersonalQuestionUseCase:
         mock.search_similar_questions.return_value = 0.3  # 유사도 낮음 (중복 아님)
         mock.search_by_member.return_value = [
             QADocument(
-                family_id=1,
+                family_id="family-1",
                 member_id="member-10",
                 role_label="첫째 딸",
                 question="오늘 학교 어땠어?",
@@ -34,7 +34,7 @@ class TestGeneratePersonalQuestionUseCase:
                 answered_at=datetime(2026, 1, 15, 10, 0, 0),
             ),
             QADocument(
-                family_id=1,
+                family_id="family-1",
                 member_id="member-10",
                 role_label="첫째 딸",
                 question="친구들과 뭐 했어?",
@@ -80,7 +80,7 @@ class TestGeneratePersonalQuestionUseCase:
         )
 
         input_dto = GeneratePersonalQuestionInput(
-            family_id=1,
+            family_id="family-1",
             member_id="member-10",
             role_label="첫째 딸",
             base_question="오늘 뭐 했어?",
@@ -126,7 +126,7 @@ class TestGeneratePersonalQuestionUseCase:
         )
 
         input_dto = GeneratePersonalQuestionInput(
-            family_id=1,
+            family_id="family-1",
             member_id="member-10",
             role_label="첫째 딸",
             base_question="오늘 뭐 했어?",
@@ -164,7 +164,7 @@ class TestGeneratePersonalQuestionUseCase:
         )
 
         input_dto = GeneratePersonalQuestionInput(
-            family_id=1,
+            family_id="family-1",
             member_id="member-10",
             role_label="첫째 딸",
             base_question="테스트",
@@ -175,9 +175,9 @@ class TestGeneratePersonalQuestionUseCase:
         # When/Then: 저장 실패 시 예외 발생
         with pytest.raises(Exception) as exc_info:
             await use_case.execute(input_dto)
-        
+
         assert "저장 실패" in str(exc_info.value)
-        
+
         # 질문 생성은 호출됨 (저장 전에 실행되므로)
         mock_question_generator.generate_question.assert_called_once()
 
@@ -195,7 +195,7 @@ class TestGenerateFamilyQuestionUseCase:
         mock.search_similar_questions.return_value = 0.3  # 유사도 낮음 (중복 아님)
         mock.search_by_family.return_value = [
             QADocument(
-                family_id=1,
+                family_id="family-1",
                 member_id="member-10",
                 role_label="첫째 딸",
                 question="오늘 저녁 뭐 먹을까?",
@@ -242,7 +242,7 @@ class TestGenerateFamilyQuestionUseCase:
         )
 
         input_dto = GenerateFamilyQuestionInput(
-            family_id=1,
+            family_id="family-1",
             member_id="member-10",
             role_label="첫째 딸",
             base_question="오늘 저녁 뭐 먹을까?",
@@ -265,7 +265,7 @@ class TestGenerateFamilyQuestionUseCase:
 
         # Then: 검색 파라미터 검증 (top_k=10)
         search_call = mock_vector_store.search_by_family.call_args
-        assert search_call.kwargs["family_id"] == 1
+        assert search_call.kwargs["family_id"] == "family-1"
         assert search_call.kwargs["top_k"] == 10
 
 
@@ -281,7 +281,7 @@ class TestDuplicateQuestionCheck:
         mock.store.return_value = True
         mock.search_by_member.return_value = [
             QADocument(
-                family_id=1,
+                family_id="family-1",
                 member_id="member-10",
                 role_label="첫째 딸",
                 question="오늘 학교 어땠어?",
@@ -305,11 +305,11 @@ class TestDuplicateQuestionCheck:
         self, mock_vector_store, mock_question_generator
     ):
         """[RED] 유사도 0.9 이상이면 재생성"""
-        from app.domain.value_objects.question_level import QuestionLevel
         from app.application.use_cases.generate_personal_question import (
             GeneratePersonalQuestionInput,
             GeneratePersonalQuestionUseCase,
         )
+        from app.domain.value_objects.question_level import QuestionLevel
 
         # Given: 첫 번째 질문은 유사도 높음, 두 번째는 OK
         mock_question_generator.generate_question.side_effect = [
@@ -327,7 +327,7 @@ class TestDuplicateQuestionCheck:
         )
 
         input_dto = GeneratePersonalQuestionInput(
-            family_id=1,
+            family_id="family-1",
             member_id="member-10",
             role_label="첫째 딸",
             base_question="오늘 뭐 했어?",
@@ -348,11 +348,11 @@ class TestDuplicateQuestionCheck:
         self, mock_vector_store, mock_question_generator
     ):
         """[RED] 최대 3회 재생성 후 마지막 질문 반환"""
-        from app.domain.value_objects.question_level import QuestionLevel
         from app.application.use_cases.generate_personal_question import (
             GeneratePersonalQuestionInput,
             GeneratePersonalQuestionUseCase,
         )
+        from app.domain.value_objects.question_level import QuestionLevel
 
         # Given: 모든 질문이 유사함
         mock_question_generator.generate_question.return_value = (
@@ -366,7 +366,7 @@ class TestDuplicateQuestionCheck:
         )
 
         input_dto = GeneratePersonalQuestionInput(
-            family_id=1,
+            family_id="family-1",
             member_id="member-10",
             role_label="첫째 딸",
             base_question="오늘 뭐 했어?",
@@ -402,7 +402,7 @@ class TestDuplicateQuestionCheck:
         )
 
         input_dto = GeneratePersonalQuestionInput(
-            family_id=1,
+            family_id="family-1",
             member_id="member-10",
             role_label="첫째 딸",
             base_question="오늘 뭐 했어?",
@@ -434,7 +434,7 @@ class TestFamilyRecentQuestionUseCase:
             if member_id == "member-1":
                 return [
                     QADocument(
-                        family_id=1,
+                        family_id="family-1",
                         member_id="member-1",
                         role_label="아빠",
                         question="오늘 회사 어땠어?",
@@ -442,7 +442,7 @@ class TestFamilyRecentQuestionUseCase:
                         answered_at=datetime(2026, 1, 19, 18, 0, 0),
                     ),
                     QADocument(
-                        family_id=1,
+                        family_id="family-1",
                         member_id="member-1",
                         role_label="아빠",
                         question="점심 뭐 먹었어?",
@@ -453,7 +453,7 @@ class TestFamilyRecentQuestionUseCase:
             elif member_id == "member-2":
                 return [
                     QADocument(
-                        family_id=1,
+                        family_id="family-1",
                         member_id="member-2",
                         role_label="엄마",
                         question="오늘 뭐 했어?",
@@ -486,7 +486,6 @@ class TestFamilyRecentQuestionUseCase:
         # Given
         from app.application.dto.question_dto import (
             FamilyRecentQuestionInput,
-            FamilyRecentQuestionOutput,
         )
         from app.application.use_cases.family_recent_question import (
             FamilyRecentQuestionUseCase,
@@ -498,7 +497,7 @@ class TestFamilyRecentQuestionUseCase:
         )
 
         input_dto = FamilyRecentQuestionInput(
-            family_id=1,
+            family_id="family-1",
             target_member_id="member-1",
             target_role_label="아빠",
             member_ids=["member-1", "member-2"],
@@ -527,11 +526,11 @@ class TestFamilyRecentQuestionUseCase:
         self, mock_vector_store, mock_question_generator
     ):
         """[RED] 유사도 높으면 재생성"""
-        from app.domain.value_objects.question_level import QuestionLevel
         from app.application.dto.question_dto import FamilyRecentQuestionInput
         from app.application.use_cases.family_recent_question import (
             FamilyRecentQuestionUseCase,
         )
+        from app.domain.value_objects.question_level import QuestionLevel
 
         # Given: 첫 번째 질문은 유사도 높음
         mock_question_generator.generate_question_for_target.side_effect = [
@@ -546,7 +545,7 @@ class TestFamilyRecentQuestionUseCase:
         )
 
         input_dto = FamilyRecentQuestionInput(
-            family_id=1,
+            family_id="family-1",
             target_member_id="member-1",
             target_role_label="아빠",
             member_ids=["member-1"],
@@ -581,7 +580,7 @@ class TestFamilyRecentQuestionUseCase:
         )
 
         input_dto = FamilyRecentQuestionInput(
-            family_id=1,
+            family_id="family-1",
             target_member_id="member-1",
             target_role_label="아빠",
             member_ids=["member-1", "member-2"],
@@ -604,7 +603,7 @@ class TestUseCaseDTO:
         from app.application.dto.question_dto import GeneratePersonalQuestionInput
 
         input_dto = GeneratePersonalQuestionInput(
-            family_id=1,
+            family_id="family-1",
             member_id="member-10",
             role_label="첫째 딸",
             base_question="테스트",
@@ -613,7 +612,7 @@ class TestUseCaseDTO:
         )
 
         # Then
-        assert input_dto.family_id == 1
+        assert input_dto.family_id == "family-1"
         assert input_dto.member_id == "member-10"
         assert input_dto.role_label == "첫째 딸"
 

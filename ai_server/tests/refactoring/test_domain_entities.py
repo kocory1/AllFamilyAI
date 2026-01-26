@@ -19,7 +19,7 @@ class TestQADocumentEntity:
 
         # When
         doc = QADocument(
-            family_id=1,
+            family_id="family-1",
             member_id="member-10",
             role_label="첫째 딸",
             question="오늘 뭐 했어?",
@@ -28,7 +28,7 @@ class TestQADocumentEntity:
         )
 
         # Then
-        assert doc.family_id == 1
+        assert doc.family_id == "family-1"
         assert doc.member_id == "member-10"
         assert doc.role_label == "첫째 딸"
         assert doc.question == "오늘 뭐 했어?"
@@ -41,7 +41,7 @@ class TestQADocumentEntity:
         from app.domain.entities.qa_document import QADocument
 
         doc = QADocument(
-            family_id=1,
+            family_id="family-1",
             member_id="member-10",
             role_label="첫째 딸",
             question="테스트",
@@ -67,7 +67,7 @@ class TestQADocumentEntity:
         recent_date = datetime.now() - timedelta(days=15)
 
         doc = QADocument(
-            family_id=1,
+            family_id="family-1",
             member_id="member-10",
             role_label="첫째 딸",
             question="테스트",
@@ -88,7 +88,7 @@ class TestQADocumentEntity:
         old_date = datetime.now() - timedelta(days=45)
 
         doc = QADocument(
-            family_id=1,
+            family_id="family-1",
             member_id="member-10",
             role_label="첫째 딸",
             question="테스트",
@@ -105,7 +105,7 @@ class TestQADocumentEntity:
         from app.domain.entities.qa_document import QADocument
 
         doc = QADocument(
-            family_id=1,
+            family_id="family-1",
             member_id="member-10",
             role_label="첫째 딸",
             question="테스트",

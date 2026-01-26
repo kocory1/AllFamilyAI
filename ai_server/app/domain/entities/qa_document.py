@@ -21,7 +21,7 @@ class QADocument:
     - 순수한 비즈니스 개념 표현
 
     Attributes:
-        family_id: 가족 ID
+        family_id: 가족 ID (UUID)
         member_id: 멤버 ID (UUID)
         role_label: 역할 레이블 (예: "첫째 딸", "아빠")
         question: 질문 내용
@@ -29,7 +29,7 @@ class QADocument:
         answered_at: 답변 시각 (datetime 객체)
     """
 
-    family_id: int
+    family_id: str  # UUID
     member_id: str  # UUID
     role_label: str
     question: str

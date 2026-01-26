@@ -23,7 +23,7 @@ class PersonalQuestionRequestSchema(BaseModel):
 
     model_config = ConfigDict(populate_by_name=True)
 
-    familyId: int = Field(alias="familyId", description="가족 ID")
+    familyId: str = Field(alias="familyId", description="가족 ID (UUID)")
     memberId: str = Field(alias="memberId", description="멤버 ID (UUID)")
     roleLabel: str = Field(alias="roleLabel", description="역할 레이블 (예: 첫째 딸)")
     baseQuestion: str = Field(alias="baseQuestion", description="기준 질문")
@@ -54,7 +54,7 @@ class FamilyRecentQuestionRequestSchema(BaseModel):
 
     model_config = ConfigDict(populate_by_name=True)
 
-    familyId: int = Field(alias="familyId", description="가족 ID")
+    familyId: str = Field(alias="familyId", description="가족 ID (UUID)")
     targetMemberId: str = Field(
         alias="targetMemberId", description="질문 대상 멤버 ID (UUID)"
     )

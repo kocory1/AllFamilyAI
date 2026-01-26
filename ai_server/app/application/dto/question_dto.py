@@ -16,7 +16,7 @@ from app.domain.value_objects.question_level import QuestionLevel
 class GeneratePersonalQuestionInput:
     """개인 질문 생성 Use Case 입력 DTO"""
 
-    family_id: int
+    family_id: str  # UUID
     member_id: str  # UUID
     role_label: str
     base_question: str
@@ -42,7 +42,7 @@ GenerateFamilyQuestionOutput = GeneratePersonalQuestionOutput
 class FamilyRecentQuestionInput:
     """가족 최근 질문 기반 생성 Use Case 입력 DTO"""
 
-    family_id: int
+    family_id: str  # UUID
     target_member_id: str  # 질문 대상 멤버 UUID
     target_role_label: str  # 질문 대상 역할 라벨
     member_ids: list[str]  # 컨텍스트 조회할 멤버 ID 목록

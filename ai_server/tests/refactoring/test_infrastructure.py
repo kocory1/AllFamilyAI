@@ -35,13 +35,13 @@ class TestChromaVectorStore:
                 "metadatas": [
                     [
                         {
-                            "family_id": 1,
+                            "family_id": "family-1",
                             "member_id": "member-10",
                             "role_label": "첫째 딸",
                             "answered_at": "2026-01-15T10:00:00",
                         },
                         {
-                            "family_id": 1,
+                            "family_id": "family-1",
                             "member_id": "member-10",
                             "role_label": "첫째 딸",
                             "answered_at": "2026-01-14T15:30:00",
@@ -83,7 +83,7 @@ class TestChromaVectorStore:
         )
 
         doc = QADocument(
-            family_id=1,
+            family_id="family-1",
             member_id="member-10",
             role_label="첫째 딸",
             question="오늘 뭐 했어?",
@@ -108,7 +108,7 @@ class TestChromaVectorStore:
 
         # 메타데이터 검증
         metadata = call_kwargs["metadatas"][0]
-        assert metadata["family_id"] == 1
+        assert metadata["family_id"] == "family-1"
         assert metadata["member_id"] == "member-10"
         assert metadata["role_label"] == "첫째 딸"
 
@@ -284,7 +284,7 @@ class TestInfrastructureIntegration:
         )
 
         input_dto = GeneratePersonalQuestionInput(
-            family_id=1,
+            family_id="family-1",
             member_id="member-10",
             role_label="첫째 딸",
             base_question="테스트",

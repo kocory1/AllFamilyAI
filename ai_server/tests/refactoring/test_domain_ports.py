@@ -120,7 +120,7 @@ class TestPortContracts:
 
         # store 호출
         doc = QADocument(
-            family_id=1,
+            family_id="family-1",
             member_id="member-10",
             role_label="첫째 딸",
             question="테스트",
@@ -165,7 +165,7 @@ class TestPortContracts:
 
         # generate_question 호출
         base_qa = QADocument(
-            family_id=1,
+            family_id="family-1",
             member_id="member-10",
             role_label="첫째 딸",
             question="테스트",
