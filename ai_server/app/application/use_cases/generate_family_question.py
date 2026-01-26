@@ -63,6 +63,10 @@ class GenerateFamilyQuestionUseCase:
         """
         logger.info(f"[Use Case] 가족 질문 생성 시작: family_id={input_dto.family_id}")
 
+        # 설정값
+        MAX_REGENERATION = 3
+        SIMILARITY_THRESHOLD = 0.9
+
         # 1. Domain Entity 생성
         base_qa = QADocument(
             family_id=input_dto.family_id,
@@ -73,11 +77,7 @@ class GenerateFamilyQuestionUseCase:
             answered_at=input_dto.answered_at,
         )
 
-        # 2. 저장
-        await self.vector_store.store(base_qa)
-        logger.info("[Use Case] 벡터 스토어 저장 완료")
-
-        # 3. RAG 검색 (family_id 필터, top_k=10)
+        # 2. RAG 검색 (family_id 필터, top_k=10, 과거 데이터만)
         rag_context = await self.vector_store.search_by_family(
             family_id=input_dto.family_id,
             query_doc=base_qa,
@@ -85,12 +85,46 @@ class GenerateFamilyQuestionUseCase:
         )
         logger.info(f"[Use Case] RAG 검색 완료: {len(rag_context)}개")
 
-        # 4. 질문 생성
-        question, level = await self.question_generator.generate_question(
-            base_qa=base_qa,
-            rag_context=rag_context,
-        )
-        logger.info(f"[Use Case] 질문 생성 완료: {question[:30]}...")
+        # 3. 질문 생성 + 중복 체크 (최대 3회)
+        regeneration_count = 0
+        similarity_warning = False
+
+        for attempt in range(MAX_REGENERATION):
+            question, level = await self.question_generator.generate_question(
+                base_qa=base_qa,
+                rag_context=rag_context,
+            )
+            logger.info(f"[Use Case] 질문 생성 (시도 {attempt + 1}): {question[:30]}...")
+
+            # 유사도 검색
+            similarity = await self.vector_store.search_similar_questions(
+                question_text=question,
+                member_id=input_dto.member_id,
+            )
+
+            # 유사도가 임계값 미만이면 성공
+            if similarity < SIMILARITY_THRESHOLD:
+                logger.info(f"[Use Case] 고유 질문 확인 (유사도: {similarity:.2f})")
+                break
+
+            # 마지막 시도면 경고 플래그 설정하고 탈출
+            if attempt == MAX_REGENERATION - 1:
+                similarity_warning = True
+                logger.warning("[Use Case] 최대 재생성 횟수 도달, 마지막 질문 사용")
+                break
+
+            # 재생성 필요 (마지막 제외)
+            regeneration_count += 1
+            logger.warning(
+                f"[Use Case] 중복 질문 감지 (유사도: {similarity:.2f}), "
+                f"재생성 {regeneration_count}/{MAX_REGENERATION - 1}"
+            )
+
+        # 4. 저장 (다음 RAG를 위해)
+        stored = await self.vector_store.store(base_qa)
+        if not stored:
+            raise Exception("벡터 DB 저장 실패")
+        logger.info("[Use Case] 벡터 스토어 저장 완료")
 
         # 5. Output DTO 구성
         output = GenerateFamilyQuestionOutput(
@@ -100,6 +134,8 @@ class GenerateFamilyQuestionUseCase:
                 "rag_count": len(rag_context),
                 "member_id": input_dto.member_id,
                 "family_id": input_dto.family_id,
+                "regeneration_count": regeneration_count,
+                "similarity_warning": similarity_warning,
             },
         )
 

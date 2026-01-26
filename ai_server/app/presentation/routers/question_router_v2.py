@@ -13,24 +13,17 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.application.dto.assignment_dto import AssignMembersInput
 from app.application.dto.question_dto import (
     GenerateFamilyQuestionInput,
     GeneratePersonalQuestionInput,
 )
-from app.application.use_cases.assign_members import AssignMembersUseCase
 from app.application.use_cases.generate_family_question import GenerateFamilyQuestionUseCase
 from app.application.use_cases.generate_personal_question import (
     GeneratePersonalQuestionUseCase,
 )
 from app.presentation.dependencies import (
-    get_assign_members_use_case,
     get_family_question_use_case,
     get_personal_question_use_case,
-)
-from app.presentation.schemas.assignment_schemas import (
-    MemberAssignRequestSchema,
-    MemberAssignResponseSchema,
 )
 from app.presentation.schemas.question_schemas import (
     FamilyQuestionRequestSchema,
@@ -41,61 +34,6 @@ from app.presentation.schemas.question_schemas import (
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/questions", tags=["질문 생성"])
-
-
-# === 멤버 할당 API ===
-
-
-@router.post(
-    "/assign",
-    response_model=MemberAssignResponseSchema,
-    summary="멤버 할당 (확률 기반)",
-    description="최근 30회 기준으로 질문을 적게 받은 멤버를 확률적으로 선정",
-)
-async def assign_members(
-    request: MemberAssignRequestSchema,
-    use_case: AssignMembersUseCase = Depends(get_assign_members_use_case),
-) -> MemberAssignResponseSchema:
-    """
-    멤버 할당 API (Clean Architecture)
-
-    Router 책임:
-    1. HTTP 요청 검증
-    2. API Schema → Use Case DTO 변환
-    3. Use Case 호출
-    4. Use Case DTO → API Response 변환
-    """
-    try:
-        logger.info(
-            f"[API] 멤버 할당 요청: family_id={request.familyId}, "
-            f"candidates={len(request.memberIds)}, pick={request.pickCount}"
-        )
-
-        # 1. API Schema → Use Case DTO 변환
-        use_case_input = AssignMembersInput(
-            family_id=request.familyId,
-            member_ids=request.memberIds,
-            pick_count=request.pickCount,
-        )
-
-        # 2. Use Case 실행
-        output = await use_case.execute(use_case_input)
-
-        # 3. Use Case DTO → API Response 변환
-        response = MemberAssignResponseSchema(
-            selectedMemberIds=output.selected_member_ids,
-            metadata=output.metadata,
-        )
-
-        logger.info(f"[API] 멤버 할당 완료: selected={output.selected_member_ids}")
-        return response
-
-    except ValueError as e:
-        logger.error(f"[API] 멤버 할당 검증 실패: {e}")
-        raise HTTPException(status_code=400, detail=str(e)) from e
-    except Exception as e:
-        logger.error(f"[API] 멤버 할당 실패: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"멤버 할당 실패: {str(e)}") from e
 
 
 # === 질문 생성 API ===

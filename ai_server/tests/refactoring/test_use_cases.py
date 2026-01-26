@@ -23,6 +23,7 @@ class TestGeneratePersonalQuestionUseCase:
 
         mock = AsyncMock()
         mock.store.return_value = True
+        mock.search_similar_questions.return_value = 0.3  # 유사도 낮음 (중복 아님)
         mock.search_by_member.return_value = [
             QADocument(
                 family_id=1,
@@ -59,12 +60,12 @@ class TestGeneratePersonalQuestionUseCase:
         """
         [RED] 개인 질문 생성 Use Case - 성공 케이스
 
-        플로우:
+        플로우 (옵션 B):
         1. Input DTO 받음
         2. Domain Entity 생성
-        3. 벡터 스토어에 저장 (Port 호출)
-        4. RAG 검색 (Port 호출)
-        5. 질문 생성 (Port 호출)
+        3. RAG 검색 (Port 호출)
+        4. 질문 생성 (Port 호출)
+        5. 벡터 스토어에 저장 (Port 호출)
         6. Output DTO 반환
         """
         # Given
@@ -96,10 +97,10 @@ class TestGeneratePersonalQuestionUseCase:
         assert output.metadata["rag_count"] == 2
         assert output.metadata["member_id"] == 10
 
-        # Then: Mock 호출 검증 (Port 인터페이스 호출)
-        mock_vector_store.store.assert_called_once()
+        # Then: Mock 호출 검증 (순서: RAG → 생성 → 저장)
         mock_vector_store.search_by_member.assert_called_once()
         mock_question_generator.generate_question.assert_called_once()
+        mock_vector_store.store.assert_called_once()
 
         # Then: 검색 파라미터 검증
         search_call = mock_vector_store.search_by_member.call_args
@@ -145,10 +146,10 @@ class TestGeneratePersonalQuestionUseCase:
         assert generate_call.kwargs["rag_context"] == []
 
     @pytest.mark.asyncio
-    async def test_generate_personal_question_vector_store_failure(
+    async def test_generate_personal_question_vector_store_failure_raises_error(
         self, mock_vector_store, mock_question_generator
     ):
-        """[RED] 벡터 스토어 저장 실패 시 예외 전파"""
+        """[RED] 벡터 스토어 저장 실패 시 예외 발생 (옵션 B)"""
         # Given
         mock_vector_store.store.return_value = False
 
@@ -171,9 +172,14 @@ class TestGeneratePersonalQuestionUseCase:
             answered_at=datetime.now(),
         )
 
-        # When/Then: 저장 실패 시에도 계속 진행 (현재 동작 유지)
-        output = await use_case.execute(input_dto)
-        assert output.question == "친구들과 어떤 놀이를 했나요?"
+        # When/Then: 저장 실패 시 예외 발생
+        with pytest.raises(Exception) as exc_info:
+            await use_case.execute(input_dto)
+        
+        assert "저장 실패" in str(exc_info.value)
+        
+        # 질문 생성은 호출됨 (저장 전에 실행되므로)
+        mock_question_generator.generate_question.assert_called_once()
 
 
 class TestGenerateFamilyQuestionUseCase:
@@ -186,6 +192,7 @@ class TestGenerateFamilyQuestionUseCase:
 
         mock = AsyncMock()
         mock.store.return_value = True
+        mock.search_similar_questions.return_value = 0.3  # 유사도 낮음 (중복 아님)
         mock.search_by_family.return_value = [
             QADocument(
                 family_id=1,
@@ -222,7 +229,7 @@ class TestGenerateFamilyQuestionUseCase:
     async def test_generate_family_question_success(
         self, mock_vector_store, mock_question_generator
     ):
-        """[RED] 가족 질문 생성 Use Case - 성공 케이스"""
+        """[RED] 가족 질문 생성 Use Case - 성공 케이스 (옵션 B)"""
         # Given
         from app.application.use_cases.generate_family_question import (
             GenerateFamilyQuestionInput,
@@ -251,14 +258,164 @@ class TestGenerateFamilyQuestionUseCase:
         assert output.level.value == 3
         assert output.metadata["rag_count"] == 2
 
-        # Then: Mock 호출 검증
-        mock_vector_store.store.assert_called_once()
+        # Then: Mock 호출 검증 (순서: RAG → 생성 → 저장)
         mock_vector_store.search_by_family.assert_called_once()
+        mock_question_generator.generate_question.assert_called_once()
+        mock_vector_store.store.assert_called_once()
 
         # Then: 검색 파라미터 검증 (top_k=10)
         search_call = mock_vector_store.search_by_family.call_args
         assert search_call.kwargs["family_id"] == 1
         assert search_call.kwargs["top_k"] == 10
+
+
+class TestDuplicateQuestionCheck:
+    """중복 질문 체크 테스트"""
+
+    @pytest.fixture
+    def mock_vector_store(self):
+        """VectorStorePort Mock"""
+        from app.domain.entities.qa_document import QADocument
+
+        mock = AsyncMock()
+        mock.store.return_value = True
+        mock.search_by_member.return_value = [
+            QADocument(
+                family_id=1,
+                member_id=10,
+                role_label="첫째 딸",
+                question="오늘 학교 어땠어?",
+                answer="재미있었어요!",
+                answered_at=datetime(2026, 1, 15, 10, 0, 0),
+            ),
+        ]
+        return mock
+
+    @pytest.fixture
+    def mock_question_generator(self):
+        """QuestionGeneratorPort Mock"""
+        from app.domain.value_objects.question_level import QuestionLevel
+
+        mock = AsyncMock()
+        mock.generate_question.return_value = ("새로운 질문입니다", QuestionLevel(2))
+        return mock
+
+    @pytest.mark.asyncio
+    async def test_regenerate_when_similarity_over_threshold(
+        self, mock_vector_store, mock_question_generator
+    ):
+        """[RED] 유사도 0.9 이상이면 재생성"""
+        from app.domain.value_objects.question_level import QuestionLevel
+        from app.application.use_cases.generate_personal_question import (
+            GeneratePersonalQuestionInput,
+            GeneratePersonalQuestionUseCase,
+        )
+
+        # Given: 첫 번째 질문은 유사도 높음, 두 번째는 OK
+        mock_question_generator.generate_question.side_effect = [
+            ("오늘 학교 어땠어?", QuestionLevel(2)),  # 중복 (기존 질문과 동일)
+            ("새로운 친구 사귀었어?", QuestionLevel(2)),  # 고유
+        ]
+        mock_vector_store.search_similar_questions.side_effect = [
+            0.95,  # 첫 번째: 유사도 높음 → 재생성
+            0.30,  # 두 번째: 유사도 낮음 → OK
+        ]
+
+        use_case = GeneratePersonalQuestionUseCase(
+            vector_store=mock_vector_store,
+            question_generator=mock_question_generator,
+        )
+
+        input_dto = GeneratePersonalQuestionInput(
+            family_id=1,
+            member_id=10,
+            role_label="첫째 딸",
+            base_question="오늘 뭐 했어?",
+            base_answer="친구랑 놀았어요",
+            answered_at=datetime(2026, 1, 20, 14, 30, 0),
+        )
+
+        # When
+        output = await use_case.execute(input_dto)
+
+        # Then: 재생성 후 고유 질문 반환
+        assert output.question == "새로운 친구 사귀었어?"
+        assert mock_question_generator.generate_question.call_count == 2
+        assert output.metadata["regeneration_count"] == 1
+
+    @pytest.mark.asyncio
+    async def test_max_regeneration_limit(
+        self, mock_vector_store, mock_question_generator
+    ):
+        """[RED] 최대 3회 재생성 후 마지막 질문 반환"""
+        from app.domain.value_objects.question_level import QuestionLevel
+        from app.application.use_cases.generate_personal_question import (
+            GeneratePersonalQuestionInput,
+            GeneratePersonalQuestionUseCase,
+        )
+
+        # Given: 모든 질문이 유사함
+        mock_question_generator.generate_question.return_value = (
+            "계속 유사한 질문", QuestionLevel(2)
+        )
+        mock_vector_store.search_similar_questions.return_value = 0.95  # 항상 유사
+
+        use_case = GeneratePersonalQuestionUseCase(
+            vector_store=mock_vector_store,
+            question_generator=mock_question_generator,
+        )
+
+        input_dto = GeneratePersonalQuestionInput(
+            family_id=1,
+            member_id=10,
+            role_label="첫째 딸",
+            base_question="오늘 뭐 했어?",
+            base_answer="친구랑 놀았어요",
+            answered_at=datetime(2026, 1, 20, 14, 30, 0),
+        )
+
+        # When
+        output = await use_case.execute(input_dto)
+
+        # Then: 3번 시도 후 마지막 질문 반환
+        assert mock_question_generator.generate_question.call_count == 3
+        assert output.question == "계속 유사한 질문"
+        assert output.metadata["regeneration_count"] == 2
+        assert output.metadata["similarity_warning"] is True
+
+    @pytest.mark.asyncio
+    async def test_no_regeneration_when_unique(
+        self, mock_vector_store, mock_question_generator
+    ):
+        """[RED] 처음부터 고유하면 재생성 없음"""
+        from app.application.use_cases.generate_personal_question import (
+            GeneratePersonalQuestionInput,
+            GeneratePersonalQuestionUseCase,
+        )
+
+        # Given: 유사도 낮음
+        mock_vector_store.search_similar_questions.return_value = 0.30
+
+        use_case = GeneratePersonalQuestionUseCase(
+            vector_store=mock_vector_store,
+            question_generator=mock_question_generator,
+        )
+
+        input_dto = GeneratePersonalQuestionInput(
+            family_id=1,
+            member_id=10,
+            role_label="첫째 딸",
+            base_question="오늘 뭐 했어?",
+            base_answer="친구랑 놀았어요",
+            answered_at=datetime(2026, 1, 20, 14, 30, 0),
+        )
+
+        # When
+        output = await use_case.execute(input_dto)
+
+        # Then: 1번만 호출
+        assert mock_question_generator.generate_question.call_count == 1
+        assert output.metadata["regeneration_count"] == 0
 
 
 class TestUseCaseDTO:

@@ -98,6 +98,11 @@ class TestPortContracts:
             ) -> list[QADocument]:
                 return []
 
+            async def search_similar_questions(
+                self, question_text: str, member_id: str
+            ) -> float:
+                return 0.0
+
         # 인스턴스 생성 가능 (모든 메서드 구현)
         mock_store = MockVectorStore()
 

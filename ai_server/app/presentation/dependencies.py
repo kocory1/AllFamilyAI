@@ -132,13 +132,6 @@ def get_family_generator() -> QuestionGeneratorPort:
 # === Application Layer (Use Cases) ===
 
 
-def get_assign_members_use_case():
-    """멤버 할당 Use Case"""
-    from app.application.use_cases.assign_members import AssignMembersUseCase
-
-    return AssignMembersUseCase()
-
-
 def get_personal_question_use_case() -> GeneratePersonalQuestionUseCase:
     """
     개인 질문 생성 Use Case

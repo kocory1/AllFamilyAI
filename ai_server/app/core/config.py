@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     # AI 모델 설정
     default_model: str = "gpt-4o-mini"
     max_tokens: int = 10000
-    temperature: float = 0.2
+    temperature: float = 0.3
 
     # ChromaDB 설정 (RAG용 벡터 DB)
     chroma_persist_directory: str = (

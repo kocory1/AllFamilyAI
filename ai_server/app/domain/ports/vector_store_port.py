@@ -76,3 +76,21 @@ class VectorStorePort(ABC):
             Domain Entity 리스트 (member_id 포함)
         """
         pass
+
+    @abstractmethod
+    async def search_similar_questions(
+        self,
+        question_text: str,
+        member_id: str,
+    ) -> float:
+        """
+        생성된 질문의 유사도 검색
+
+        Args:
+            question_text: 생성된 질문 텍스트
+            member_id: 멤버 ID
+
+        Returns:
+            가장 높은 유사도 점수 (0.0 ~ 1.0)
+        """
+        pass

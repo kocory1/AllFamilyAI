@@ -273,6 +273,7 @@ class TestInfrastructureIntegration:
         mock_vector_store = AsyncMock(spec=VectorStorePort)
         mock_vector_store.store.return_value = True
         mock_vector_store.search_by_member.return_value = []
+        mock_vector_store.search_similar_questions.return_value = 0.3  # 유사도 낮음
 
         mock_generator = AsyncMock(spec=QuestionGeneratorPort)
         mock_generator.generate_question.return_value = ("테스트 질문", QuestionLevel(2))

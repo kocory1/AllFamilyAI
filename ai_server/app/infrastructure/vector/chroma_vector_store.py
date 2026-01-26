@@ -151,6 +151,45 @@ class ChromaVectorStore(VectorStorePort):
             logger.error(f"[ChromaVectorStore] 검색 실패: {e}")
             return []
 
+    async def search_similar_questions(
+        self,
+        question_text: str,
+        member_id: str,
+    ) -> float:
+        """생성된 질문의 유사도 검색 (Port 구현)"""
+        try:
+            # 질문 텍스트로 임베딩 생성
+            response = await self.openai_client.create_embedding(question_text)
+            query_embedding = response.data[0].embedding
+
+            # ChromaDB 검색 (유사도 포함)
+            results = self.collection.query(
+                query_embeddings=[query_embedding],
+                n_results=1,
+                where={"member_id": member_id},
+                include=["distances"],
+            )
+
+            # 결과가 없으면 유사도 0
+            if not results["ids"] or not results["ids"][0]:
+                return 0.0
+
+            # ChromaDB distance → similarity 변환 (코사인 거리)
+            # distance = 1 - similarity, so similarity = 1 - distance
+            distance = results["distances"][0][0]
+            similarity = 1 - distance
+
+            logger.info(
+                f"[ChromaVectorStore] 유사도 검색: question={question_text[:30]}..., "
+                f"similarity={similarity:.2f}"
+            )
+
+            return similarity
+
+        except Exception as e:
+            logger.error(f"[ChromaVectorStore] 유사도 검색 실패: {e}")
+            return 0.0
+
     # === Private: Infrastructure 세부사항 ===
 
     def _to_embedding_text(self, doc: QADocument) -> str:
