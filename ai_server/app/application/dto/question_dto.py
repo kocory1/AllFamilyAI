@@ -45,7 +45,6 @@ class FamilyRecentQuestionInput:
     family_id: str  # UUID
     target_member_id: str  # 질문 대상 멤버 UUID
     target_role_label: str  # 질문 대상 역할 라벨
-    member_ids: list[str]  # 컨텍스트 조회할 멤버 ID 목록
 
 
 @dataclass

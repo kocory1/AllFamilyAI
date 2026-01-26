@@ -12,7 +12,7 @@ from fastapi.responses import JSONResponse
 from app.core.config import settings
 
 # Clean Architecture Router
-from app.presentation.routers import question_router_v2
+from app.presentation.routers import question_router
 
 # 환경 변수 로드
 load_dotenv()
@@ -70,7 +70,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 
 # 라우터 등록 (Clean Architecture)
-app.include_router(question_router_v2.router, prefix="/api/v1", tags=["질문 생성"])
+app.include_router(question_router.router, prefix="/api/v1", tags=["질문 생성"])
 
 
 @app.get("/")
@@ -82,6 +82,7 @@ async def root():
         "endpoints": {
             "personal": "/api/v1/questions/generate/personal",
             "family": "/api/v1/questions/generate/family",
+            "family-recent": "/api/v1/questions/generate/family-recent",
         },
     }
 

@@ -49,7 +49,7 @@ class FamilyRecentQuestionRequestSchema(BaseModel):
     가족 최근 질문 기반 생성 API 요청 스키마 (신규 API)
 
     - base_qa 없음 (기존 질문/답변 입력 불필요)
-    - 각 멤버의 최근 질문을 컨텍스트로 활용
+    - family_id 기준으로 모든 멤버의 최근 질문을 자동 조회
     """
 
     model_config = ConfigDict(populate_by_name=True)
@@ -60,9 +60,6 @@ class FamilyRecentQuestionRequestSchema(BaseModel):
     )
     targetRoleLabel: str = Field(
         alias="targetRoleLabel", description="질문 대상 역할 라벨 (예: 아빠)"
-    )
-    memberIds: list[str] = Field(
-        alias="memberIds", description="컨텍스트 조회할 멤버 ID 목록"
     )
 
 

@@ -106,7 +106,7 @@ class LangchainPersonalGenerator(QuestionGeneratorPort):
         lines = []
         for idx, doc in enumerate(docs[:5], 1):
             year, month, day = doc.get_date_parts()
-            line = f"{idx}. [{year}-{month:02d}-{day:02d}] Q: {doc.question} / A: {doc.answer}"
+            line = f"{idx}. [{year}-{month:02d}-{day:02d}] {doc.role_label}: Q: {doc.question} / A: {doc.answer}"
             lines.append(line)
 
         return "\n".join(lines)

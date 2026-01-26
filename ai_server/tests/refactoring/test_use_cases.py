@@ -429,41 +429,33 @@ class TestFamilyRecentQuestionUseCase:
         mock = AsyncMock()
         mock.search_similar_questions.return_value = 0.3  # 유사도 낮음
 
-        # 멤버별 최근 질문 반환
-        def get_recent_side_effect(member_id: str, limit: int = 2):
-            if member_id == "member-1":
-                return [
-                    QADocument(
-                        family_id="family-1",
-                        member_id="member-1",
-                        role_label="아빠",
-                        question="오늘 회사 어땠어?",
-                        answer="바빴어",
-                        answered_at=datetime(2026, 1, 19, 18, 0, 0),
-                    ),
-                    QADocument(
-                        family_id="family-1",
-                        member_id="member-1",
-                        role_label="아빠",
-                        question="점심 뭐 먹었어?",
-                        answer="김치찌개",
-                        answered_at=datetime(2026, 1, 18, 12, 0, 0),
-                    ),
-                ]
-            elif member_id == "member-2":
-                return [
-                    QADocument(
-                        family_id="family-1",
-                        member_id="member-2",
-                        role_label="엄마",
-                        question="오늘 뭐 했어?",
-                        answer="집 청소했어",
-                        answered_at=datetime(2026, 1, 19, 15, 0, 0),
-                    ),
-                ]
-            return []
-
-        mock.get_recent_questions_by_member.side_effect = get_recent_side_effect
+        # 가족 전체 최근 질문 반환
+        mock.get_recent_questions_by_family.return_value = [
+            QADocument(
+                family_id="family-1",
+                member_id="member-1",
+                role_label="아빠",
+                question="오늘 회사 어땠어?",
+                answer="바빴어",
+                answered_at=datetime(2026, 1, 19, 18, 0, 0),
+            ),
+            QADocument(
+                family_id="family-1",
+                member_id="member-1",
+                role_label="아빠",
+                question="점심 뭐 먹었어?",
+                answer="김치찌개",
+                answered_at=datetime(2026, 1, 18, 12, 0, 0),
+            ),
+            QADocument(
+                family_id="family-1",
+                member_id="member-2",
+                role_label="엄마",
+                question="오늘 뭐 했어?",
+                answer="집 청소했어",
+                answered_at=datetime(2026, 1, 19, 15, 0, 0),
+            ),
+        ]
         return mock
 
     @pytest.fixture
@@ -500,7 +492,6 @@ class TestFamilyRecentQuestionUseCase:
             family_id="family-1",
             target_member_id="member-1",
             target_role_label="아빠",
-            member_ids=["member-1", "member-2"],
         )
 
         # When
@@ -509,11 +500,14 @@ class TestFamilyRecentQuestionUseCase:
         # Then: 응답 검증
         assert output.question == "아빠, 요즘 회사에서 어떤 프로젝트 하고 계세요?"
         assert output.level.value == 3
-        assert output.metadata["context_count"] == 3  # 2 + 1
+        assert output.metadata["context_count"] == 3
         assert output.metadata["target_member_id"] == "member-1"
 
-        # Then: 각 멤버별 최근 질문 조회 확인
-        assert mock_vector_store.get_recent_questions_by_member.call_count == 2
+        # Then: 가족 전체 최근 질문 조회 확인
+        mock_vector_store.get_recent_questions_by_family.assert_called_once_with(
+            family_id="family-1",
+            limit_per_member=3,
+        )
 
         # Then: 질문 생성 확인
         mock_question_generator.generate_question_for_target.assert_called_once()
@@ -548,7 +542,6 @@ class TestFamilyRecentQuestionUseCase:
             family_id="family-1",
             target_member_id="member-1",
             target_role_label="아빠",
-            member_ids=["member-1"],
         )
 
         # When
@@ -569,9 +562,9 @@ class TestFamilyRecentQuestionUseCase:
             FamilyRecentQuestionUseCase,
         )
 
-        # Given: 모든 멤버의 최근 질문이 없음 (새로운 mock 생성)
+        # Given: 가족의 최근 질문이 없음 (새로운 mock 생성)
         empty_vector_store = AsyncMock()
-        empty_vector_store.get_recent_questions_by_member.return_value = []
+        empty_vector_store.get_recent_questions_by_family.return_value = []
         empty_vector_store.search_similar_questions.return_value = 0.3
 
         use_case = FamilyRecentQuestionUseCase(
@@ -583,7 +576,6 @@ class TestFamilyRecentQuestionUseCase:
             family_id="family-1",
             target_member_id="member-1",
             target_role_label="아빠",
-            member_ids=["member-1", "member-2"],
         )
 
         # When

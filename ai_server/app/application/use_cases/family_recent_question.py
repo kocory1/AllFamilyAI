@@ -46,14 +46,11 @@ class FamilyRecentQuestionUseCase(QuestionGenerationUseCase):
             f"family_id={input_dto.family_id}, target={input_dto.target_member_id}"
         )
 
-        # 1. 각 멤버별 최근 질문 조회
-        context: list[QADocument] = []
-        for member_id in input_dto.member_ids:
-            recent = await self.vector_store.get_recent_questions_by_member(
-                member_id=member_id,
-                limit=2,
-            )
-            context.extend(recent)
+        # 1. 가족 전체의 최근 질문 조회 (멤버별 3개씩)
+        context = await self.vector_store.get_recent_questions_by_family(
+            family_id=input_dto.family_id,
+            limit_per_member=3,
+        )
         logger.info(f"[Use Case] 컨텍스트 조회 완료: {len(context)}개")
 
         # 2. 질문 생성 + 중복 체크

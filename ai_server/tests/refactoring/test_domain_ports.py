@@ -96,7 +96,7 @@ class TestPortContracts:
                 return True
 
             async def search_by_member(
-                self, member_id: int, query_doc: QADocument, top_k: int = 5
+                self, member_id: str, query_doc: QADocument, top_k: int = 5
             ) -> list[QADocument]:
                 return []
 
@@ -112,6 +112,11 @@ class TestPortContracts:
 
             async def get_recent_questions_by_member(
                 self, member_id: str, limit: int = 2
+            ) -> list[QADocument]:
+                return []
+
+            async def get_recent_questions_by_family(
+                self, family_id: str, limit_per_member: int = 3
             ) -> list[QADocument]:
                 return []
 
@@ -131,12 +136,16 @@ class TestPortContracts:
         assert result is True
 
         # search_by_member 호출
-        results = await mock_store.search_by_member(10, doc, top_k=5)
+        results = await mock_store.search_by_member("member-10", doc, top_k=5)
         assert results == []
 
         # get_recent_questions_by_member 호출
         recent = await mock_store.get_recent_questions_by_member("member-uuid", limit=2)
         assert recent == []
+
+        # get_recent_questions_by_family 호출
+        family_recent = await mock_store.get_recent_questions_by_family("family-1", limit_per_member=3)
+        assert family_recent == []
 
     @pytest.mark.asyncio
     async def test_question_generator_port_contract(self):

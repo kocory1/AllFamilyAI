@@ -252,6 +252,77 @@ class ChromaVectorStore(VectorStorePort):
             logger.error(f"[ChromaVectorStore] 최근 질문 조회 실패: {e}")
             return []
 
+    async def get_recent_questions_by_family(
+        self,
+        family_id: str,
+        limit_per_member: int = 3,
+    ) -> list[QADocument]:
+        """
+        가족 전체의 최근 질문 조회 (멤버별 N개씩)
+
+        Args:
+            family_id: 가족 ID (UUID)
+            limit_per_member: 멤버당 최대 질문 수 (기본값: 3)
+
+        Returns:
+            최근 QADocument 리스트 (각 멤버별 limit_per_member개)
+        """
+        try:
+            # ChromaDB에서 해당 가족의 모든 문서 조회
+            results = self.collection.get(
+                where={"family_id": family_id},
+                include=["documents", "metadatas"],
+            )
+
+            if not results["ids"]:
+                logger.info(
+                    f"[ChromaVectorStore] 가족 최근 질문 조회: family_id={family_id}, 결과=0개"
+                )
+                return []
+
+            # Domain Entity 변환
+            all_entities: list[QADocument] = []
+            for i in range(len(results["ids"])):
+                metadata = results["metadatas"][i]
+                document = results["documents"][i]
+
+                question, answer = self._parse_embedding_text(document)
+
+                entity = QADocument(
+                    family_id=metadata["family_id"],
+                    member_id=metadata["member_id"],
+                    role_label=metadata["role_label"],
+                    question=question,
+                    answer=answer,
+                    answered_at=datetime.fromisoformat(metadata["answered_at"]),
+                )
+                all_entities.append(entity)
+
+            # 멤버별로 그룹화 후 각각 최근 N개씩 추출
+            from collections import defaultdict
+
+            member_groups: dict[str, list[QADocument]] = defaultdict(list)
+            for entity in all_entities:
+                member_groups[entity.member_id].append(entity)
+
+            # 각 멤버별 최근 N개 추출
+            recent_entities: list[QADocument] = []
+            for _member_id, entities in member_groups.items():
+                # 시간순 내림차순 정렬
+                entities.sort(key=lambda x: x.answered_at, reverse=True)
+                recent_entities.extend(entities[:limit_per_member])
+
+            logger.info(
+                f"[ChromaVectorStore] 가족 최근 질문 조회: family_id={family_id}, "
+                f"멤버={len(member_groups)}명, 반환={len(recent_entities)}개"
+            )
+
+            return recent_entities
+
+        except Exception as e:
+            logger.error(f"[ChromaVectorStore] 가족 최근 질문 조회 실패: {e}")
+            return []
+
     # === Private: Infrastructure 세부사항 ===
 
     def _to_embedding_text(self, doc: QADocument) -> str:

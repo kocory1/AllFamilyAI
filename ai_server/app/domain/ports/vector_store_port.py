@@ -112,3 +112,21 @@ class VectorStorePort(ABC):
             최근 QADocument 리스트 (answered_at 내림차순)
         """
         pass
+
+    @abstractmethod
+    async def get_recent_questions_by_family(
+        self,
+        family_id: str,
+        limit_per_member: int = 3,
+    ) -> list[QADocument]:
+        """
+        가족 전체의 최근 질문 조회 (멤버별 N개씩)
+
+        Args:
+            family_id: 가족 ID (UUID)
+            limit_per_member: 멤버당 최대 질문 수 (기본값: 3)
+
+        Returns:
+            최근 QADocument 리스트 (각 멤버별 limit_per_member개)
+        """
+        pass

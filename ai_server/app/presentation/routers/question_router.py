@@ -159,7 +159,7 @@ async def generate_family_question(
     "/generate/family-recent",
     response_model=GenerateQuestionResponseSchema,
     summary="가족 최근 질문 기반 생성 (P4)",
-    description="각 멤버의 최근 질문을 컨텍스트로 활용하여 특정 멤버에게 질문 생성 (base_qa 불필요)",
+    description="가족 전체의 최근 질문을 컨텍스트로 활용하여 특정 멤버에게 질문 생성 (base_qa 불필요)",
 )
 async def generate_family_recent_question(
     request: FamilyRecentQuestionRequestSchema,
@@ -170,7 +170,7 @@ async def generate_family_recent_question(
 
     특징:
     - base_qa 없이 동작
-    - 각 멤버별 최근 2개 질문을 컨텍스트로 활용
+    - family_id 기준으로 모든 멤버의 최근 질문 자동 조회 (멤버당 3개)
     - 벡터 DB 저장 없음
     """
     try:
@@ -184,7 +184,6 @@ async def generate_family_recent_question(
             family_id=request.familyId,
             target_member_id=request.targetMemberId,
             target_role_label=request.targetRoleLabel,
-            member_ids=request.memberIds,
         )
 
         # 2. Use Case 실행
