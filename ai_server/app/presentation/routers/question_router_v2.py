@@ -14,19 +14,23 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.application.dto.question_dto import (
+    FamilyRecentQuestionInput,
     GenerateFamilyQuestionInput,
     GeneratePersonalQuestionInput,
 )
+from app.application.use_cases.family_recent_question import FamilyRecentQuestionUseCase
 from app.application.use_cases.generate_family_question import GenerateFamilyQuestionUseCase
 from app.application.use_cases.generate_personal_question import (
     GeneratePersonalQuestionUseCase,
 )
 from app.presentation.dependencies import (
     get_family_question_use_case,
+    get_family_recent_question_use_case,
     get_personal_question_use_case,
 )
 from app.presentation.schemas.question_schemas import (
     FamilyQuestionRequestSchema,
+    FamilyRecentQuestionRequestSchema,
     GenerateQuestionResponseSchema,
     PersonalQuestionRequestSchema,
 )
@@ -148,4 +152,56 @@ async def generate_family_question(
 
     except Exception as e:
         logger.error(f"[API] 가족 질문 생성 실패: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"질문 생성 실패: {str(e)}") from e
+
+
+@router.post(
+    "/generate/family-recent",
+    response_model=GenerateQuestionResponseSchema,
+    summary="가족 최근 질문 기반 생성 (P4)",
+    description="각 멤버의 최근 질문을 컨텍스트로 활용하여 특정 멤버에게 질문 생성 (base_qa 불필요)",
+)
+async def generate_family_recent_question(
+    request: FamilyRecentQuestionRequestSchema,
+    use_case: FamilyRecentQuestionUseCase = Depends(get_family_recent_question_use_case),
+) -> GenerateQuestionResponseSchema:
+    """
+    가족 최근 질문 기반 생성 API (신규)
+
+    특징:
+    - base_qa 없이 동작
+    - 각 멤버별 최근 2개 질문을 컨텍스트로 활용
+    - 벡터 DB 저장 없음
+    """
+    try:
+        logger.info(
+            f"[API] 가족 최근 질문 생성 요청: family_id={request.familyId}, "
+            f"target={request.targetMemberId}"
+        )
+
+        # 1. API Schema → Use Case DTO 변환
+        use_case_input = FamilyRecentQuestionInput(
+            family_id=request.familyId,
+            target_member_id=request.targetMemberId,
+            target_role_label=request.targetRoleLabel,
+            member_ids=request.memberIds,
+        )
+
+        # 2. Use Case 실행
+        output = await use_case.execute(use_case_input)
+
+        # 3. Use Case DTO → API Response 변환
+        response = GenerateQuestionResponseSchema(
+            memberId=request.targetMemberId,  # 대상 멤버 ID
+            content=output.question,  # 질문 원문
+            level=output.level.value,  # AI 자동 추론 (1-4)
+            priority=4,  # 최근 기반 = 4
+            metadata=output.metadata,
+        )
+
+        logger.info(f"[API] 가족 최근 질문 생성 완료: {response.content[:30]}...")
+        return response
+
+    except Exception as e:
+        logger.error(f"[API] 가족 최근 질문 생성 실패: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"질문 생성 실패: {str(e)}") from e

@@ -94,3 +94,21 @@ class VectorStorePort(ABC):
             가장 높은 유사도 점수 (0.0 ~ 1.0)
         """
         pass
+
+    @abstractmethod
+    async def get_recent_questions_by_member(
+        self,
+        member_id: str,
+        limit: int = 2,
+    ) -> list[QADocument]:
+        """
+        멤버별 최근 질문 조회 (시간순 정렬)
+
+        Args:
+            member_id: 멤버 ID (UUID)
+            limit: 반환할 최대 결과 수 (기본값: 2)
+
+        Returns:
+            최근 QADocument 리스트 (answered_at 내림차순)
+        """
+        pass

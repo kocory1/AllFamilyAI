@@ -41,6 +41,13 @@ class TestVectorStorePort:
         # search_by_family 메서드가 존재해야 함
         assert hasattr(VectorStorePort, "search_by_family")
 
+    def test_vector_store_port_has_get_recent_questions_by_member_method(self):
+        """[RED] get_recent_questions_by_member 메서드 시그니처 확인"""
+        from app.domain.ports.vector_store_port import VectorStorePort
+
+        # get_recent_questions_by_member 메서드가 존재해야 함
+        assert hasattr(VectorStorePort, "get_recent_questions_by_member")
+
     def test_vector_store_port_cannot_be_instantiated(self):
         """[RED] 추상 클래스는 직접 인스턴스화 불가"""
         from app.domain.ports.vector_store_port import VectorStorePort
@@ -103,13 +110,18 @@ class TestPortContracts:
             ) -> float:
                 return 0.0
 
+            async def get_recent_questions_by_member(
+                self, member_id: str, limit: int = 2
+            ) -> list[QADocument]:
+                return []
+
         # 인스턴스 생성 가능 (모든 메서드 구현)
         mock_store = MockVectorStore()
 
         # store 호출
         doc = QADocument(
             family_id=1,
-            member_id=10,
+            member_id="member-10",
             role_label="첫째 딸",
             question="테스트",
             answer="테스트",
@@ -121,6 +133,10 @@ class TestPortContracts:
         # search_by_member 호출
         results = await mock_store.search_by_member(10, doc, top_k=5)
         assert results == []
+
+        # get_recent_questions_by_member 호출
+        recent = await mock_store.get_recent_questions_by_member("member-uuid", limit=2)
+        assert recent == []
 
     @pytest.mark.asyncio
     async def test_question_generator_port_contract(self):
@@ -136,13 +152,21 @@ class TestPortContracts:
             ) -> tuple[str, QuestionLevel]:
                 return "테스트 질문", QuestionLevel(2)
 
+            async def generate_question_for_target(
+                self,
+                target_member_id: str,
+                target_role_label: str,
+                context: list[QADocument],
+            ) -> tuple[str, QuestionLevel]:
+                return "타겟 질문", QuestionLevel(3)
+
         # 인스턴스 생성 가능
         mock_generator = MockQuestionGenerator()
 
         # generate_question 호출
         base_qa = QADocument(
             family_id=1,
-            member_id=10,
+            member_id="member-10",
             role_label="첫째 딸",
             question="테스트",
             answer="테스트",

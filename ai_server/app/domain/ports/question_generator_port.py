@@ -45,3 +45,23 @@ class QuestionGeneratorPort(ABC):
             (생성된 질문, 난이도) 튜플
         """
         pass
+
+    @abstractmethod
+    async def generate_question_for_target(
+        self,
+        target_member_id: str,
+        target_role_label: str,
+        context: list[QADocument],
+    ) -> tuple[str, QuestionLevel]:
+        """
+        특정 멤버를 대상으로 질문 생성 (base_qa 없이)
+
+        Args:
+            target_member_id: 질문 대상 멤버 ID
+            target_role_label: 질문 대상 역할 라벨 (예: "아빠", "엄마")
+            context: 최근 QA 컨텍스트 목록 (Domain Entities)
+
+        Returns:
+            (생성된 질문, 난이도) 튜플
+        """
+        pass

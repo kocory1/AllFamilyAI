@@ -20,7 +20,7 @@ class TestQADocumentEntity:
         # When
         doc = QADocument(
             family_id=1,
-            member_id=10,
+            member_id="member-10",
             role_label="첫째 딸",
             question="오늘 뭐 했어?",
             answer="친구들과 놀았어요",
@@ -29,7 +29,7 @@ class TestQADocumentEntity:
 
         # Then
         assert doc.family_id == 1
-        assert doc.member_id == 10
+        assert doc.member_id == "member-10"
         assert doc.role_label == "첫째 딸"
         assert doc.question == "오늘 뭐 했어?"
         assert doc.answer == "친구들과 놀았어요"
@@ -42,7 +42,7 @@ class TestQADocumentEntity:
 
         doc = QADocument(
             family_id=1,
-            member_id=10,
+            member_id="member-10",
             role_label="첫째 딸",
             question="테스트",
             answer="테스트",
@@ -68,7 +68,7 @@ class TestQADocumentEntity:
 
         doc = QADocument(
             family_id=1,
-            member_id=10,
+            member_id="member-10",
             role_label="첫째 딸",
             question="테스트",
             answer="테스트",
@@ -89,7 +89,7 @@ class TestQADocumentEntity:
 
         doc = QADocument(
             family_id=1,
-            member_id=10,
+            member_id="member-10",
             role_label="첫째 딸",
             question="테스트",
             answer="테스트",
@@ -106,7 +106,7 @@ class TestQADocumentEntity:
 
         doc = QADocument(
             family_id=1,
-            member_id=10,
+            member_id="member-10",
             role_label="첫째 딸",
             question="테스트",
             answer="테스트",
