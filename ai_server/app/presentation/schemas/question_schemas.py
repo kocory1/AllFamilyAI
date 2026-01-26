@@ -36,7 +36,7 @@ class FamilyQuestionRequestSchema(BaseModel):
 
     model_config = ConfigDict(populate_by_name=True)
 
-    familyId: int = Field(alias="familyId", description="가족 ID")
+    familyId: str = Field(alias="familyId", description="가족 ID (UUID)")
     memberId: str = Field(alias="memberId", description="답변한 멤버 ID (UUID)")
     roleLabel: str = Field(alias="roleLabel", description="역할 레이블")
     baseQuestion: str = Field(alias="baseQuestion", description="기준 질문")

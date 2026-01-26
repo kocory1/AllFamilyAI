@@ -124,7 +124,7 @@ class ChromaVectorStore(VectorStorePort):
             return []
 
     async def search_by_family(
-        self, family_id: int, query_doc: QADocument, top_k: int = 5
+        self, family_id: str, query_doc: QADocument, top_k: int = 5
     ) -> list[QADocument]:
         """가족 QA 검색 (Port 구현)"""
         try:

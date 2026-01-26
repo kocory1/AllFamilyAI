@@ -203,7 +203,7 @@ class TestGenerateFamilyQuestionUseCase:
                 answered_at=datetime(2026, 1, 15, 18, 0, 0),
             ),
             QADocument(
-                family_id=1,
+                family_id="family-1",
                 member_id=2,
                 role_label="엄마",
                 question="내일 날씨 어때?",

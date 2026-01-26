@@ -51,7 +51,7 @@ async def test_chromadb_store_and_search():
         print("\n3️⃣ 테스트 QA 데이터 저장 중...")
         test_docs = [
             QADocument(
-                family_id=999,
+                family_id="family-999",
                 member_id=1,
                 role_label="테스트 엄마",
                 question="오늘 저녁 뭐 먹고 싶어?",
@@ -59,7 +59,7 @@ async def test_chromadb_store_and_search():
                 answered_at=datetime(2026, 1, 20, 18, 0, 0),
             ),
             QADocument(
-                family_id=999,
+                family_id="family-999",
                 member_id=1,
                 role_label="테스트 엄마",
                 question="주말에 뭐 할까?",
@@ -67,7 +67,7 @@ async def test_chromadb_store_and_search():
                 answered_at=datetime(2026, 1, 19, 10, 0, 0),
             ),
             QADocument(
-                family_id=999,
+                family_id="family-999",
                 member_id=2,
                 role_label="테스트 아빠",
                 question="오늘 회사 어땠어?",
@@ -89,7 +89,7 @@ async def test_chromadb_store_and_search():
         # 4. 검색 테스트 (개인)
         print("\n4️⃣ 개인 검색 테스트 (member_id=1)...")
         query_doc = QADocument(
-            family_id=999,
+            family_id="family-999",
             member_id=1,
             role_label="테스트 엄마",
             question="저녁 메뉴",
@@ -108,7 +108,7 @@ async def test_chromadb_store_and_search():
         # 5. 검색 테스트 (가족)
         print("\n5️⃣ 가족 검색 테스트 (family_id=999)...")
         family_results = await vector_store.search_by_family(
-            family_id=999, query_doc=query_doc, top_k=5
+            family_id="family-999", query_doc=query_doc, top_k=5
         )
 
         print(f"   ✅ 검색 결과: {len(family_results)}개")

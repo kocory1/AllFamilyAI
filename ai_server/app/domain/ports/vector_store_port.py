@@ -60,7 +60,7 @@ class VectorStorePort(ABC):
     @abstractmethod
     async def search_by_family(
         self,
-        family_id: int,
+        family_id: str,
         query_doc: QADocument,
         top_k: int = 5,
     ) -> list[QADocument]:
