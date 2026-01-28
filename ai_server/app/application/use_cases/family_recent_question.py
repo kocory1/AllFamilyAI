@@ -43,7 +43,7 @@ class FamilyRecentQuestionUseCase(QuestionGenerationUseCase):
         """
         logger.info(
             f"[Use Case] 가족 최근 질문 생성 시작: "
-            f"family_id={input_dto.family_id}, target={input_dto.target_member_id}"
+            f"family_id={input_dto.family_id}, target={input_dto.member_id}"
         )
 
         # 1. 가족 전체의 최근 질문 조회 (멤버별 3개씩)
@@ -53,11 +53,19 @@ class FamilyRecentQuestionUseCase(QuestionGenerationUseCase):
         )
         logger.info(f"[Use Case] 컨텍스트 조회 완료: {len(context)}개")
 
-        # 2. 질문 생성 + 중복 체크
+        # 2. 타겟 멤버의 role_label 추출 (컨텍스트에서)
+        target_role_label = self._extract_role_label(context, input_dto.member_id)
+        if not target_role_label:
+            logger.warning(
+                f"[Use Case] 타겟 멤버의 role_label을 찾을 수 없음: member_id={input_dto.member_id}"
+            )
+            target_role_label = "멤버"  # 기본값
+
+        # 3. 질문 생성 + 중복 체크 (base 클래스의 공통 메서드 사용)
         question, level, regeneration_count, similarity_warning = (
             await self._generate_for_target_with_retry(
-                target_member_id=input_dto.target_member_id,
-                target_role_label=input_dto.target_role_label,
+                member_id=input_dto.member_id,
+                role_label=target_role_label,
                 context=context,
             )
         )
@@ -68,55 +76,27 @@ class FamilyRecentQuestionUseCase(QuestionGenerationUseCase):
             level=level,
             metadata={
                 "context_count": len(context),
-                "target_member_id": input_dto.target_member_id,
+                "member_id": input_dto.member_id,
                 "family_id": input_dto.family_id,
                 "regeneration_count": regeneration_count,
                 "similarity_warning": similarity_warning,
             },
         )
 
-    async def _generate_for_target_with_retry(
-        self,
-        target_member_id: str,
-        target_role_label: str,
-        context: list[QADocument],
-    ) -> tuple[str, QuestionLevel, int, bool]:
+    def _extract_role_label(
+        self, context: list[QADocument], target_member_id: str
+    ) -> str | None:
         """
-        타겟 멤버용 질문 생성 + 중복 체크 (재생성 로직)
+        컨텍스트에서 타겟 멤버의 role_label 추출
+
+        Args:
+            context: 가족 최근 질문 리스트
+            target_member_id: 타겟 멤버 ID
+
+        Returns:
+            role_label 또는 None (찾지 못한 경우)
         """
-        regeneration_count = 0
-        similarity_warning = False
-
-        for attempt in range(self.MAX_REGENERATION):
-            question, level = await self.question_generator.generate_question_for_target(
-                target_member_id=target_member_id,
-                target_role_label=target_role_label,
-                context=context,
-            )
-            logger.info(f"[Use Case] 질문 생성 (시도 {attempt + 1}): {question[:30]}...")
-
-            # 유사도 검색
-            similarity = await self.vector_store.search_similar_questions(
-                question_text=question,
-                member_id=target_member_id,
-            )
-
-            # 유사도가 임계값 미만이면 성공
-            if similarity < self.SIMILARITY_THRESHOLD:
-                logger.info(f"[Use Case] 고유 질문 확인 (유사도: {similarity:.2f})")
-                break
-
-            # 마지막 시도면 경고 플래그 설정하고 탈출
-            if attempt == self.MAX_REGENERATION - 1:
-                similarity_warning = True
-                logger.warning("[Use Case] 최대 재생성 횟수 도달, 마지막 질문 사용")
-                break
-
-            # 재생성 필요 (마지막 제외)
-            regeneration_count += 1
-            logger.warning(
-                f"[Use Case] 중복 질문 감지 (유사도: {similarity:.2f}), "
-                f"재생성 {regeneration_count}/{self.MAX_REGENERATION - 1}"
-            )
-
-        return question, level, regeneration_count, similarity_warning
+        for doc in context:
+            if doc.member_id == target_member_id:
+                return doc.role_label
+        return None

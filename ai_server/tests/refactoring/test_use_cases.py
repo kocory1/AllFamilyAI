@@ -24,6 +24,17 @@ class TestGeneratePersonalQuestionUseCase:
         mock = AsyncMock()
         mock.store.return_value = True
         mock.search_similar_questions.return_value = 0.3  # 유사도 낮음 (중복 아님)
+        # role_label 조회용
+        mock.get_recent_questions_by_member.return_value = [
+            QADocument(
+                family_id="family-1",
+                member_id="member-10",
+                role_label="첫째 딸",
+                question="이전 질문",
+                answer="이전 답변",
+                answered_at=datetime(2026, 1, 19, 10, 0, 0),
+            ),
+        ]
         mock.search_by_member.return_value = [
             QADocument(
                 family_id="family-1",
@@ -82,7 +93,6 @@ class TestGeneratePersonalQuestionUseCase:
         input_dto = GeneratePersonalQuestionInput(
             family_id="family-1",
             member_id="member-10",
-            role_label="첫째 딸",
             base_question="오늘 뭐 했어?",
             base_answer="친구들과 놀았어요",
             answered_at=datetime(2026, 1, 20, 14, 30, 0),
@@ -128,7 +138,6 @@ class TestGeneratePersonalQuestionUseCase:
         input_dto = GeneratePersonalQuestionInput(
             family_id="family-1",
             member_id="member-10",
-            role_label="첫째 딸",
             base_question="오늘 뭐 했어?",
             base_answer="공부했어요",
             answered_at=datetime(2026, 1, 20, 14, 30, 0),
@@ -166,7 +175,6 @@ class TestGeneratePersonalQuestionUseCase:
         input_dto = GeneratePersonalQuestionInput(
             family_id="family-1",
             member_id="member-10",
-            role_label="첫째 딸",
             base_question="테스트",
             base_answer="테스트",
             answered_at=datetime.now(),
@@ -193,6 +201,17 @@ class TestGenerateFamilyQuestionUseCase:
         mock = AsyncMock()
         mock.store.return_value = True
         mock.search_similar_questions.return_value = 0.3  # 유사도 낮음 (중복 아님)
+        # role_label 조회용
+        mock.get_recent_questions_by_member.return_value = [
+            QADocument(
+                family_id="family-1",
+                member_id="member-10",
+                role_label="첫째 딸",
+                question="이전 질문",
+                answer="이전 답변",
+                answered_at=datetime(2026, 1, 19, 10, 0, 0),
+            ),
+        ]
         mock.search_by_family.return_value = [
             QADocument(
                 family_id="family-1",
@@ -244,7 +263,6 @@ class TestGenerateFamilyQuestionUseCase:
         input_dto = GenerateFamilyQuestionInput(
             family_id="family-1",
             member_id="member-10",
-            role_label="첫째 딸",
             base_question="오늘 저녁 뭐 먹을까?",
             base_answer="치킨 먹고 싶어요",
             answered_at=datetime(2026, 1, 20, 18, 0, 0),
@@ -329,7 +347,6 @@ class TestDuplicateQuestionCheck:
         input_dto = GeneratePersonalQuestionInput(
             family_id="family-1",
             member_id="member-10",
-            role_label="첫째 딸",
             base_question="오늘 뭐 했어?",
             base_answer="친구랑 놀았어요",
             answered_at=datetime(2026, 1, 20, 14, 30, 0),
@@ -368,7 +385,6 @@ class TestDuplicateQuestionCheck:
         input_dto = GeneratePersonalQuestionInput(
             family_id="family-1",
             member_id="member-10",
-            role_label="첫째 딸",
             base_question="오늘 뭐 했어?",
             base_answer="친구랑 놀았어요",
             answered_at=datetime(2026, 1, 20, 14, 30, 0),
@@ -404,7 +420,6 @@ class TestDuplicateQuestionCheck:
         input_dto = GeneratePersonalQuestionInput(
             family_id="family-1",
             member_id="member-10",
-            role_label="첫째 딸",
             base_question="오늘 뭐 했어?",
             base_answer="친구랑 놀았어요",
             answered_at=datetime(2026, 1, 20, 14, 30, 0),
@@ -490,8 +505,7 @@ class TestFamilyRecentQuestionUseCase:
 
         input_dto = FamilyRecentQuestionInput(
             family_id="family-1",
-            target_member_id="member-1",
-            target_role_label="아빠",
+            member_id="member-1",
         )
 
         # When
@@ -501,7 +515,7 @@ class TestFamilyRecentQuestionUseCase:
         assert output.question == "아빠, 요즘 회사에서 어떤 프로젝트 하고 계세요?"
         assert output.level.value == 3
         assert output.metadata["context_count"] == 3
-        assert output.metadata["target_member_id"] == "member-1"
+        assert output.metadata["member_id"] == "member-1"
 
         # Then: 가족 전체 최근 질문 조회 확인
         mock_vector_store.get_recent_questions_by_family.assert_called_once_with(
@@ -540,8 +554,7 @@ class TestFamilyRecentQuestionUseCase:
 
         input_dto = FamilyRecentQuestionInput(
             family_id="family-1",
-            target_member_id="member-1",
-            target_role_label="아빠",
+            member_id="member-1",
         )
 
         # When
@@ -574,8 +587,7 @@ class TestFamilyRecentQuestionUseCase:
 
         input_dto = FamilyRecentQuestionInput(
             family_id="family-1",
-            target_member_id="member-1",
-            target_role_label="아빠",
+            member_id="member-1",
         )
 
         # When
@@ -597,7 +609,6 @@ class TestUseCaseDTO:
         input_dto = GeneratePersonalQuestionInput(
             family_id="family-1",
             member_id="member-10",
-            role_label="첫째 딸",
             base_question="테스트",
             base_answer="테스트",
             answered_at=datetime.now(),
@@ -606,7 +617,6 @@ class TestUseCaseDTO:
         # Then
         assert input_dto.family_id == "family-1"
         assert input_dto.member_id == "member-10"
-        assert input_dto.role_label == "첫째 딸"
 
     def test_generate_personal_question_output_dto(self):
         """[RED] Output DTO 생성 및 검증"""

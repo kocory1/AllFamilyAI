@@ -25,7 +25,6 @@ class PersonalQuestionRequestSchema(BaseModel):
 
     familyId: str = Field(alias="familyId", description="가족 ID (UUID)")
     memberId: str = Field(alias="memberId", description="멤버 ID (UUID)")
-    roleLabel: str = Field(alias="roleLabel", description="역할 레이블 (예: 첫째 딸)")
     baseQuestion: str = Field(alias="baseQuestion", description="기준 질문")
     baseAnswer: str = Field(alias="baseAnswer", description="기준 답변")
     answeredAt: str = Field(alias="answeredAt", description="답변 시각 (ISO 8601)")
@@ -38,7 +37,6 @@ class FamilyQuestionRequestSchema(BaseModel):
 
     familyId: str = Field(alias="familyId", description="가족 ID (UUID)")
     memberId: str = Field(alias="memberId", description="답변한 멤버 ID (UUID)")
-    roleLabel: str = Field(alias="roleLabel", description="역할 레이블")
     baseQuestion: str = Field(alias="baseQuestion", description="기준 질문")
     baseAnswer: str = Field(alias="baseAnswer", description="기준 답변")
     answeredAt: str = Field(alias="answeredAt", description="답변 시각 (ISO 8601)")
@@ -55,11 +53,8 @@ class FamilyRecentQuestionRequestSchema(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     familyId: str = Field(alias="familyId", description="가족 ID (UUID)")
-    targetMemberId: str = Field(
-        alias="targetMemberId", description="질문 대상 멤버 ID (UUID)"
-    )
-    targetRoleLabel: str = Field(
-        alias="targetRoleLabel", description="질문 대상 역할 라벨 (예: 아빠)"
+    memberId: str = Field(
+        alias="memberId", description="질문 대상 멤버 ID (UUID)"
     )
 
 
@@ -77,5 +72,5 @@ class GenerateQuestionResponseSchema(BaseModel):
     )
     content: str = Field(description="생성된 질문 원문")
     level: int = Field(description="질문 난이도 (1-4, AI 자동 추론)", ge=1, le=4)
-    priority: int = Field(description="질문 우선순위 (개인 RAG=2, 가족 RAG=3, 최근=4)", ge=1, le=4)
+    priority: int = Field(description="질문 우선순위 (개인 RAG=2, 가족 RAG=3, 가족 최근=3)", ge=1, le=4)
     metadata: dict[str, Any] = Field(description="생성 메타데이터")

@@ -8,6 +8,7 @@ Clean Architecture:
 """
 
 import logging
+from collections import defaultdict
 from datetime import datetime
 
 from app.domain.entities.qa_document import QADocument
@@ -299,8 +300,6 @@ class ChromaVectorStore(VectorStorePort):
                 all_entities.append(entity)
 
             # 멤버별로 그룹화 후 각각 최근 N개씩 추출
-            from collections import defaultdict
-
             member_groups: dict[str, list[QADocument]] = defaultdict(list)
             for entity in all_entities:
                 member_groups[entity.member_id].append(entity)

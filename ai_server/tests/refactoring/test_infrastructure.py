@@ -265,15 +265,28 @@ class TestInfrastructureIntegration:
         from app.application.use_cases.generate_personal_question import (
             GeneratePersonalQuestionUseCase,
         )
+
+        # Given: Mock Infrastructure
+        from app.domain.entities.qa_document import QADocument
         from app.domain.ports.question_generator_port import QuestionGeneratorPort
         from app.domain.ports.vector_store_port import VectorStorePort
         from app.domain.value_objects.question_level import QuestionLevel
 
-        # Given: Mock Infrastructure
         mock_vector_store = AsyncMock(spec=VectorStorePort)
         mock_vector_store.store.return_value = True
         mock_vector_store.search_by_member.return_value = []
         mock_vector_store.search_similar_questions.return_value = 0.3  # 유사도 낮음
+        # role_label 조회용
+        mock_vector_store.get_recent_questions_by_member.return_value = [
+            QADocument(
+                family_id="family-1",
+                member_id="member-10",
+                role_label="첫째 딸",
+                question="이전 질문",
+                answer="이전 답변",
+                answered_at=datetime(2026, 1, 19, 10, 0, 0),
+            ),
+        ]
 
         mock_generator = AsyncMock(spec=QuestionGeneratorPort)
         mock_generator.generate_question.return_value = ("테스트 질문", QuestionLevel(2))
@@ -286,7 +299,6 @@ class TestInfrastructureIntegration:
         input_dto = GeneratePersonalQuestionInput(
             family_id="family-1",
             member_id="member-10",
-            role_label="첫째 딸",
             base_question="테스트",
             base_answer="테스트",
             answered_at=datetime.now(),

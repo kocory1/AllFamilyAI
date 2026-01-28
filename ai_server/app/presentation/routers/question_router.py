@@ -12,6 +12,7 @@ import logging
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import ValidationError
 
 from app.application.dto.question_dto import (
     FamilyRecentQuestionInput,
@@ -73,7 +74,6 @@ async def generate_personal_question(
         use_case_input = GeneratePersonalQuestionInput(
             family_id=request.familyId,
             member_id=request.memberId,
-            role_label=request.roleLabel,
             base_question=request.baseQuestion,
             base_answer=request.baseAnswer,
             answered_at=datetime.fromisoformat(request.answeredAt.replace("Z", "+00:00")),
@@ -94,6 +94,9 @@ async def generate_personal_question(
         logger.info(f"[API] 개인 질문 생성 완료: {response.content[:30]}...")
         return response
 
+    except ValueError as e:
+        logger.error(f"[API] 개인 질문 생성 실패 (잘못된 입력): {e}", exc_info=True)
+        raise HTTPException(status_code=400, detail=f"잘못된 요청: {str(e)}") from e
     except Exception as e:
         logger.error(f"[API] 개인 질문 생성 실패: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"질문 생성 실패: {str(e)}") from e
@@ -102,7 +105,7 @@ async def generate_personal_question(
 @router.post(
     "/generate/family",
     response_model=GenerateQuestionResponseSchema,
-    summary="가족 파생 질문 생성 (P3)",
+    summary="가족 파생 질문 생성 (P3-base)",
     description="RAG로 가족 구성원들의 과거 답변을 종합하여 가족 대화 질문 생성",
 )
 async def generate_family_question(
@@ -129,7 +132,6 @@ async def generate_family_question(
         use_case_input = GenerateFamilyQuestionInput(
             family_id=request.familyId,
             member_id=request.memberId,
-            role_label=request.roleLabel,
             base_question=request.baseQuestion,
             base_answer=request.baseAnswer,
             answered_at=datetime.fromisoformat(request.answeredAt.replace("Z", "+00:00")),
@@ -150,6 +152,9 @@ async def generate_family_question(
         logger.info(f"[API] 가족 질문 생성 완료: {response.content[:30]}...")
         return response
 
+    except ValueError as e:
+        logger.error(f"[API] 가족 질문 생성 실패 (잘못된 입력): {e}", exc_info=True)
+        raise HTTPException(status_code=400, detail=f"잘못된 요청: {str(e)}") from e
     except Exception as e:
         logger.error(f"[API] 가족 질문 생성 실패: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"질문 생성 실패: {str(e)}") from e
@@ -158,7 +163,7 @@ async def generate_family_question(
 @router.post(
     "/generate/family-recent",
     response_model=GenerateQuestionResponseSchema,
-    summary="가족 최근 질문 기반 생성 (P4)",
+    summary="가족 최근 질문 기반 생성 (P3-recent)",
     description="가족 전체의 최근 질문을 컨텍스트로 활용하여 특정 멤버에게 질문 생성 (base_qa 불필요)",
 )
 async def generate_family_recent_question(
@@ -176,14 +181,13 @@ async def generate_family_recent_question(
     try:
         logger.info(
             f"[API] 가족 최근 질문 생성 요청: family_id={request.familyId}, "
-            f"target={request.targetMemberId}"
+            f"target={request.memberId}"
         )
 
         # 1. API Schema → Use Case DTO 변환
         use_case_input = FamilyRecentQuestionInput(
             family_id=request.familyId,
-            target_member_id=request.targetMemberId,
-            target_role_label=request.targetRoleLabel,
+            member_id=request.memberId,
         )
 
         # 2. Use Case 실행
@@ -191,16 +195,19 @@ async def generate_family_recent_question(
 
         # 3. Use Case DTO → API Response 변환
         response = GenerateQuestionResponseSchema(
-            memberId=request.targetMemberId,  # 대상 멤버 ID
+            memberId=request.memberId,  # 대상 멤버 ID
             content=output.question,  # 질문 원문
             level=output.level.value,  # AI 자동 추론 (1-4)
-            priority=4,  # 최근 기반 = 4
+            priority=3,  # 최근 기반 = 3
             metadata=output.metadata,
         )
 
         logger.info(f"[API] 가족 최근 질문 생성 완료: {response.content[:30]}...")
         return response
 
+    except ValueError as e:
+        logger.error(f"[API] 가족 최근 질문 생성 실패 (잘못된 입력): {e}", exc_info=True)
+        raise HTTPException(status_code=400, detail=f"잘못된 요청: {str(e)}") from e
     except Exception as e:
         logger.error(f"[API] 가족 최근 질문 생성 실패: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"질문 생성 실패: {str(e)}") from e

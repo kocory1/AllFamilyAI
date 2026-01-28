@@ -18,7 +18,6 @@ class GeneratePersonalQuestionInput:
 
     family_id: str  # UUID
     member_id: str  # UUID
-    role_label: str
     base_question: str
     base_answer: str
     answered_at: datetime
@@ -43,8 +42,7 @@ class FamilyRecentQuestionInput:
     """가족 최근 질문 기반 생성 Use Case 입력 DTO"""
 
     family_id: str  # UUID
-    target_member_id: str  # 질문 대상 멤버 UUID
-    target_role_label: str  # 질문 대상 역할 라벨
+    member_id: str  # 질문 대상 멤버 UUID
 
 
 @dataclass
