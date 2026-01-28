@@ -15,7 +15,6 @@ from app.application.dto.question_dto import (
 )
 from app.application.use_cases.base import QuestionGenerationUseCase
 from app.domain.entities.qa_document import QADocument
-from app.domain.value_objects.question_level import QuestionLevel
 
 logger = logging.getLogger(__name__)
 

@@ -12,7 +12,6 @@ import logging
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import ValidationError
 
 from app.application.dto.question_dto import (
     FamilyRecentQuestionInput,
