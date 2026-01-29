@@ -73,6 +73,7 @@ async def generate_personal_question(
         use_case_input = GeneratePersonalQuestionInput(
             family_id=request.familyId,
             member_id=request.memberId,
+            role_label=request.roleLabel,
             base_question=request.baseQuestion,
             base_answer=request.baseAnswer,
             answered_at=datetime.fromisoformat(request.answeredAt.replace("Z", "+00:00")),

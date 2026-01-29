@@ -299,6 +299,7 @@ class TestInfrastructureIntegration:
         input_dto = GeneratePersonalQuestionInput(
             family_id="family-1",
             member_id="member-10",
+            role_label="첫째 딸",
             base_question="테스트",
             base_answer="테스트",
             answered_at=datetime.now(),

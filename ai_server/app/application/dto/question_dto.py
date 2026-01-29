@@ -18,6 +18,7 @@ class GeneratePersonalQuestionInput:
 
     family_id: str  # UUID
     member_id: str  # UUID
+    role_label: str
     base_question: str
     base_answer: str
     answered_at: datetime
@@ -33,7 +34,16 @@ class GeneratePersonalQuestionOutput:
 
 
 # 가족 질문은 동일한 DTO 사용 (입력 구조 동일)
-GenerateFamilyQuestionInput = GeneratePersonalQuestionInput
+@dataclass
+class GenerateFamilyQuestionInput:
+    """가족 질문 생성 Use Case 입력 DTO"""
+
+    family_id: str  # UUID
+    member_id: str  # UUID
+    base_question: str
+    base_answer: str
+    answered_at: datetime
+
 GenerateFamilyQuestionOutput = GeneratePersonalQuestionOutput
 
 

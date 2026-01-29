@@ -93,6 +93,7 @@ class TestGeneratePersonalQuestionUseCase:
         input_dto = GeneratePersonalQuestionInput(
             family_id="family-1",
             member_id="member-10",
+            role_label="첫째 딸",
             base_question="오늘 뭐 했어?",
             base_answer="친구들과 놀았어요",
             answered_at=datetime(2026, 1, 20, 14, 30, 0),
@@ -138,6 +139,7 @@ class TestGeneratePersonalQuestionUseCase:
         input_dto = GeneratePersonalQuestionInput(
             family_id="family-1",
             member_id="member-10",
+            role_label="첫째 딸",
             base_question="오늘 뭐 했어?",
             base_answer="공부했어요",
             answered_at=datetime(2026, 1, 20, 14, 30, 0),
@@ -175,6 +177,7 @@ class TestGeneratePersonalQuestionUseCase:
         input_dto = GeneratePersonalQuestionInput(
             family_id="family-1",
             member_id="member-10",
+            role_label="첫째 딸",
             base_question="테스트",
             base_answer="테스트",
             answered_at=datetime.now(),
@@ -347,6 +350,7 @@ class TestDuplicateQuestionCheck:
         input_dto = GeneratePersonalQuestionInput(
             family_id="family-1",
             member_id="member-10",
+            role_label="첫째 딸",
             base_question="오늘 뭐 했어?",
             base_answer="친구랑 놀았어요",
             answered_at=datetime(2026, 1, 20, 14, 30, 0),
@@ -361,9 +365,7 @@ class TestDuplicateQuestionCheck:
         assert output.metadata["regeneration_count"] == 1
 
     @pytest.mark.asyncio
-    async def test_max_regeneration_limit(
-        self, mock_vector_store, mock_question_generator
-    ):
+    async def test_max_regeneration_limit(self, mock_vector_store, mock_question_generator):
         """[RED] 최대 3회 재생성 후 마지막 질문 반환"""
         from app.application.use_cases.generate_personal_question import (
             GeneratePersonalQuestionInput,
@@ -373,7 +375,8 @@ class TestDuplicateQuestionCheck:
 
         # Given: 모든 질문이 유사함
         mock_question_generator.generate_question.return_value = (
-            "계속 유사한 질문", QuestionLevel(2)
+            "계속 유사한 질문",
+            QuestionLevel(2),
         )
         mock_vector_store.search_similar_questions.return_value = 0.95  # 항상 유사
 
@@ -385,6 +388,7 @@ class TestDuplicateQuestionCheck:
         input_dto = GeneratePersonalQuestionInput(
             family_id="family-1",
             member_id="member-10",
+            role_label="첫째 딸",
             base_question="오늘 뭐 했어?",
             base_answer="친구랑 놀았어요",
             answered_at=datetime(2026, 1, 20, 14, 30, 0),
@@ -400,9 +404,7 @@ class TestDuplicateQuestionCheck:
         assert output.metadata["similarity_warning"] is True
 
     @pytest.mark.asyncio
-    async def test_no_regeneration_when_unique(
-        self, mock_vector_store, mock_question_generator
-    ):
+    async def test_no_regeneration_when_unique(self, mock_vector_store, mock_question_generator):
         """[RED] 처음부터 고유하면 재생성 없음"""
         from app.application.use_cases.generate_personal_question import (
             GeneratePersonalQuestionInput,
@@ -420,6 +422,7 @@ class TestDuplicateQuestionCheck:
         input_dto = GeneratePersonalQuestionInput(
             family_id="family-1",
             member_id="member-10",
+            role_label="첫째 딸",
             base_question="오늘 뭐 했어?",
             base_answer="친구랑 놀았어요",
             answered_at=datetime(2026, 1, 20, 14, 30, 0),
@@ -486,9 +489,7 @@ class TestFamilyRecentQuestionUseCase:
         return mock
 
     @pytest.mark.asyncio
-    async def test_family_recent_question_success(
-        self, mock_vector_store, mock_question_generator
-    ):
+    async def test_family_recent_question_success(self, mock_vector_store, mock_question_generator):
         """[RED] 가족 최근 질문 기반 생성 - 성공 케이스"""
         # Given
         from app.application.dto.question_dto import (
@@ -566,9 +567,7 @@ class TestFamilyRecentQuestionUseCase:
         assert output.metadata["regeneration_count"] == 1
 
     @pytest.mark.asyncio
-    async def test_family_recent_question_empty_context(
-        self, mock_question_generator
-    ):
+    async def test_family_recent_question_empty_context(self, mock_question_generator):
         """[RED] 최근 질문이 없어도 생성 가능"""
         from app.application.dto.question_dto import FamilyRecentQuestionInput
         from app.application.use_cases.family_recent_question import (
@@ -609,6 +608,7 @@ class TestUseCaseDTO:
         input_dto = GeneratePersonalQuestionInput(
             family_id="family-1",
             member_id="member-10",
+            role_label="첫째 딸",
             base_question="테스트",
             base_answer="테스트",
             answered_at=datetime.now(),

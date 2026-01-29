@@ -194,8 +194,12 @@ class RAGQuestionUseCase(QuestionGenerationUseCase):
         log_prefix = self._get_log_prefix()
         logger.info(f"[Use Case] {log_prefix} 시작")
 
-        # 1. role_label 조회 (memberId로 최근 질문에서 추출)
-        role_label = await self._get_role_label(input_dto.member_id)
+        # 1. role_label 결정
+        # - P2: API에서 role_label을 받는 경우 우선 사용
+        # - 그 외: member_id 기준 최근 질문에서 추출
+        role_label = getattr(input_dto, "role_label", None) or await self._get_role_label(
+            input_dto.member_id
+        )
         if not role_label:
             logger.warning(
                 f"[Use Case] role_label을 찾을 수 없음: member_id={input_dto.member_id}, "

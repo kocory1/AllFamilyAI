@@ -25,6 +25,7 @@ class PersonalQuestionRequestSchema(BaseModel):
 
     familyId: str = Field(alias="familyId", description="가족 ID (UUID)")
     memberId: str = Field(alias="memberId", description="멤버 ID (UUID)")
+    roleLabel: str = Field(alias="roleLabel", description="역할 레이블 (예: '첫째 딸', '아빠')")
     baseQuestion: str = Field(alias="baseQuestion", description="기준 질문")
     baseAnswer: str = Field(alias="baseAnswer", description="기준 답변")
     answeredAt: str = Field(alias="answeredAt", description="답변 시각 (ISO 8601)")
