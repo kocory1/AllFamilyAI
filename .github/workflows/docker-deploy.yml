@@ -52,12 +52,12 @@ jobs:
           script: |
             # 디렉토리 생성
             mkdir -p ~/onsikgu_ai
-            mkdir -p ~/onsikgu_data/chroma
+            mkdir -p /home/ubuntu/onsikgu_data/chroma
+            # 컨테이너(appuser=1000)가 쓸 수 있도록 권한 보정
+            sudo chown -R 1000:1000 /home/ubuntu/onsikgu_data/chroma || true
             
             # docker-compose.yml 생성
             cat > ~/onsikgu_ai/docker-compose.yml << 'EOF'
-            version: '3.8'
-            
             services:
               ai-server:
                 container_name: onsikgu-ai-server
@@ -65,7 +65,8 @@ jobs:
                 ports:
                   - "8000:8000"
                 volumes:
-                  - ~/onsikgu_data/chroma:/data/chroma
+                  # NOTE: sudo로 올려도 경로가 /root로 안 바뀌도록 절대경로 사용
+                  - /home/ubuntu/onsikgu_data/chroma:/data/chroma
                 env_file:
                   - .env
                 environment:
@@ -144,6 +145,10 @@ jobs:
             ENVIRONMENT=production
             EOF
             echo "   ✅ .env 파일 생성 완료"
+
+            # ChromaDB 저장 디렉토리 권한 보정 (재배포/재기동 시 재발 방지)
+            sudo mkdir -p /home/ubuntu/onsikgu_data/chroma
+            sudo chown -R 1000:1000 /home/ubuntu/onsikgu_data/chroma || true
             
             # 6. Docker 설치 확인
             if ! command -v docker &> /dev/null; then
