@@ -1,6 +1,7 @@
 import logging
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import uvicorn
 from dotenv import load_dotenv
@@ -34,8 +35,38 @@ else:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # 시작/종료 훅 (DB 미사용 모드)
+    # 시작 훅: 첫 요청 전에 의존성(Chroma/체인) 초기화
+    # - 첫 요청에서 터지지 않게 fail-fast
+    # - 권한/경로 문제를 부팅 단계에서 바로 발견
+    logger.info("[lifespan] startup: initializing dependencies (chroma + generators)")
+
+    # Chroma persist directory 쓰기 가능 여부 확인 (권한 이슈 조기 감지)
+    persist_dir = Path(settings.chroma_persist_directory)
+    persist_dir.mkdir(parents=True, exist_ok=True)
+    write_test_path = persist_dir / ".write_test"
+    try:
+        write_test_path.write_text("ok", encoding="utf-8")
+        write_test_path.unlink(missing_ok=True)
+    except Exception as e:
+        logger.error(f"[lifespan] chroma persist dir not writable: {persist_dir}", exc_info=True)
+        raise RuntimeError(f"Chroma persist directory is not writable: {persist_dir}") from e
+
+    # DI 싱글톤 생성(초기화) 트리거
+    from app.presentation.dependencies import (
+        get_chroma_collection,
+        get_family_generator,
+        get_personal_generator,
+        get_vector_store,
+    )
+
+    get_chroma_collection()
+    get_vector_store()
+    get_personal_generator()
+    get_family_generator()
+
+    logger.info("[lifespan] startup: initialization complete")
     yield
+    logger.info("[lifespan] shutdown")
 
 
 # FastAPI 앱 생성
