@@ -54,9 +54,7 @@ class FamilyRecentQuestionRequestSchema(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     familyId: str = Field(alias="familyId", description="가족 ID (UUID)")
-    memberId: str = Field(
-        alias="memberId", description="질문 대상 멤버 ID (UUID)"
-    )
+    memberId: str = Field(alias="memberId", description="질문 대상 멤버 ID (UUID)")
 
 
 class GenerateQuestionResponseSchema(BaseModel):
@@ -73,5 +71,17 @@ class GenerateQuestionResponseSchema(BaseModel):
     )
     content: str = Field(description="생성된 질문 원문")
     level: int = Field(description="질문 난이도 (1-4, AI 자동 추론)", ge=1, le=4)
-    priority: int = Field(description="질문 우선순위 (개인 RAG=2, 가족 RAG=3, 가족 최근=3)", ge=1, le=4)
+    priority: int = Field(
+        description="질문 우선순위 (개인 RAG=2, 가족 RAG=3, 가족 최근=3)", ge=1, le=4
+    )
     metadata: dict[str, Any] = Field(description="생성 메타데이터")
+
+
+class SummaryResponseSchema(BaseModel):
+    """
+    주간/월간 요약 API 응답 스키마 (context만)
+
+    - period: weekly = 최근 7일, monthly = 최근 30일 (API 스펙)
+    """
+
+    context: str = Field(description="[특보] 스타일 헤드라인 1개")

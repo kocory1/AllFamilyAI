@@ -6,21 +6,26 @@ Presentation → Application → Domain ← Infrastructure
 """
 
 import logging
+from typing import Annotated, Any
 
 import chromadb
 from chromadb.config import Settings as ChromaSettings
+from fastapi import Depends
 
 from app.adapters.openai_client import OpenAIClient
 from app.application.use_cases.family_recent_question import FamilyRecentQuestionUseCase
+from app.application.use_cases.family_summary import FamilySummaryUseCase
 from app.application.use_cases.generate_family_question import GenerateFamilyQuestionUseCase
 from app.application.use_cases.generate_personal_question import (
     GeneratePersonalQuestionUseCase,
 )
 from app.core.config import settings
 from app.domain.ports.question_generator_port import QuestionGeneratorPort
+from app.domain.ports.summary_generator_port import SummaryGeneratorPort
 from app.domain.ports.vector_store_port import VectorStorePort
 from app.infrastructure.llm.langchain_family_generator import LangchainFamilyGenerator
 from app.infrastructure.llm.langchain_personal_generator import LangchainPersonalGenerator
+from app.infrastructure.llm.langchain_summary_generator import LangChainSummaryGenerator
 from app.infrastructure.llm.prompt_loader import PromptLoader
 from app.infrastructure.vector.chroma_vector_store import ChromaVectorStore
 
@@ -32,6 +37,7 @@ _chroma_collection = None
 _vector_store: VectorStorePort | None = None
 _personal_generator: QuestionGeneratorPort | None = None
 _family_generator: QuestionGeneratorPort | None = None
+_summary_generator: SummaryGeneratorPort | None = None
 
 
 # === Infrastructure Layer ===
@@ -46,8 +52,8 @@ def get_openai_client() -> OpenAIClient:
     return _openai_client
 
 
-def get_chroma_collection():
-    """ChromaDB Collection 싱글톤"""
+def get_chroma_collection() -> Any:
+    """ChromaDB Collection 싱글톤 (chromadb 공식 Collection 타입 스텁 없음 → Any)"""
     global _chroma_collection
     if _chroma_collection is None:
         logger.info("[DI] ChromaDB Collection 생성")
@@ -130,6 +136,21 @@ def get_family_generator() -> QuestionGeneratorPort:
     return _family_generator
 
 
+def get_summary_generator() -> SummaryGeneratorPort:
+    """주간/월간 요약 생성기 싱글톤 (SummaryGeneratorPort 반환)"""
+    global _summary_generator
+    if _summary_generator is None:
+        logger.info("[DI] LangChainSummaryGenerator 생성")
+        prompt_loader = PromptLoader(prompt_dir="prompts")
+        prompt_data = prompt_loader.load("summary_headline.yaml")
+        _summary_generator = LangChainSummaryGenerator(
+            prompt_data=prompt_data,
+            model=settings.default_model,
+            temperature=settings.temperature,
+        )
+    return _summary_generator
+
+
 # === Application Layer (Use Cases) ===
 
 
@@ -172,3 +193,31 @@ def get_family_recent_question_use_case() -> FamilyRecentQuestionUseCase:
         vector_store=get_vector_store(),  # ← Port (인터페이스)
         question_generator=get_family_generator(),  # ← Port (인터페이스, 가족용 프롬프트)
     )
+
+
+def get_family_summary_use_case() -> FamilySummaryUseCase:
+    """
+    가족 주간/월간 요약 Use Case
+
+    GET /api/v1/summary?familyId=xxx&period=weekly|monthly
+    - period: weekly=최근 7일, monthly=최근 30일
+    - 응답: context만
+    """
+    return FamilySummaryUseCase(
+        vector_store=get_vector_store(),
+        summary_generator=get_summary_generator(),
+    )
+
+
+# === Annotated 의존성 (라우터에서 타입으로 사용, dependency_overrides 용이) ===
+
+PersonalQuestionUC = Annotated[
+    GeneratePersonalQuestionUseCase, Depends(get_personal_question_use_case)
+]
+FamilyQuestionUC = Annotated[
+    GenerateFamilyQuestionUseCase, Depends(get_family_question_use_case)
+]
+FamilyRecentQuestionUC = Annotated[
+    FamilyRecentQuestionUseCase, Depends(get_family_recent_question_use_case)
+]
+SummaryUC = Annotated[FamilySummaryUseCase, Depends(get_family_summary_use_case)]

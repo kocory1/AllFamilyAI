@@ -10,8 +10,9 @@ Clean Architecture 원칙:
 
 import logging
 from datetime import datetime
+from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 
 from app.application.dto.question_dto import (
     FamilyRecentQuestionInput,
@@ -24,9 +25,9 @@ from app.application.use_cases.generate_personal_question import (
     GeneratePersonalQuestionUseCase,
 )
 from app.presentation.dependencies import (
-    get_family_question_use_case,
-    get_family_recent_question_use_case,
-    get_personal_question_use_case,
+    FamilyQuestionUC,
+    FamilyRecentQuestionUC,
+    PersonalQuestionUC,
 )
 from app.presentation.schemas.question_schemas import (
     FamilyQuestionRequestSchema,
@@ -40,6 +41,28 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/questions", tags=["질문 생성"])
 
 
+async def _execute_question_generation(
+    use_case_input: Any,
+    use_case: (
+        GeneratePersonalQuestionUseCase
+        | GenerateFamilyQuestionUseCase
+        | FamilyRecentQuestionUseCase
+    ),
+    member_id: str,
+    priority: int,
+    log_prefix: str,
+) -> GenerateQuestionResponseSchema:
+    """질문 생성 Use Case 실행 후 응답 스키마 반환 (공통 플로우)."""
+    output = await use_case.execute(use_case_input)
+    return GenerateQuestionResponseSchema(
+        memberId=member_id,
+        content=output.question,
+        level=output.level.value,
+        priority=priority,
+        metadata=output.metadata,
+    )
+
+
 # === 질문 생성 API ===
 
 
@@ -51,7 +74,7 @@ router = APIRouter(prefix="/questions", tags=["질문 생성"])
 )
 async def generate_personal_question(
     request: PersonalQuestionRequestSchema,
-    use_case: GeneratePersonalQuestionUseCase = Depends(get_personal_question_use_case),
+    use_case: PersonalQuestionUC,
 ) -> GenerateQuestionResponseSchema:
     """
     개인 파생 질문 생성 API (Clean Architecture)
@@ -68,8 +91,6 @@ async def generate_personal_question(
             f"[API] 개인 질문 생성 요청: family_id={request.familyId}, "
             f"member_id={request.memberId}"
         )
-
-        # 1. API Schema → Use Case DTO 변환 (Adapter 역할)
         use_case_input = GeneratePersonalQuestionInput(
             family_id=request.familyId,
             member_id=request.memberId,
@@ -78,22 +99,11 @@ async def generate_personal_question(
             base_answer=request.baseAnswer,
             answered_at=datetime.fromisoformat(request.answeredAt.replace("Z", "+00:00")),
         )
-
-        # 2. Use Case 실행
-        output = await use_case.execute(use_case_input)
-
-        # 3. Use Case DTO → API Response 변환 (BE member_question 테이블 구조)
-        response = GenerateQuestionResponseSchema(
-            memberId=request.memberId,  # BE에서 받은 값 그대로
-            content=output.question,  # 질문 원문
-            level=output.level.value,  # AI 자동 추론 (1-4)
-            priority=2,  # 개인 RAG = 2
-            metadata=output.metadata,
+        response = await _execute_question_generation(
+            use_case_input, use_case, request.memberId, 2, "[API] 개인 질문 생성"
         )
-
         logger.info(f"[API] 개인 질문 생성 완료: {response.content[:30]}...")
         return response
-
     except ValueError as e:
         logger.error(f"[API] 개인 질문 생성 실패 (잘못된 입력): {e}", exc_info=True)
         raise HTTPException(status_code=400, detail=f"잘못된 요청: {str(e)}") from e
@@ -110,7 +120,7 @@ async def generate_personal_question(
 )
 async def generate_family_question(
     request: FamilyQuestionRequestSchema,
-    use_case: GenerateFamilyQuestionUseCase = Depends(get_family_question_use_case),
+    use_case: FamilyQuestionUC,
 ) -> GenerateQuestionResponseSchema:
     """
     가족 파생 질문 생성 API (Clean Architecture)
@@ -127,8 +137,6 @@ async def generate_family_question(
             f"[API] 가족 질문 생성 요청: family_id={request.familyId}, "
             f"member_id={request.memberId}"
         )
-
-        # 1. API Schema → Use Case DTO 변환
         use_case_input = GenerateFamilyQuestionInput(
             family_id=request.familyId,
             member_id=request.memberId,
@@ -136,22 +144,11 @@ async def generate_family_question(
             base_answer=request.baseAnswer,
             answered_at=datetime.fromisoformat(request.answeredAt.replace("Z", "+00:00")),
         )
-
-        # 2. Use Case 실행
-        output = await use_case.execute(use_case_input)
-
-        # 3. Use Case DTO → API Response 변환 (BE member_question 테이블 구조)
-        response = GenerateQuestionResponseSchema(
-            memberId=request.memberId,  # BE에서 받은 값 그대로
-            content=output.question,  # 질문 원문
-            level=output.level.value,  # AI 자동 추론 (1-4)
-            priority=3,  # 가족 RAG = 3
-            metadata=output.metadata,
+        response = await _execute_question_generation(
+            use_case_input, use_case, request.memberId, 3, "[API] 가족 질문 생성"
         )
-
         logger.info(f"[API] 가족 질문 생성 완료: {response.content[:30]}...")
         return response
-
     except ValueError as e:
         logger.error(f"[API] 가족 질문 생성 실패 (잘못된 입력): {e}", exc_info=True)
         raise HTTPException(status_code=400, detail=f"잘못된 요청: {str(e)}") from e
@@ -168,7 +165,7 @@ async def generate_family_question(
 )
 async def generate_family_recent_question(
     request: FamilyRecentQuestionRequestSchema,
-    use_case: FamilyRecentQuestionUseCase = Depends(get_family_recent_question_use_case),
+    use_case: FamilyRecentQuestionUC,
 ) -> GenerateQuestionResponseSchema:
     """
     가족 최근 질문 기반 생성 API (신규)
@@ -183,28 +180,15 @@ async def generate_family_recent_question(
             f"[API] 가족 최근 질문 생성 요청: family_id={request.familyId}, "
             f"target={request.memberId}"
         )
-
-        # 1. API Schema → Use Case DTO 변환
         use_case_input = FamilyRecentQuestionInput(
             family_id=request.familyId,
             member_id=request.memberId,
         )
-
-        # 2. Use Case 실행
-        output = await use_case.execute(use_case_input)
-
-        # 3. Use Case DTO → API Response 변환
-        response = GenerateQuestionResponseSchema(
-            memberId=request.memberId,  # 대상 멤버 ID
-            content=output.question,  # 질문 원문
-            level=output.level.value,  # AI 자동 추론 (1-4)
-            priority=3,  # 최근 기반 = 3
-            metadata=output.metadata,
+        response = await _execute_question_generation(
+            use_case_input, use_case, request.memberId, 3, "[API] 가족 최근 질문 생성"
         )
-
         logger.info(f"[API] 가족 최근 질문 생성 완료: {response.content[:30]}...")
         return response
-
     except ValueError as e:
         logger.error(f"[API] 가족 최근 질문 생성 실패 (잘못된 입력): {e}", exc_info=True)
         raise HTTPException(status_code=400, detail=f"잘못된 요청: {str(e)}") from e

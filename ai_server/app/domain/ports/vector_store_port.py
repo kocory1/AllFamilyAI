@@ -130,3 +130,23 @@ class VectorStorePort(ABC):
             최근 QADocument 리스트 (각 멤버별 limit_per_member개)
         """
         pass
+
+    @abstractmethod
+    async def get_qa_by_family_in_range(
+        self,
+        family_id: str,
+        start: "datetime",
+        end: "datetime",
+    ) -> list[QADocument]:
+        """
+        가족 QA를 기간으로 조회 (주간/월간 요약용)
+
+        Args:
+            family_id: 가족 ID (UUID)
+            start: 시작 시각 (이후)
+            end: 종료 시각 (이전)
+
+        Returns:
+            answered_at이 [start, end] 안인 QADocument 리스트 (시간순 정렬)
+        """
+        pass

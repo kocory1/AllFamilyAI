@@ -1,10 +1,14 @@
+# ruff: noqa: E402  # P0: load_dotenv() must run before other imports
+from dotenv import load_dotenv
+
+load_dotenv()
+
 import logging
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 import uvicorn
-from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,10 +17,7 @@ from fastapi.responses import JSONResponse
 from app.core.config import settings
 
 # Clean Architecture Router
-from app.presentation.routers import question_router
-
-# 환경 변수 로드
-load_dotenv()
+from app.presentation.routers import question_router, summary_router
 
 # Langsmith 환경변수 설정 (Langchain이 자동으로 읽음)
 os.environ["LANGCHAIN_TRACING_V2"] = settings.langchain_tracing_v2
@@ -56,6 +57,7 @@ async def lifespan(app: FastAPI):
         get_chroma_collection,
         get_family_generator,
         get_personal_generator,
+        get_summary_generator,
         get_vector_store,
     )
 
@@ -63,6 +65,7 @@ async def lifespan(app: FastAPI):
     get_vector_store()
     get_personal_generator()
     get_family_generator()
+    get_summary_generator()
 
     logger.info("[lifespan] startup: initialization complete")
     yield
@@ -77,10 +80,15 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS 설정
+# CORS 설정 (cors_allowed_origins: "*" 또는 쉼표 구분 목록, 운영에서는 구체적 origin 권장)
+_cors_origins = (
+    ["*"]
+    if settings.cors_allowed_origins.strip() == "*"
+    else [o.strip() for o in settings.cors_allowed_origins.split(",") if o.strip()]
+)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -101,7 +109,8 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 
 # 라우터 등록 (Clean Architecture)
-app.include_router(question_router.router, prefix="/api/v1", tags=["질문 생성"])
+app.include_router(question_router.router, prefix="/api/v1")
+app.include_router(summary_router.router, prefix="/api/v1")
 
 
 @app.get("/")
@@ -114,6 +123,7 @@ async def root():
             "personal": "/api/v1/questions/generate/personal",
             "family": "/api/v1/questions/generate/family",
             "family-recent": "/api/v1/questions/generate/family-recent",
+            "summary": "/api/v1/summary",
         },
     }
 

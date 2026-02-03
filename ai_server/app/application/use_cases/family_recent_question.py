@@ -25,13 +25,11 @@ class FamilyRecentQuestionUseCase(QuestionGenerationUseCase):
 
     특징:
     - base_qa 없음 (사용자 입력 질문/답변 없음)
-    - 각 멤버별 최근 2개 질문을 컨텍스트로 사용
+    - 각 멤버별 최근 3개 질문을 컨텍스트로 사용
     - 벡터 DB 저장 안 함
     """
 
-    async def execute(
-        self, input_dto: FamilyRecentQuestionInput
-    ) -> FamilyRecentQuestionOutput:
+    async def execute(self, input_dto: FamilyRecentQuestionInput) -> FamilyRecentQuestionOutput:
         """
         Use Case 실행
 
@@ -61,12 +59,15 @@ class FamilyRecentQuestionUseCase(QuestionGenerationUseCase):
             target_role_label = "멤버"  # 기본값
 
         # 3. 질문 생성 + 중복 체크 (base 클래스의 공통 메서드 사용)
-        question, level, regeneration_count, similarity_warning = (
-            await self._generate_for_target_with_retry(
-                member_id=input_dto.member_id,
-                role_label=target_role_label,
-                context=context,
-            )
+        (
+            question,
+            level,
+            regeneration_count,
+            similarity_warning,
+        ) = await self._generate_for_target_with_retry(
+            member_id=input_dto.member_id,
+            role_label=target_role_label,
+            context=context,
         )
 
         # 3. Output DTO 구성 (저장 없음)
@@ -82,9 +83,7 @@ class FamilyRecentQuestionUseCase(QuestionGenerationUseCase):
             },
         )
 
-    def _extract_role_label(
-        self, context: list[QADocument], target_member_id: str
-    ) -> str | None:
+    def _extract_role_label(self, context: list[QADocument], target_member_id: str) -> str | None:
         """
         컨텍스트에서 타겟 멤버의 role_label 추출
 

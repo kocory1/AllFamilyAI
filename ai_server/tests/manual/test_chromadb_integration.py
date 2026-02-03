@@ -122,7 +122,7 @@ async def test_chromadb_store_and_search():
         assert collection.count() == 3, f"저장 실패: {collection.count()}개 (예상: 3개)"
         assert len(results) > 0, "개인 검색 실패"
         assert len(family_results) > 0, "가족 검색 실패"
-        assert all(r.family_id == 999 for r in family_results), "가족 필터 실패"
+        assert all(r.family_id == "family-999" for r in family_results), "가족 필터 실패"
 
         print("\n" + "=" * 50)
         print("🎉 모든 테스트 통과!")

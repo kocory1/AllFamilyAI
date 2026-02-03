@@ -105,9 +105,7 @@ class TestPortContracts:
             ) -> list[QADocument]:
                 return []
 
-            async def search_similar_questions(
-                self, question_text: str, member_id: str
-            ) -> float:
+            async def search_similar_questions(self, question_text: str, member_id: str) -> float:
                 return 0.0
 
             async def get_recent_questions_by_member(
@@ -117,6 +115,11 @@ class TestPortContracts:
 
             async def get_recent_questions_by_family(
                 self, family_id: str, limit_per_member: int = 3
+            ) -> list[QADocument]:
+                return []
+
+            async def get_qa_by_family_in_range(
+                self, family_id: str, start, end
             ) -> list[QADocument]:
                 return []
 
@@ -144,7 +147,9 @@ class TestPortContracts:
         assert recent == []
 
         # get_recent_questions_by_family 호출
-        family_recent = await mock_store.get_recent_questions_by_family("family-1", limit_per_member=3)
+        family_recent = await mock_store.get_recent_questions_by_family(
+            "family-1", limit_per_member=3
+        )
         assert family_recent == []
 
     @pytest.mark.asyncio

@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     # 서버 설정
     host: str = "127.0.0.1"  # nginx 리버스 프록시 사용 시 localhost만 리스닝
     port: int = 8000  # nginx가 80/443 포트에서 리스닝하고 8000으로 프록시
+    # CORS: "*" 또는 쉼표 구분 origin 목록 (예: "https://api.example.com,https://app.example.com"). 운영에서는 구체적 origin 권장.
+    cors_allowed_origins: str = "*"
 
     # 로깅 설정
     log_level: str = "INFO"

@@ -5,8 +5,12 @@ Clean Architecture:
 - VectorStorePort 인터페이스 구현
 - Domain Entity 입출력
 - ChromaDB 구체 구현 세부사항 캡슐화
+
+ChromaDB Python 클라이언트는 동기 API이므로, async 메서드 내에서는
+asyncio.to_thread()로 스레드 풀에서 실행해 이벤트 루프 블로킹을 방지함.
 """
 
+import asyncio
 import logging
 from collections import defaultdict
 from datetime import datetime
@@ -69,9 +73,10 @@ class ChromaVectorStore(VectorStorePort):
                 "answered_at": doc.answered_at.isoformat(),
             }
 
-            # ChromaDB 저장
+            # ChromaDB 저장 (동기 API → 스레드 풀에서 실행)
             doc_id = f"{doc.family_id}_{doc.member_id}_{int(datetime.now().timestamp() * 1000)}"
-            self.collection.add(
+            await asyncio.to_thread(
+                self.collection.add,
                 ids=[doc_id],
                 embeddings=[embedding],
                 documents=[embedding_text],
@@ -103,8 +108,9 @@ class ChromaVectorStore(VectorStorePort):
             response = await self.openai_client.create_embedding(query_text)
             query_embedding = response.data[0].embedding
 
-            # ChromaDB 검색
-            results = self.collection.query(
+            # ChromaDB 검색 (동기 API → 스레드 풀에서 실행)
+            results = await asyncio.to_thread(
+                self.collection.query,
                 query_embeddings=[query_embedding],
                 n_results=top_k,
                 where={"member_id": member_id},
@@ -133,7 +139,8 @@ class ChromaVectorStore(VectorStorePort):
             response = await self.openai_client.create_embedding(query_text)
             query_embedding = response.data[0].embedding
 
-            results = self.collection.query(
+            results = await asyncio.to_thread(
+                self.collection.query,
                 query_embeddings=[query_embedding],
                 n_results=top_k,
                 where={"family_id": family_id},
@@ -163,8 +170,9 @@ class ChromaVectorStore(VectorStorePort):
             response = await self.openai_client.create_embedding(question_text)
             query_embedding = response.data[0].embedding
 
-            # ChromaDB 검색 (유사도 포함)
-            results = self.collection.query(
+            # ChromaDB 검색 (유사도 포함, 동기 API → 스레드 풀에서 실행)
+            results = await asyncio.to_thread(
+                self.collection.query,
                 query_embeddings=[query_embedding],
                 n_results=1,
                 where={"member_id": member_id},
@@ -207,9 +215,10 @@ class ChromaVectorStore(VectorStorePort):
             최근 QADocument 리스트 (answered_at 내림차순)
         """
         try:
-            # ChromaDB에서 해당 멤버의 모든 문서 조회
+            # ChromaDB에서 해당 멤버의 모든 문서 조회 (동기 API → 스레드 풀에서 실행)
             # Note: ChromaDB는 메타데이터 정렬을 지원하지 않으므로 Python에서 정렬
-            results = self.collection.get(
+            results = await asyncio.to_thread(
+                self.collection.get,
                 where={"member_id": member_id},
                 include=["documents", "metadatas"],
             )
@@ -269,8 +278,9 @@ class ChromaVectorStore(VectorStorePort):
             최근 QADocument 리스트 (각 멤버별 limit_per_member개)
         """
         try:
-            # ChromaDB에서 해당 가족의 모든 문서 조회
-            results = self.collection.get(
+            # ChromaDB에서 해당 가족의 모든 문서 조회 (동기 API → 스레드 풀에서 실행)
+            results = await asyncio.to_thread(
+                self.collection.get,
                 where={"family_id": family_id},
                 include=["documents", "metadatas"],
             )
@@ -320,6 +330,61 @@ class ChromaVectorStore(VectorStorePort):
 
         except Exception as e:
             logger.error(f"[ChromaVectorStore] 가족 최근 질문 조회 실패: {e}")
+            return []
+
+    async def get_qa_by_family_in_range(
+        self,
+        family_id: str,
+        start: datetime,
+        end: datetime,
+    ) -> list[QADocument]:
+        """
+        가족 QA를 기간으로 조회 (주간/월간 요약용)
+
+        ChromaDB는 메타데이터 범위 쿼리를 지원하지 않으므로
+        family_id로 전체 조회 후 Python에서 answered_at 필터링.
+        """
+        try:
+            # ChromaDB 기간 조회 (동기 API → 스레드 풀에서 실행)
+            results = await asyncio.to_thread(
+                self.collection.get,
+                where={"family_id": family_id},
+                include=["documents", "metadatas"],
+            )
+
+            if not results["ids"]:
+                logger.info(
+                    f"[ChromaVectorStore] 기간 조회: family_id={family_id}, 결과=0개"
+                )
+                return []
+
+            entities: list[QADocument] = []
+            for i in range(len(results["ids"])):
+                metadata = results["metadatas"][i]
+                document = results["documents"][i]
+                question, answer = self._parse_embedding_text(document)
+                answered_at = datetime.fromisoformat(metadata["answered_at"])
+                if start <= answered_at <= end:
+                    entities.append(
+                        QADocument(
+                            family_id=metadata["family_id"],
+                            member_id=metadata["member_id"],
+                            role_label=metadata["role_label"],
+                            question=question,
+                            answer=answer,
+                            answered_at=answered_at,
+                        )
+                    )
+
+            entities.sort(key=lambda x: x.answered_at)
+            logger.info(
+                f"[ChromaVectorStore] 기간 조회: family_id={family_id}, "
+                f"[{start.date()}~{end.date()}], 반환={len(entities)}개"
+            )
+            return entities
+
+        except Exception as e:
+            logger.error(f"[ChromaVectorStore] 기간 조회 실패: {e}")
             return []
 
     # === Private: Infrastructure 세부사항 ===
