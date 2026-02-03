@@ -8,6 +8,7 @@ Clean Architecture - 의존성 역전 원칙:
 """
 
 from abc import ABC, abstractmethod
+from datetime import datetime
 
 from app.domain.entities.qa_document import QADocument
 
@@ -135,8 +136,8 @@ class VectorStorePort(ABC):
     async def get_qa_by_family_in_range(
         self,
         family_id: str,
-        start: "datetime",
-        end: "datetime",
+        start: datetime,
+        end: datetime,
     ) -> list[QADocument]:
         """
         가족 QA를 기간으로 조회 (주간/월간 요약용)

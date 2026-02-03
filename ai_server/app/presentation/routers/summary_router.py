@@ -8,10 +8,10 @@ GET /api/v1/summary?familyId=xxx&period=weekly|monthly
 
 import logging
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.application.dto.summary_dto import SummaryInput, SummaryOutput
-from app.presentation.dependencies import SummaryUC
+from app.presentation.dependencies import SummaryUC, get_family_summary_use_case
 from app.presentation.schemas.question_schemas import SummaryResponseSchema
 
 logger = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ async def get_family_summary(
         description="weekly(최근 7일) 또는 monthly(최근 30일)",
         pattern="^(weekly|monthly)$",
     ),
-    use_case: SummaryUC,
+    use_case: SummaryUC = Depends(get_family_summary_use_case),
 ) -> SummaryResponseSchema:
     try:
         input_dto = SummaryInput(family_id=familyId, period=period)
