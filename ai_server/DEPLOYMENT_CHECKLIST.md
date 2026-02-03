@@ -120,16 +120,30 @@ sudo netstat -tlnp | grep 8000
 ```
 
 ### 문제 2: 502 Bad Gateway (nginx)
-**원인**: 백엔드 서버 응답 없음
+**원인**: 백엔드 서버 응답 없음 (앱 기동 실패 또는 연결 불가)
 
 **해결**:
 ```bash
-# nginx 상태 확인
-sudo systemctl status nginx
+# 1) Docker 사용 시: 컨테이너 로그에서 기동 실패 원인 확인 (lifespan 예외 등)
+docker logs onsikgu-ai-server --tail 200
+# 또는
+docker compose -f ... logs ai-server --tail 200
 
-# nginx 로그 확인
+# 2) 컨테이너가 재시작 루프인지 확인
+docker ps -a   # STATUS가 Restarting이면 lifespan/기동 실패 가능성 높음
+
+# 3) 호스트에서 앱 포트 직접 호출 (프록시 제외)
+curl -s http://localhost:8000/health   # 실패 시 앱 자체 문제
+
+# 4) nginx 상태 및 로그
+sudo systemctl status nginx
 sudo tail -f /var/log/nginx/error.log
 ```
+
+**자주 나오는 기동 실패 원인**
+- `Chroma persist directory is not writable` → 볼륨 경로 `chown 1000:1000` (또는 appuser uid)
+- `OPENAI_API_KEY` 누락/오류 → env_file 또는 환경변수 확인
+- `get_chroma_collection()` / LLM 초기화 예외 → 위 로그에 traceback 출력됨
 
 ### 문제 3: OpenAI API 에러
 **원인**: API 키 미설정 또는 잘못된 키
