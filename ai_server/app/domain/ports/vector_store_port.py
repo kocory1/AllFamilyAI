@@ -151,3 +151,16 @@ class VectorStorePort(ABC):
             answered_at이 [start, end] 안인 QADocument 리스트 (시간순 정렬)
         """
         pass
+
+    @abstractmethod
+    async def delete_by_member(self, member_id: str) -> int:
+        """
+        해당 멤버의 ChromaDB 이력 전부 삭제 (탈퇴 등).
+
+        Args:
+            member_id: 멤버 ID (UUID)
+
+        Returns:
+            삭제된 문서 수. 0이면 해당 member_id로 저장된 문서가 없음.
+        """
+        pass

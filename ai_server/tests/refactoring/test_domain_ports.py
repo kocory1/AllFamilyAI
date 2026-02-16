@@ -48,6 +48,12 @@ class TestVectorStorePort:
         # get_recent_questions_by_member 메서드가 존재해야 함
         assert hasattr(VectorStorePort, "get_recent_questions_by_member")
 
+    def test_vector_store_port_has_delete_by_member_method(self):
+        """[RED] delete_by_member 메서드 시그니처 확인"""
+        from app.domain.ports.vector_store_port import VectorStorePort
+
+        assert hasattr(VectorStorePort, "delete_by_member")
+
     def test_vector_store_port_cannot_be_instantiated(self):
         """[RED] 추상 클래스는 직접 인스턴스화 불가"""
         from app.domain.ports.vector_store_port import VectorStorePort
@@ -122,6 +128,9 @@ class TestPortContracts:
                 self, family_id: str, start, end
             ) -> list[QADocument]:
                 return []
+
+            async def delete_by_member(self, member_id: str) -> int:
+                return 0
 
         # 인스턴스 생성 가능 (모든 메서드 구현)
         mock_store = MockVectorStore()

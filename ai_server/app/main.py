@@ -17,7 +17,7 @@ from fastapi.responses import JSONResponse
 from app.core.config import settings
 
 # Clean Architecture Router
-from app.presentation.routers import question_router, summary_router
+from app.presentation.routers import members_router, question_router, summary_router
 
 # Langsmith 환경변수 설정 (Langchain이 자동으로 읽음)
 os.environ["LANGCHAIN_TRACING_V2"] = settings.langchain_tracing_v2
@@ -102,13 +102,15 @@ app.add_middleware(
 )
 
 
-# Validation 에러 핸들러 (422 에러 상세 로깅)
+# Validation 에러 핸들러 (422). body는 개인정보 포함 가능하므로 로그에 남기지 않음.
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    body = await request.body()
-    logger.error(f"[422 Validation Error] method={request.method}, path={request.url.path}")
-    logger.error(f"[422 Validation Error] body={body.decode('utf-8') if body else 'empty'}")
-    logger.error(f"[422 Validation Error] errors={exc.errors()}")
+    logger.error(
+        "[422 Validation Error] method=%s path=%s errors=%s",
+        request.method,
+        request.url.path,
+        exc.errors(),
+    )
     return JSONResponse(
         status_code=422,
         content={"detail": exc.errors(), "message": "요청 데이터 검증에 실패했습니다."},
@@ -118,6 +120,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 # 라우터 등록 (Clean Architecture)
 app.include_router(question_router.router, prefix="/api/v1")
 app.include_router(summary_router.router, prefix="/api/v1")
+app.include_router(members_router.router, prefix="/api/v1")
 
 
 @app.get("/")
@@ -131,6 +134,7 @@ async def root():
             "family": "/api/v1/questions/generate/family",
             "family-recent": "/api/v1/questions/generate/family-recent",
             "summary": "/api/v1/summary",
+            "members-delete": "/api/v1/members/delete",
         },
     }
 

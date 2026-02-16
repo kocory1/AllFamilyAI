@@ -224,9 +224,7 @@ class ChromaVectorStore(VectorStorePort):
             )
 
             if not results["ids"]:
-                logger.info(
-                    f"[ChromaVectorStore] 최근 질문 조회: member_id={member_id}, 결과=0개"
-                )
+                logger.info(f"[ChromaVectorStore] 최근 질문 조회: member_id={member_id}, 결과=0개")
                 return []
 
             # Domain Entity 변환
@@ -353,9 +351,7 @@ class ChromaVectorStore(VectorStorePort):
             )
 
             if not results["ids"]:
-                logger.info(
-                    f"[ChromaVectorStore] 기간 조회: family_id={family_id}, 결과=0개"
-                )
+                logger.info(f"[ChromaVectorStore] 기간 조회: family_id={family_id}, 결과=0개")
                 return []
 
             entities: list[QADocument] = []
@@ -386,6 +382,37 @@ class ChromaVectorStore(VectorStorePort):
         except Exception as e:
             logger.error(f"[ChromaVectorStore] 기간 조회 실패: {e}")
             return []
+
+    async def delete_by_member(self, member_id: str) -> int:
+        """
+        해당 멤버의 ChromaDB 이력 전부 삭제 (방법 A: get → delete by ids).
+
+        Args:
+            member_id: 멤버 ID (UUID)
+
+        Returns:
+            삭제된 문서 수. 0이면 해당 member_id로 저장된 문서가 없음.
+        """
+        try:
+            # 해당 멤버 문서 id만 조회 (본문 불필요)
+            results = await asyncio.to_thread(
+                self.collection.get,
+                where={"member_id": member_id},
+                include=[],
+            )
+            ids = results.get("ids") or []
+            if not ids:
+                logger.info(f"[ChromaVectorStore] 삭제 대상 없음: member_id={member_id}")
+                return 0
+            await asyncio.to_thread(self.collection.delete, ids=ids)
+            logger.info(
+                f"[ChromaVectorStore] 멤버 이력 삭제 완료: member_id={member_id}, "
+                f"삭제={len(ids)}개"
+            )
+            return len(ids)
+        except Exception as e:
+            logger.error(f"[ChromaVectorStore] delete_by_member 실패: {e}", exc_info=True)
+            raise
 
     # === Private: Infrastructure 세부사항 ===
 
